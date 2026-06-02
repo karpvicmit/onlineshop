@@ -8,7 +8,7 @@
         <version>4.0.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.refpro</groupId>
+    <groupId>com.ibb</groupId>
     <artifactId>OnlineShop</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>OnlineShop</name>
@@ -115,7 +115,7 @@
                             <schemaPaths>
                                 <param>src/main/resources/graphql-client</param>
                             </schemaPaths>
-                            <packageName>com.refpro.onlineshop.codegen</packageName>
+                            <packageName>com.ibb.onlineshop.codegen</packageName>
                             <addGeneratedAnnotation>true</addGeneratedAnnotation>
                             <disableDatesInGeneratedAnnotation>true</disableDatesInGeneratedAnnotation>
                         </configuration>
