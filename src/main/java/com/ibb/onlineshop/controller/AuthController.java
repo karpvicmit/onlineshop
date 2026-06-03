@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.core.Authentication;
+
 
 /**
  * Controller für Authentifizierungs-Endpunkte (Login, Registrierung).
@@ -23,6 +25,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AuthController {
 
     private final UserService userService;
+
+    @GetMapping("/")
+    public String home(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            String role = authentication.getAuthorities().stream()
+                    .findFirst()
+                    .map(Object::toString)
+                    .orElse("");
+
+            log.debug("Benutzer ist eingeloggt mit Rolle: {}", role);
+
+            if (role.equals("ROLE_ADMIN")) {
+                return "redirect:/admin/dashboard";
+            } else {
+                return "redirect:/shop/products";
+            }
+        }
+
+        log.debug("Benutzer ist nicht eingeloggt, Weiterleitung zu /login");
+        return "redirect:/login";
+    }
 
     @GetMapping("/login")
     public String loginPage(@RequestParam(value = "error", required = false) String error,
