@@ -12,36 +12,50 @@
                     <h4 class="mb-0">Registrierung</h4>
                 </div>
                 <div class="card-body">
-                    <!-- Validierungsfehler anzeigen -->
-                    <div th:if="${errors}" class="alert alert-danger">
-                        <ul class="mb-0">
-                            <li th:each="err : ${errors}" th:text="${err}"></li>
-                        </ul>
+
+                    <!-- 🟥 БИЗНЕС-ОШИБКИ (вне формы, контекст #fields не требуется) -->
+                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <span th:text="${errorMessage}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
 
+                    <!-- ✅ ФОРМА -->
                     <form th:action="@{/register}" th:object="${registrationDto}" method="post">
+
+                        <!-- 🟥 ОШИБКИ ВАЛИДАЦИИ ПОЛЕЙ (строго внутри формы!) -->
+                        <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger mb-3">
+                            <ul class="mb-0 ps-3">
+                                <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                            </ul>
+                        </div>
+
                         <div class="mb-3">
                             <label for="email" class="form-label">E-Mail *</label>
                             <input type="email" class="form-control" id="email" th:field="*{email}" required>
                             <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                         </div>
+
                         <div class="mb-3">
                             <label for="password" class="form-label">Passwort (min. 8 Zeichen) *</label>
                             <input type="password" class="form-control" id="password" th:field="*{password}" required minlength="8">
                             <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                         </div>
+
                         <div class="mb-3">
                             <label for="firstName" class="form-label">Vorname</label>
                             <input type="text" class="form-control" id="firstName" th:field="*{firstName}">
                         </div>
+
                         <div class="mb-3">
                             <label for="lastName" class="form-label">Nachname</label>
                             <input type="text" class="form-control" id="lastName" th:field="*{lastName}">
                         </div>
+
                         <div class="mb-3">
                             <label for="address" class="form-label">Lieferadresse</label>
                             <textarea class="form-control" id="address" th:field="*{address}" rows="2"></textarea>
                         </div>
+
                         <button type="submit" class="btn btn-success w-100">Registrieren</button>
                     </form>
                 </div>
