@@ -41,14 +41,4 @@ public class HomeController {
         return "redirect:/login";
     }
 
-    @GetMapping("/login")
-    public String login() {
-        return "auth/login";
-    }
-
-    @GetMapping("/register")
-    public String register(Model model) {
-        model.addAttribute("registrationDto", new UserRegistrationDto());
-        return "auth/register";
-    }
 }
