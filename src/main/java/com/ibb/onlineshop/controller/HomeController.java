@@ -1,12 +1,54 @@
 package com.ibb.onlineshop.controller;
 
+import com.ibb.onlineshop.dto.user.UserRegistrationDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+
+@Controller
+@RequiredArgsConstructor
+@Slf4j
 public class HomeController {
-    @GetMapping("/hello")
-    public String hello() {
-        return "Hello, Spring Boot!";
+
+    /**
+     * Startseite: Weiterleitung basierend auf Authentifizierungsstatus.
+     * - Eingeloggter USER → /shop/products
+     * - Eingeloggter ADMIN → /admin/dashboard
+     * - Nicht eingeloggter Benutzer → /login
+     */
+    @GetMapping("/")
+    public String home(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            String role = authentication.getAuthorities().stream()
+                    .findFirst()
+                    .map(Object::toString)
+                    .orElse("");
+
+            log.debug("Benutzer ist eingeloggt mit Rolle: {}", role);
+
+            if (role.equals("ROLE_ADMIN")) {
+                return "redirect:/admin/dashboard";
+            } else {
+                return "redirect:/shop/products";
+            }
+        }
+
+        log.debug("Benutzer ist nicht eingeloggt, Weiterleitung zu /login");
+        return "redirect:/login";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "auth/login";
+    }
+
+    @GetMapping("/register")
+    public String register(Model model) {
+        model.addAttribute("registrationDto", new UserRegistrationDto());
+        return "auth/register";
     }
 }
