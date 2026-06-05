@@ -15,9 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Implementiert die Geschäftslogik für die Benutzerverwaltung.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,7 +35,6 @@ public class UserServiceImpl implements UserService {
 
         User user = new User();
         user.setEmail(dto.getEmail());
-        // Passwort wird mit BCrypt (Stärke 12) gehasht
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.USER);
         user.setStatus(UserStatus.ACTIVE);

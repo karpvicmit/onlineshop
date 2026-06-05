@@ -38,24 +38,20 @@ public class AuthController {
             BindingResult result,
             Model model) {
 
-        // 1. Validierungsfehler (Bean Validation)
         if (result.hasErrors()) {
             log.debug("Validierungsfehler bei Registrierung: {}", result.getAllErrors());
             return "auth/register";
         }
 
-        // 2. Geschäftslogik mit gezielter Exception-Behandlung
         try {
             userService.registerUser(dto);
             log.info("Registrierung erfolgreich. Weiterleitung zur Login-Seite.");
             return "redirect:/login?registered";
         } catch (EmailAlreadyExistsException e) {
-            // ⬅️ Ловим твоё кастомное исключение
             log.warn("Registrierung abgelehnt: {}", e.getMessage());
             model.addAttribute("errorMessage", e.getMessage());
-            return "auth/register"; // Остаёмся на форме, Thymeleaf покажет alert
+            return "auth/register";
         } catch (Exception e) {
-            // Fallback für unerwartete Fehler (Datenbank, Netzwerk etc.)
             log.error("Unerwarteter Fehler bei Registrierung", e);
             model.addAttribute("errorMessage", "Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.");
             return "auth/register";
