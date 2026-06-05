@@ -53,7 +53,7 @@ spring:
 logging:
   level:
     root: INFO
-    com.ibb.onlineshop: DEBUG
+    com.karpenko.onlineshop: DEBUG
     org.flywaydb: DEBUG
     org.springframework.boot.autoconfigure.flyway: DEBUG
 
@@ -80,5 +80,5 @@ spring:
   logging:
     level:
       root: WARN
-      com.ibb.onlineshop: INFO
+      com.karpenko.onlineshop: INFO
       org.flywaydb: INFO

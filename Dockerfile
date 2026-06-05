@@ -1,4 +1,4 @@
 FROM ubuntu:latest
-LABEL authors="IBBHome"
+LABEL authors="Home"
 
 ENTRYPOINT ["top", "-b"]
