@@ -12,11 +12,9 @@
                     <h4 class="mb-0">Anmeldung</h4>
                 </div>
                 <div class="card-body">
-                    <!-- Fehlermeldung bei falschen Daten -->
                     <div th:if="${param.error}" class="alert alert-danger">
                         Ungültige E-Mail oder Passwort.
                     </div>
-                    <!-- Erfolgsmeldung nach Registrierung -->
                     <div th:if="${param.registered}" class="alert alert-success">
                         Registrierung erfolgreich! Bitte melden Sie sich an.
                     </div>
@@ -37,6 +35,15 @@
                     <small>
                         Noch kein Konto? <a th:href="@{/register}">Jetzt registrieren</a>
                     </small>
+                </div>
+
+                <hr>
+
+                <div class="text-center mt-3">
+                    <p>Oder melden Sie sich an mit:</p>
+                    <a href="/oauth2/authorization/google" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-google"></i>Google
+                    </a>
                 </div>
             </div>
         </div>

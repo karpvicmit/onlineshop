@@ -2,6 +2,7 @@ package com.karpenko.onlineshop.config;
 
 import com.karpenko.onlineshop.security.AuthSuccessHandler;
 import com.karpenko.onlineshop.security.CustomUserDetailsService;
+import com.karpenko.onlineshop.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final AuthSuccessHandler authSuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -42,6 +44,13 @@ public class SecurityConfig {
                         .successHandler(authSuccessHandler)
                         .failureUrl("/login?error=true")
                         .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService) // Unser benutzerdefinierter Service
+                        )
+                        .defaultSuccessUrl("/", true) // Weiterleitung zur Produktliste nach erfolgreichem OAuth2-Login
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
