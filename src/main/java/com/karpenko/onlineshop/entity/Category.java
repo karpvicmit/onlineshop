@@ -8,10 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
-/**
- * Entität für Produktkategorien.
- * Der 'slug' wird für benutzerfreundliche URLs verwendet (z.B. /shop?category=elektronik).
- */
 @Entity
 @Table(name = "categories")
 @Getter

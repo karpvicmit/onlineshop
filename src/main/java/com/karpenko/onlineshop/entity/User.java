@@ -8,10 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
-/**
- * Entität für den Benutzer (Kunde oder Administrator).
- * Enthält Authentifizierungsdaten und Profilinformationen.
- */
 @Entity
 @Table(name = "users")
 @Getter

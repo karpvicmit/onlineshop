@@ -10,10 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * Entität für Produkte im Online-Shop.
- * Enthält eine Many-to-One-Beziehung zur Category.
- */
 @Entity
 @Table(name = "products")
 @Getter
