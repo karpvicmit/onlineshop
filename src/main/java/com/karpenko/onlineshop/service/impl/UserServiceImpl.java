@@ -1,5 +1,6 @@
 package com.karpenko.onlineshop.service.impl;
 
+import com.karpenko.onlineshop.exception.ResourceNotFoundException;
 import com.karpenko.onlineshop.security.CustomUserDetails;
 import com.karpenko.onlineshop.dto.user.UserRegistrationDto;
 import com.karpenko.onlineshop.entity.User;
@@ -14,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -55,5 +58,31 @@ public class UserServiceImpl implements UserService {
             return customUserDetails.getUser();
         }
         throw new IllegalStateException("Benutzer ist nicht authentifiziert");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public void updateUserRole(Long userId, Role newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Benutzer nicht gefunden"));
+        user.setRole(newRole);
+        userRepository.save(user);
+        log.info("Rolle von Benutzer {} auf {} geändert", user.getEmail(), newRole);
+    }
+
+    @Override
+    @Transactional
+    public void updateUserStatus(Long userId, UserStatus newStatus) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Benutzer nicht gefunden"));
+        user.setStatus(newStatus);
+        userRepository.save(user);
+        log.info("Status von Benutzer {} auf {} geändert", user.getEmail(), newStatus);
     }
 }
