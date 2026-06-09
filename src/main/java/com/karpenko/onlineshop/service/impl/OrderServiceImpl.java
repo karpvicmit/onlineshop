@@ -41,7 +41,6 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException("Warenkorb ist leer. Keine Bestellung möglich.");
         }
 
-        // 1. Lagerbestand prüfen (Vorbedingung /F06/)
         for (CartItem item : cart.getItems()) {
             Product product = item.getProduct();
             if (product.getStock() < item.getQuantity()) {
@@ -51,27 +50,23 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        // 2. Bestellung erstellen
         Order order = new Order();
         order.setUser(user);
-        order.setDeliveryAddress(user.getAddress()); // Aus dem Profil vorbefüllt
+        order.setDeliveryAddress(user.getAddress());
         order.setStatus(OrderStatus.NEW);
 
         BigDecimal totalAmount = BigDecimal.ZERO;
 
-        // 3. Bestellpositionen erstellen und Lagerbestand reduzieren
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
 
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
-            // WICHTIG: Preis zum Zeitpunkt der Bestellung speichern (Anforderung /D07/)
             orderItem.setUnitPrice(product.getPrice());
 
             order.addItem(orderItem);
 
-            // Lagerbestand aktualisieren
             product.setStock(product.getStock() - cartItem.getQuantity());
             productRepository.save(product);
 
@@ -82,7 +77,6 @@ public class OrderServiceImpl implements OrderService {
         Order savedOrder = orderRepository.save(order);
         log.info("Bestellung {} erfolgreich angelegt. Gesamtbetrag: {}", savedOrder.getId(), totalAmount);
 
-        // 4. Warenkorb leeren
         cartService.clearCart(user);
 
         return savedOrder;
@@ -100,4 +94,15 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findByIdAndUserId(orderId, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Bestellung nicht gefunden oder kein Zugriff"));
     }
+
+    @Override
+    @Transactional
+    public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
+        log.info("Admin aktualisiert Bestellstatus: ID {} auf {}", orderId, newStatus);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bestellung nicht gefunden"));
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+    }
+    
 }
