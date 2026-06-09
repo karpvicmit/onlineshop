@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public ProductDto getProductById(Long id) {
-        log.debug("Abruf des Produkts mit ID: {}", id);
+        log.debug("getProductById: {}", id);
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
@@ -51,6 +51,18 @@ public class ProductServiceImpl implements ProductService {
                 });
 
         return productMapper.toDto(product);
+    }
+
+    @Override
+    @Transactional
+    public Product getProductEntityById(Long id) {
+        log.debug("getProductEntityById: {}", id);
+
+        return productRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Produkt mit ID {} nicht gefunden", id);
+                    return new ResourceNotFoundException("Produkt nicht gefunden");
+                });
     }
 
     @Override

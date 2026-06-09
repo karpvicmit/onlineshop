@@ -11,6 +11,7 @@ public interface ProductService {
     
     Page<ProductDto> findProducts(String name, String categorySlug, Pageable pageable);
     ProductDto getProductById(Long id);
+    Product getProductEntityById(Long id);
 
     Product saveProduct(Product product, MultipartFile imageFile);
     void deleteProduct(Long id);
