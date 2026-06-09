@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.karpenko.onlineshop.service.FileUploadService;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Slf4j
@@ -23,6 +25,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final FileUploadService fileUploadService;
 
     @Override
     @Transactional(readOnly = true)
@@ -48,5 +51,32 @@ public class ProductServiceImpl implements ProductService {
                 });
 
         return productMapper.toDto(product);
+    }
+
+    @Override
+    @Transactional
+    public Product saveProduct(Product product, MultipartFile imageFile) {
+        log.info("Speichere Produkt: {}", product.getName());
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imageUrl = fileUploadService.storeFile(imageFile);
+            product.setImageUrl(imageUrl);
+        } else if (product.getId() != null) {
+            Product existingProduct = productRepository.findById(product.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Produkt nicht gefunden"));
+            product.setImageUrl(existingProduct.getImageUrl());
+        }
+
+        return productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProduct(Long id) {
+        log.info("Lösche Produkt mit ID: {}", id);
+        if (!productRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Produkt nicht gefunden");
+        }
+        productRepository.deleteById(id);
     }
 }
