@@ -1,17 +1,14 @@
 spring:
   application:
-    name: OnlineShop
-
-  profiles:
-    active: dev
+    name: onlineshop
 
   # ==========================================
-  # Datenbank-Konfiguration
+  # Datenbank-Konfiguration (wird durch .env überschrieben)
   # ==========================================
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:onlineshop_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${DB_USER:onlineshop_user}
-    password: ${DB_PASSWORD:secret}
+    password: ${DB_PASSWORD:SecurePassword_2026!}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   # ==========================================
@@ -19,22 +16,22 @@ spring:
   # ==========================================
   jpa:
     open-in-view: false
-    hibernate:
-      ddl-auto: none
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
+        dialect: org.hibernate.dialect.MySQLDialect
 
   # ==========================================
-  # Flyway Migrationen
+  # Flyway Migrationen (V1__..., V2__...)
   # ==========================================
   flyway:
     enabled: true
     locations: classpath:db/migration
-    # baseline-on-migrate: true
+    baseline-on-migrate: true
 
   # ==========================================
-  # Datei-Upload Konfiguration
+  # Datei-Upload Konfiguration (Anforderung /F09/)
   # ==========================================
   servlet:
     multipart:
@@ -42,20 +39,28 @@ spring:
       max-request-size: 5MB
 
   # ==========================================
-  # Anwendungsspezifische Eigenschaften
+  # Fehlerbehandlung (Erforderlich für GlobalExceptionHandler / NoHandlerFoundException)
   # ==========================================
-  app:
-    upload-dir: ${APP_UPLOAD_DIR:./dev-uploads}
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
 
 # ==========================================
-# Logging (SLF4J / Logback)
+# Anwendungsspezifische Eigenschaften
+# ==========================================
+app:
+  upload-dir: ${APP_UPLOAD_DIR:./dev-uploads}
+
+# ==========================================
+# Logging (SLF4J / Logback) - Anforderung /F18/
 # ==========================================
 logging:
   level:
     root: INFO
-    com.karpenko.onlineshop: DEBUG
-    org.flywaydb: DEBUG
-    org.springframework.boot.autoconfigure.flyway: DEBUG
+    com.karpenko.onlineshop: INFO
+    org.springframework.security: INFO
 
 ---
 # ==========================================
@@ -65,6 +70,18 @@ spring:
   config:
     activate:
       on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    com.karpenko.onlineshop: DEBUG
+    org.hibernate.SQL: DEBUG
 
 ---
 # ==========================================
@@ -77,29 +94,37 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-  logging:
-    level:
-      root: WARN
-      com.karpenko.onlineshop: INFO
-      org.flywaydb: INFO
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+logging:
+  level:
+    root: WARN
+    com.karpenko.onlineshop: INFO
+    org.hibernate.SQL: WARN
 
 ---
 # ==========================================
-# Oauth: Google Login
+# Profil: test (Für JUnit / MockMvc Tests)
 # ==========================================
 spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope: profile, email
-            client-name: Google
-        provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
-            token-uri: https://oauth2.googleapis.com/token
-            user-info-uri: https://openidconnect.googleapis.com/v1/userinfo
-            user-name-attribute: sub
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  flyway:
+    enabled: false
+
+logging:
+  level:
+    com.karpenko.onlineshop: WARN
