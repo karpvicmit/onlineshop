@@ -1,10 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
 <body>
 
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+<div th:replace="~{fragments/alerts :: alerts}"></div>
+
+<div class="container mt-4">
+    <div class="row">
+
+        <!-- Боковая панель фильтров -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <i class="fas fa-filter me-2"></i>Filter
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/shop/products}" method="get">
+                        <!-- Поиск по имени -->
+                        <div class="mb-3">
+                            <label for="q" class="form-label">Suche</label>
+                            <input type="text" class="form-control" id="q" name="q"
+                                   th:value="${searchQuery}" placeholder="Produktname...">
+                        </div>
+
+                        <!-- Фильтр по категории (пример статического списка, в реальности можно динамически из Model) -->
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Kategorie</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">Alle Kategorien</option>
+                                <!-- В реальном проекте здесь будет th:each для списка категорий из Controller -->
+                                <option value="elektronik" th:selected="${selectedCategory == 'elektronik'}">Elektronik</option>
+                                <option value="buecher" th:selected="${selectedCategory == 'buecher'}">Bücher</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i> Anwenden
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Сетка товаров -->
+        <div class="col-md-9">
+            <h2 class="mb-4">Produktkatalog</h2>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <!-- Карточка товара -->
+                <div class="col" th:each="product : ${products}">
+                    <div class="card h-100 product-card shadow-sm">
+                        <!-- Изображение товара (заглушка, если нет картинки) -->
+                        <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/placeholder.jpg'}"
+                             class="card-img-top" alt="Produktbild">
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title" th:text="${product.name}">Produkt Name</h5>
+                            <p class="card-text text-muted small" th:text="${#strings.abbreviate(product.description, 80)}">Beschreibung...</p>
+
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="h5 mb-0 text-primary" th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')} + ' €'">0.00 €</span>
+                                    <span class="badge bg-success" th:if="${product.stock > 0}" th:text="'Auf Lager (' + ${product.stock} + ')'">Lager</span>
+                                    <span class="badge bg-danger" th:if="${product.stock <= 0}">Ausverkauft</span>
+                                </div>
+
+                                <a th:href="@{/shop/products/{id}(id=${product.id})}" class="btn btn-outline-dark w-100">
+                                    Details ansehen
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сообщение, если ничего не найдено -->
+            <div th:if="${#lists.isEmpty(products)}" class="alert alert-info mt-4">
+                Keine Produkte gefunden, die Ihren Kriterien entsprechen.
+            </div>
+
+            <!-- Пагинация -->
+            <div th:replace="~{fragments/pagination :: pagination}"></div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
