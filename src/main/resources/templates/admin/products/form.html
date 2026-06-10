@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head}"></head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Боковая панель админа -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" th:replace="~{admin/layout :: #sidebarMenu}"></nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content">
+            <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <!-- Заголовок меняется в зависимости от режима (создание или редактирование) -->
+                <h1 class="h2" th:text="${product.id != null} ? 'Produkt bearbeiten' : 'Neues Produkt anlegen'">Produkt</h1>
+                <a th:href="@{/admin/products}" class="btn btn-outline-secondary">Abbrechen</a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- Важно: enctype="multipart/form-data" для загрузки файлов -->
+                    <form th:action="@{/admin/products/save}" th:object="${product}" method="post" enctype="multipart/form-data">
+
+                        <!-- Скрытое поле ID для режима редактирования -->
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="row g-3">
+                            <!-- Название -->
+                            <div class="col-md-8">
+                                <label for="name" class="form-label">Produktname</label>
+                                <input type="text" class="form-control"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                       id="name" th:field="*{name}" required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                            </div>
+
+                            <!-- Категория -->
+                            <div class="col-md-4">
+                                <label for="category" class="form-label">Kategorie</label>
+                                <select class="form-select" id="category" th:field="*{category}" required>
+                                    <option value="" disabled selected>Kategorie wählen...</option>
+                                    <option th:each="cat : ${categories}"
+                                            th:value="${cat.id}"
+                                            th:text="${cat.name}">Kategorie Name</option>
+                                </select>
+                            </div>
+
+                            <!-- Цена -->
+                            <div class="col-md-4">
+                                <label for="price" class="form-label">Preis (€)</label>
+                                <input type="number" step="0.01" class="form-control"
+                                       th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'"
+                                       id="price" th:field="*{price}" required min="0.01">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+                            </div>
+
+                            <!-- Lagerbestand -->
+                            <div class="col-md-4">
+                                <label for="stock" class="form-label">Lagerbestand</label>
+                                <input type="number" class="form-control"
+                                       th:classappend="${#fields.hasErrors('stock')} ? 'is-invalid'"
+                                       id="stock" th:field="*{stock}" required min="0">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></div>
+                            </div>
+
+                            <!-- Изображение -->
+                            <div class="col-md-4">
+                                <label for="imageFile" class="form-label">Produktbild</label>
+                                <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*">
+                                <div class="form-text">Maximale Dateigröße: 5MB. Formate: JPG, PNG.</div>
+
+                                <!-- Превью текущего изображения при редактировании -->
+                                <div th:if="${product.imageUrl != null}" class="mt-2">
+                                    <img th:src="${product.imageUrl}" style="height: 50px;" class="border rounded">
+                                    <small class="text-muted d-block">Aktuelles Bild</small>
+                                </div>
+                            </div>
+
+                            <!-- Описание (на всю ширину) -->
+                            <div class="col-12">
+                                <label for="description" class="form-label">Beschreibung</label>
+                                <textarea class="form-control"
+                                          th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                                          id="description" th:field="*{description}" rows="5"></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i> Speichern
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
