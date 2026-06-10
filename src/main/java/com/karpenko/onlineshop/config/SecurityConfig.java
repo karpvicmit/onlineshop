@@ -45,13 +45,13 @@ public class SecurityConfig {
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // Unser benutzerdefinierter Service
-                        )
-                        .defaultSuccessUrl("/", true) // Weiterleitung zur Produktliste nach erfolgreichem OAuth2-Login
-                )
+//                .oauth2Login(oauth2 -> oauth2
+//                        .loginPage("/login")
+//                        .userInfoEndpoint(userInfo -> userInfo
+//                                .userService(customOAuth2UserService) // Unser benutzerdefinierter Service
+//                        )
+//                        .defaultSuccessUrl("/", true) // Weiterleitung zur Produktliste nach erfolgreichem OAuth2-Login
+//                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true")

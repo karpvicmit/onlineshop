@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<nav th:fragment="pagination" aria-label="Page navigation" th:if="${totalPages > 1}">
+    <ul class="pagination justify-content-center mt-4">
+
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{/shop/products(page=${currentPage - 1}, q=${searchQuery}, category=${selectedCategory})}">
+                Zurück
+            </a>
+        </li>
+
+        <li class="page-item"
+            th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+            th:classappend="${i == currentPage} ? 'active'">
+
+            <a class="page-link"
+               th:href="@{/shop/products(page=${i}, q=${searchQuery}, category=${selectedCategory})}"
+               th:text="${i + 1}">1</a>
+        </li>
+
+        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{/shop/products(page=${currentPage + 1}, q=${searchQuery}, category=${selectedCategory})}">
+                Weiter
+            </a>
+        </li>
+    </ul>
+</nav>
+</html>

@@ -1,4 +1,4 @@
-package com.karpenko.onlineshop.controller;
+package com.karpenko.onlineshop.controller.auth;
 
 import com.karpenko.onlineshop.dto.user.UserRegistrationDto;
 import com.karpenko.onlineshop.exception.EmailAlreadyExistsException;

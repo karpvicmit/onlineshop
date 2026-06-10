@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+<div th:replace="~{fragments/alerts :: alerts}"></div>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Mein Profil</h4>
+                </div>
+                <div class="card-body">
+
+                    <div class="mb-4 p-3 bg-light rounded">
+                        <h5>Kontoinformationen</h5>
+                        <p class="mb-1"><strong>E-Mail:</strong> <span th:text="${userEmail}">user@email.com</span></p>
+                        <p class="mb-0 text-muted small">E-Mail-Adresse und Passwort können aktuell nicht über das Web-Interface geändert werden.</p>
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">Persönliche Daten & Lieferadresse</h5>
+                    <form th:action="@{/profile/update}" th:object="${profileDto}" method="post">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">Vorname</label>
+                                <input type="text" class="form-control"
+                                       th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'"
+                                       id="firstName" th:field="*{firstName}">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Nachname</label>
+                                <input type="text" class="form-control"
+                                       th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'"
+                                       id="lastName" th:field="*{lastName}">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Lieferadresse (für Bestellungen)</label>
+                            <textarea class="form-control"
+                                      th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'"
+                                      id="address" th:field="*{address}" rows="3"></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                            <div class="form-text">Diese Adresse wird beim Checkout automatisch vorausgefüllt.</div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i> Änderungen speichern
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
