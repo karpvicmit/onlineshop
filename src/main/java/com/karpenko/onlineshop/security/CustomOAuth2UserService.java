@@ -1,6 +1,7 @@
-package com.karpenko.onlineshop.service;
+package com.karpenko.onlineshop.security;
 
 import com.karpenko.onlineshop.entity.User;
+import com.karpenko.onlineshop.entity.AuthProvider;
 import com.karpenko.onlineshop.entity.Role;
 import com.karpenko.onlineshop.entity.UserStatus;
 import com.karpenko.onlineshop.repository.UserRepository;
@@ -14,7 +15,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,40 +23,32 @@ import java.util.Optional;
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final UserRepository userRepository;
-    private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = delegate.loadUser(userRequest);
+        OAuth2User oauth2User = new DefaultOAuth2UserService().loadUser(userRequest);
 
-        String email = oAuth2User.getAttribute("email");
+        String email = oauth2User.getAttribute("email");
+        String firstName = oauth2User.getAttribute("given_name");
+        String lastName = oauth2User.getAttribute("family_name");
 
-        if (email == null || email.isEmpty()) {
-            log.error("Keine E-Mail-Adresse vom OAuth2-Provider erhalten.");
-            throw new OAuth2AuthenticationException("E-Mail-Adresse ist erforderlich");
-        }
+        log.debug("OAuth2 Login versucht für E-Mail: {}", email);
 
-        Optional<User> existingUser = userRepository.findByEmail(email);
-
-        if (existingUser.isEmpty()) {
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
             log.info("Neuer Benutzer wird über OAuth2 registriert: {}", email);
             User newUser = new User();
             newUser.setEmail(email);
-            newUser.setPasswordHash("$2a$12$RandomHashForOAuth2UserOnlyNotUsedForAuth");
-            newUser.setFirstName(oAuth2User.getAttribute("given_name"));
-            newUser.setLastName(oAuth2User.getAttribute("family_name"));
+            newUser.setFirstName(firstName != null ? firstName : "Unknown");
+            newUser.setLastName(lastName != null ? lastName : "Unknown");
+            newUser.setPasswordHash(UUID.randomUUID().toString());
             newUser.setRole(Role.USER);
             newUser.setStatus(UserStatus.ACTIVE);
+            newUser.setAuthProvider(AuthProvider.GOOGLE); // Важно! Указываем провайдера
 
-            userRepository.save(newUser);
-        } else {
-            log.info("Bestehender Benutzer hat sich über OAuth2 angemeldet: {}", email);
-            if (existingUser.get().getStatus() == UserStatus.BLOCKED) {
-                throw new OAuth2AuthenticationException("Dieses Konto wurde gesperrt.");
-            }
-        }
+            return userRepository.save(newUser);
+        });
 
-        return oAuth2User;
+        return new CustomUserDetails(user, oauth2User.getAttributes());
     }
 }

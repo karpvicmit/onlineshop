@@ -11,11 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/**
- * Leitet den Benutzer nach erfolgreichem Login basierend auf seiner Rolle weiter.
- * USER -> /shop/products
- * ADMIN -> /admin/dashboard
- */
 @Slf4j
 @Component
 public class AuthSuccessHandler implements AuthenticationSuccessHandler {

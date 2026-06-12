@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @ControllerAdvice
@@ -41,5 +42,10 @@ public class GlobalExceptionHandler {
     public String handleNoHandlerFound(NoHandlerFoundException ex, Model model) {
         log.warn("Seite nicht gefunden: {}", ex.getRequestURL());
         return "error/404";
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public void handleNoResourceFoundException(NoResourceFoundException ex) {
+        log.debug("Statische Ressource nicht gefunden (wahrscheinlich favicon.ico): {}", ex.getMessage());
     }
 }

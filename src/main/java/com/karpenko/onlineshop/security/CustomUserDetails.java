@@ -2,28 +2,37 @@ package com.karpenko.onlineshop.security;
 
 import com.karpenko.onlineshop.entity.User;
 import com.karpenko.onlineshop.entity.UserStatus;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
-/**
- * Implementiert UserDetails, um die User-Entität für Spring Security kompatibel zu machen.
- * Kapselt die Benutzerdaten und stellt Autoritäten (Rollen) und Kontostatus bereit.
- */
-public class CustomUserDetails implements UserDetails {
+@Getter
+public class CustomUserDetails implements UserDetails, OAuth2User {
 
     private final User user;
+    private final Map<String, Object> attributes;
 
     public CustomUserDetails(User user) {
         this.user = user;
+        this.attributes = Collections.emptyMap();
     }
 
+    public CustomUserDetails(User user, Map<String, Object> attributes) {
+        this.user = user;
+        this.attributes = attributes;
+    }
+
+    // ==========================================
+    // UserDetails
+    // ==========================================
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Spring Security erwartet das Präfix "ROLE_" für rollenbasierte Zugriffskontrolle
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
@@ -38,27 +47,32 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
     public boolean isAccountNonLocked() {
-        // Ein BLOCKED-Benutzer gilt als gesperrt und kann sich nicht einloggen
         return user.getStatus() == UserStatus.ACTIVE;
     }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
     public boolean isEnabled() {
         return user.getStatus() == UserStatus.ACTIVE;
     }
 
-    public User getUser() {
-        return user;
+    // ==========================================
+    //  OAuth2User
+    // ==========================================
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
+
+    @Override
+    public String getName() {
+        return user.getEmail();
+    }
+
 }

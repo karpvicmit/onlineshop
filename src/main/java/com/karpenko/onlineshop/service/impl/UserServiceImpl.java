@@ -15,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 
 import java.util.List;
 
@@ -53,11 +55,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getCurrentUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof CustomUserDetails customUserDetails) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Проверяем, что пользователь действительно аутентифицирован и не аноним
+        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
+            throw new IllegalStateException("Benutzer ist nicht authentifiziert");
+        }
+
+        // Извлекаем нашего CustomUserDetails (теперь он будет и для Form, и для OAuth2)
+        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
             return customUserDetails.getUser();
         }
-        throw new IllegalStateException("Benutzer ist nicht authentifiziert");
+
+        throw new IllegalStateException("Unbekannter Principal-Typ: " + authentication.getPrincipal().getClass().getName());
     }
 
     @Override
