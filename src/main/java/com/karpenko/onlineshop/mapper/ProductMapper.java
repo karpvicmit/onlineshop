@@ -9,6 +9,5 @@ import org.mapstruct.Mapping;
 public interface ProductMapper {
 
     @Mapping(source = "category.name", target = "categoryName")
-    @Mapping(source = "category.slug", target = "categorySlug")
     ProductDto toDto(Product product);
 }

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/layout :: head}"></head>
-<body>
+<head th:replace="~{fragments/head :: head('Analyse-Dashboard')}"></head>
+<body class="bg-light">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 <div class="container-fluid">
     <div class="row">
         <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" th:replace="~{admin/layout :: #sidebarMenu}"></nav>
@@ -46,9 +47,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script th:inline="javascript">
-    /*<![CDATA[*/
 
-    // 1. Daten für das Umsatzdiagramm (Liniendiagramm)
     const revenueData = /*[[${revenueData}]]*/ [];
     const revenueLabels = revenueData.map(d => d.month + '/' + d.year);
     const revenueValues = revenueData.map(d => parseFloat(d.totalRevenue));
@@ -69,7 +68,6 @@
         options: { responsive: true }
     });
 
-    // 2. Daten für Top-Produkte (Balkendiagramm)
     const topProducts = /*[[${topProducts}]]*/ [];
     new Chart(document.getElementById('topProductsChart'), {
         type: 'bar',
@@ -87,7 +85,6 @@
         }
     });
 
-    // 3. Auftragsstatusdaten (Kreisdiagramm)
     const statusCounts = /*[[${statusCounts}]]*/ [];
     new Chart(document.getElementById('orderStatusChart'), {
         type: 'doughnut',

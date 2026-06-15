@@ -34,7 +34,6 @@ public class ProductController {
 
         log.info("Anfrage Produktliste: q='{}', category='{}', page={}", q, category, page);
 
-        // Paginierung: 12 Elemente pro Seite
         Pageable pageable = PageRequest.of(page, 12, Sort.by(Sort.Direction.DESC, "id"));
 
         Page<ProductDto> productPage = productService.findProducts(q, category, pageable);
@@ -49,9 +48,6 @@ public class ProductController {
         return "shop/products/list";
     }
 
-    /**
-     * Zeigt die Detailseite eines einzelnen Produkts an.
-     */
     @GetMapping("/{id}")
     public String productDetail(@PathVariable Long id, Model model) {
         log.info("Anfrage Produktdetail für ID: {}", id);

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Kategorie bearbeiten')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+    <h2 th:text="${category.id == null} ? 'Neue Kategorie anlegen' : 'Kategorie bearbeiten'">Kategorie</h2>
+
+    <form th:action="@{/admin/categories/save}" th:object="${category}" method="post">
+        <input type="hidden" th:field="*{id}"/>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Kategoriename *</label>
+            <input type="text" class="form-control" id="name" th:field="*{name}" required>
+            <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Beschreibung</label>
+            <textarea class="form-control" id="description" th:field="*{description}" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3" th:if="${category.slug != null}">
+            <label class="form-label">Slug (automatisch generiert)</label>
+            <input type="text" class="form-control bg-light" th:value="${category.slug}" readonly>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Speichern</button>
+            <a th:href="@{/admin/categories}" class="btn btn-secondary">Abbrechen</a>
+        </div>
+    </form>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

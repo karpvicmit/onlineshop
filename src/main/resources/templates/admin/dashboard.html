@@ -1,50 +1,52 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/layout :: head}"></head>
-<body>
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" th:replace="~{admin/layout :: #sidebarMenu}"></nav>
+<head th:replace="~{fragments/head :: head('Admin Dashboard')}"></head>
+<body class="bg-light"> 
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content">
-            <div th:replace="~{fragments/alerts :: alerts}"></div>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary"><i class="bi bi-speedometer2"></i> Admin-Dashboard</h2>
+        <span class="badge bg-warning text-dark">Administrator-Modus</span>
+    </div>
 
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Dashboard Übersicht</h1>
-            </div>
+    <div th:replace="~{fragments/alerts :: alerts}"></div>
 
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card text-white bg-primary h-100">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="fas fa-box me-2"></i>Produkte</h5>
-                            <p class="card-text fs-4">Verwalten Sie den gesamten Katalog.</p>
-                            <a th:href="@{/admin/products}" class="btn btn-light btn-sm">Zur Verwaltung</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-white bg-success h-100">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="fas fa-shopping-bag me-2"></i>Bestellungen</h5>
-                            <p class="card-text fs-4">Neue Eingänge und Statusänderungen.</p>
-                            <a th:href="@{/admin/orders}" class="btn btn-light btn-sm">Zur Übersicht</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-white bg-warning h-100">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="fas fa-chart-pie me-2"></i>Analysen</h5>
-                            <p class="card-text fs-4">Umsatz und Top-Produkte im Blick.</p>
-                            <a th:href="@{/admin/analytics}" class="btn btn-light btn-sm">Zum Dashboard</a>
-                        </div>
-                    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-box-seam display-4 text-primary mb-3"></i>
+                    <h5 class="card-title">Produktverwaltung</h5>
+                    <p class="card-text">Produkte anlegen, bearbeiten, Bilder verwalten.</p>
+                    <a th:href="@{/admin/products}" class="btn btn-primary">Verwalten</a>
                 </div>
             </div>
-        </main>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-success">
+                <div class="card-body text-center">
+                    <i class="bi bi-tags display-4 text-success mb-3"></i>
+                    <h5 class="card-title">Kategorieverwaltung</h5>
+                    <p class="card-text">Kategorien und Slugs organisieren.</p>
+                    <a th:href="@{/admin/categories}" class="btn btn-success">Verwalten</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-info">
+                <div class="card-body text-center">
+                    <i class="bi bi-receipt display-4 text-info mb-3"></i>
+                    <h5 class="card-title">Bestellverwaltung</h5>
+                    <p class="card-text">Bestellungen einsehen und Status ändern.</p>
+                    <a th:href="@{/admin/orders}" class="btn btn-info text-white">Verwalten</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

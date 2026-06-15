@@ -37,7 +37,7 @@ public class ProfileController {
         model.addAttribute("profileDto", dto);
         model.addAttribute("userEmail", currentUser.getEmail());
 
-        return "shop/profile";
+        return "/profile";
     }
 
     @PostMapping("/update")
@@ -45,7 +45,7 @@ public class ProfileController {
                                 BindingResult bindingResult,
                                 RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            return "shop/profile";
+            return "/profile";
         }
 
         User currentUser = userService.getCurrentUser();

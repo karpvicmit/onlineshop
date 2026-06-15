@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * Zentrale Konfiguration für Spring Security.
- * Definiert die SecurityFilterChain, den PasswordEncoder und die Zugriffsregeln.
+ * Definiert die SecurityFilterChain, den PasswordEncoder und die Zugriffsregeln (RBAC).
  */
 @Configuration
 @EnableWebSecurity
@@ -30,14 +30,21 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Öffentliche Ressourcen
-                        .requestMatchers("/", "/register", "/login", "/error", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
-                        .requestMatchers("/favicon.ico", "/images/**", "/css/**", "/js/**", "/webjars/**", "/images/site.webmanifest").permitAll()
-                        // Admin-Bereich: Nur für ROLE_ADMIN
+                        // 1. Öffentliche Ressourcen (statische Dateien, Login, Registrierung, Fehler)
+                        .requestMatchers("/", "/register", "/login", "/error",
+                                "/css/**", "/js/**", "/images/**", "/uploads/**",
+                                "/favicon.ico", "/webjars/**").permitAll()
+
+                        // 2. Öffentlicher Produktkatalog
+                        .requestMatchers("/shop/**").permitAll()
+
+                        // 3. Kundenbereich: Nur für authentifizierte Benutzer
+                        .requestMatchers("/cart/**", "/profile/**", "/orders/**").authenticated()
+
+                        // 4. Admin-Bereich: Ausschließlich für ROLE_ADMIN
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // Kundenbereich: Für alle authentifizierten Benutzer (USER und ADMIN)
-                        .requestMatchers("/shop/**", "/profile/**").authenticated()
-                        // Alle anderen Anfragen erfordern Authentifizierung
+
+                        // 5. Alle anderen Anfragen erfordern Authentifizierung
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

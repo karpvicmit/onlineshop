@@ -1,28 +1,21 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<nav th:fragment="pagination" aria-label="Page navigation" th:if="${totalPages > 1}">
-    <ul class="pagination justify-content-center mt-4">
-
-        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-            <a class="page-link"
-               th:href="@{/shop/products(page=${currentPage - 1}, q=${searchQuery}, category=${selectedCategory})}">
-                Zurück
+<nav th:fragment="pagination" th:if="${page != null and page.totalPages > 1}" aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+            <a class="page-link" th:href="@{${currentPageUrl}(page=${page.number - 1})}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
 
-        <li class="page-item"
-            th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-            th:classappend="${i == currentPage} ? 'active'">
-
-            <a class="page-link"
-               th:href="@{/shop/products(page=${i}, q=${searchQuery}, category=${selectedCategory})}"
-               th:text="${i + 1}">1</a>
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+            th:classappend="${i == page.number} ? 'active'">
+            <a class="page-link" th:href="@{${currentPageUrl}(page=${i})}" th:text="${i + 1}">1</a>
         </li>
 
-        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-            <a class="page-link"
-               th:href="@{/shop/products(page=${currentPage + 1}, q=${searchQuery}, category=${selectedCategory})}">
-                Weiter
+        <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+            <a class="page-link" th:href="@{${currentPageUrl}(page=${page.number + 1})}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
     </ul>

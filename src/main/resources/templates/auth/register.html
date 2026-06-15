@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head}"></head>
+<head th:replace="~{fragments/head :: head('Registrierung')}"></head>
 <body class="bg-light">
 
 <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container">
-        <a class="navbar-brand" th:href="@{/}"><i class="fas fa-store me-2"></i>OnlineShop</a>
+        <a class="navbar-brand" th:href="@{/}">
+            <i class="bi bi-shop"></i> OnlineShop
+        </a>
     </div>
 </nav>
 

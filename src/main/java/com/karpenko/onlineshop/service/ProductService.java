@@ -1,10 +1,13 @@
 package com.karpenko.onlineshop.service;
 
 import com.karpenko.onlineshop.dto.product.ProductDto;
+import com.karpenko.onlineshop.entity.Category;
 import com.karpenko.onlineshop.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
 
 
 public interface ProductService {

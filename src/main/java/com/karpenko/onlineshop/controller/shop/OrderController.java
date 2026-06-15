@@ -28,7 +28,7 @@ public class OrderController {
         User user = userService.getCurrentUser();
         List<Order> orders = orderService.getOrderHistory(user);
         model.addAttribute("orders", orders);
-        return "shop/orders/history";
+        return "shop/orders/list";
     }
 
     @GetMapping("/{id}")

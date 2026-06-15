@@ -36,7 +36,7 @@ public class HomeController {
         }
 
         log.debug("Benutzer ist nicht eingeloggt, Weiterleitung zu /login");
-        return "redirect:/login";
+        return "redirect:/shop/products";
     }
 
 }
