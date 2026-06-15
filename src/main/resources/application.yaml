@@ -34,3 +34,9 @@ logging:
   level:
     root: INFO
     com.karpenko.onlineshop: INFO
+
+app:
+  init:
+    admin:
+      email: ${ADMIN_EMAIL:admin@onlineshop.de}
+      password: ${ADMIN_PASSWORD:AdminSecure2026!}
