@@ -7,6 +7,7 @@ import com.karpenko.onlineshop.entity.UserStatus;
 import com.karpenko.onlineshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -44,10 +45,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             newUser.setPasswordHash(UUID.randomUUID().toString());
             newUser.setRole(Role.USER);
             newUser.setStatus(UserStatus.ACTIVE);
-            newUser.setAuthProvider(AuthProvider.GOOGLE); // Важно! Указываем провайдера
+            newUser.setAuthProvider(AuthProvider.GOOGLE);
 
             return userRepository.save(newUser);
         });
+
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            log.warn("VERSUCHTER LOGIN: Gesperrter Benutzer versucht sich via OAuth2 anzumelden: {}", email);
+            throw new DisabledException("Dieses Benutzerkonto wurde gesperrt. Bitte kontaktieren Sie den Administrator.");
+        }
 
         return new CustomUserDetails(user, oauth2User.getAttributes());
     }
