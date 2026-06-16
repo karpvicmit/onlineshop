@@ -10,6 +10,7 @@ import com.karpenko.onlineshop.repository.ProductRepository;
 import com.karpenko.onlineshop.service.CartService;
 import com.karpenko.onlineshop.service.OrderService;
 import com.karpenko.onlineshop.service.PriceCalculatorService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,13 @@ public class OrderServiceImpl implements OrderService {
     public Order getOrderDetails(Long orderId, User user) {
         return orderRepository.findByIdAndUserId(orderId, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Bestellung nicht gefunden oder kein Zugriff"));
+    }
+
+    @Transactional(readOnly = true)
+    public Order getOrderById(Long id) {
+        log.debug("Bestellung mit ID {} wird gesucht.", id);
+        return orderRepository.findByIdWithItems(id)
+                .orElseThrow(() -> new EntityNotFoundException("Bestellung mit ID " + id + " nicht gefunden"));
     }
 
     @Override

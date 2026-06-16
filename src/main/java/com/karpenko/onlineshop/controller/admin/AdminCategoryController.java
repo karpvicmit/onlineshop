@@ -22,6 +22,9 @@ public class AdminCategoryController {
 
     private final CategoryService categoryService;
 
+    @ModelAttribute("activeMenu")
+    public String activeMenu() { return "categories"; }
+
     @GetMapping
     public String listCategories(Model model) {
         model.addAttribute("categories", categoryService.getAllCategories());

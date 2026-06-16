@@ -26,6 +26,9 @@ public class AdminProductController {
     private final ProductService productService;
     private final CategoryRepository categoryRepository;
 
+    @ModelAttribute("activeMenu")
+    public String activeMenu() { return "products"; }
+
     @GetMapping
     public String listProducts(Model model) {
         model.addAttribute("products", productService.findProducts(null, null, PageRequest.of(0, 100)).getContent());

@@ -15,6 +15,8 @@ public interface UserService {
 
     List<User> getAllUsers();
 
+    Long getCurrentUserId();
+
     void updateUserRole(Long userId, Role newRole);
 
     void updateUserStatus(Long userId, UserStatus newStatus);

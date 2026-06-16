@@ -1,5 +1,6 @@
 package com.karpenko.onlineshop.security;
 
+import com.karpenko.onlineshop.entity.Role;
 import com.karpenko.onlineshop.entity.User;
 import com.karpenko.onlineshop.entity.UserStatus;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+
 
 @Getter
 public class CustomUserDetails implements UserDetails, OAuth2User {
@@ -28,9 +30,18 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         this.attributes = attributes;
     }
 
-    // ==========================================
-    // UserDetails
-    // ==========================================
+    public Long getId() {
+        return user.getId();
+    }
+
+    public String getEmail() {
+        return user.getEmail();
+    }
+
+    public Role getRole() {
+        return user.getRole();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
@@ -47,7 +58,9 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
     public boolean isAccountNonLocked() {
@@ -55,7 +68,9 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
     public boolean isEnabled() {
@@ -63,8 +78,9 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     }
 
     // ==========================================
-    //  OAuth2User
+    // OAuth2User Implementation
     // ==========================================
+
     @Override
     public Map<String, Object> getAttributes() {
         return attributes;
@@ -74,5 +90,4 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     public String getName() {
         return user.getEmail();
     }
-
 }

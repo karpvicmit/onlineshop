@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminDashboardController {
+
+    @ModelAttribute("activeMenu")
+    public String activeMenu() { return "dashboard"; }
 
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {

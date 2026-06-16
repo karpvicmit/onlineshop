@@ -10,6 +10,6 @@ public interface OrderService {
     Order checkout(User user);
     Order getOrderDetails(Long orderId, User user);
     List<Order> getOrderHistory(User user);
-
+    Order getOrderById(Long id);
     void updateOrderStatus(Long orderId, OrderStatus newStatus);
 }

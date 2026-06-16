@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -24,6 +25,9 @@ public class AdminAnalyticsController {
 
     private final AnalyticsService analyticsService;
 
+    @ModelAttribute("activeMenu")
+    public String activeMenu() { return "analytics"; }
+
     @GetMapping
     public String showDashboard(Model model) {
         log.info("Admin ruft Analytics-Dashboard auf");
@@ -35,7 +39,6 @@ public class AdminAnalyticsController {
         model.addAttribute("revenueData", revenueData);
         model.addAttribute("topProducts", topProducts);
         model.addAttribute("statusCounts", statusCounts);
-
         return "admin/analytics";
     }
 }

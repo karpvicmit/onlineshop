@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Bestelldetail')}"></head>
+<body class="bg-light">
+
+<div class="d-flex">
+    <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
+
+    <main class="flex-grow-1 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0"><i class="bi bi-receipt-cutoff text-info me-2"></i>Bestelldetail #<span th:text="${order.id}">1</span></h2>
+            <a th:href="@{/admin/orders}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Zurück zur Liste
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white fw-bold">Bestellpositionen</div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Produkt</th>
+                                <th class="text-center">Menge</th>
+                                <th class="text-end">Einzelpreis</th>
+                                <th class="text-end">Gesamt</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item : ${order.orderItems}">
+                                <td th:text="${item.product != null ? item.product.name : 'Unbekanntes Produkt'}">Produktname</td>
+                                <td class="text-center" th:text="${item.quantity}">1</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2)} + ' €'">0.00 €</td>
+                                <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(item.quantity * item.unitPrice, 1, 2)} + ' €'">0.00 €</td>
+                            </tr>
+                            </tbody>
+                            <tfoot class="table-light">
+                            <tr>
+                                <td colspan="3" class="text-end fw-bold">Gesamtsumme:</td>
+                                <td class="text-end fw-bold text-primary fs-5" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' €'">0.00 €</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white fw-bold">Kundeninformationen</div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>E-Mail:</strong> <span th:text="${order.user != null ? order.user.email : 'Gast'}">email</span></p>
+                        <p class="mb-0"><strong>Bestelldatum:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}">Datum</span></p>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-bold">Lieferadresse</div>
+                    <div class="card-body">
+                        <p class="mb-0" style="white-space: pre-line;" th:text="${order.deliveryAddress}">Musterstraße 1&#10;12345 Berlin</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

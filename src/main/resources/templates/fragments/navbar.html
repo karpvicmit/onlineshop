@@ -30,21 +30,6 @@
                         <i class="bi bi-receipt"></i> Bestellungen
                     </a>
                 </li>
-
-                <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-shield-lock"></i> Admin
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" th:href="@{/admin/dashboard}">Dashboard</a></li>
-                        <li><a class="dropdown-item" th:href="@{/admin/products}">Produktverwaltung</a></li>
-                        <li><a class="dropdown-item" th:href="@{/admin/categories}">Kategorieverwaltung</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" th:href="@{/admin/orders}">Bestellverwaltung</a></li>
-                        <li><a class="dropdown-item" th:href="@{/admin/users}">Benutzerverwaltung</a></li>
-                        <li><a class="dropdown-item" th:href="@{/admin/analytics}">Analyse-Dashboard</a></li>
-                    </ul>
-                </li>
             </ul>
 
             <ul class="navbar-nav">

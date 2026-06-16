@@ -23,11 +23,20 @@ public class AdminOrderController {
 
     private final OrderService orderService;
 
+    @ModelAttribute("activeMenu")
+    public String activeMenu() { return "orders"; }
+
     @GetMapping
     public String listOrders(Model model) {
         model.addAttribute("orders", List.of());
         model.addAttribute("statuses", Arrays.asList(OrderStatus.values()));
         return "admin/orders/list";
+    }
+
+    @GetMapping("/detail/{id}")
+    public String orderDetail(@PathVariable Long id, Model model) {
+        model.addAttribute("order", orderService.getOrderById(id));
+        return "admin/orders/detail";
     }
 
     @PostMapping("/{id}/status")

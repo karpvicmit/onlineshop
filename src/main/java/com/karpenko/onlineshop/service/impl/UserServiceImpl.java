@@ -9,6 +9,7 @@ import com.karpenko.onlineshop.entity.UserStatus;
 import com.karpenko.onlineshop.exception.EmailAlreadyExistsException;
 import com.karpenko.onlineshop.repository.UserRepository;
 import com.karpenko.onlineshop.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -81,6 +82,12 @@ public class UserServiceImpl implements UserService {
     public void updateUserRole(Long userId, Role newRole) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Benutzer nicht gefunden"));
+        Long currentUserId = getCurrentUserId();
+
+        if (user.getId().equals(currentUserId)) {
+            throw new IllegalStateException("Ein Administrator kann seine eigene Rolle nicht ändern.");
+        }
+
         user.setRole(newRole);
         userRepository.save(user);
         log.info("Rolle von Benutzer {} auf {} geändert", user.getEmail(), newRole);
@@ -91,8 +98,25 @@ public class UserServiceImpl implements UserService {
     public void updateUserStatus(Long userId, UserStatus newStatus) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Benutzer nicht gefunden"));
+        Long currentUserId = getCurrentUserId();
+
+        if (user.getId().equals(currentUserId)) {
+            throw new IllegalStateException("Ein Administrator kann sich nicht selbst sperren oder entsperren.");
+        }
         user.setStatus(newStatus);
         userRepository.save(user);
         log.info("Status von Benutzer {} auf {} geändert", user.getEmail(), newStatus);
+    }
+
+    @Override
+    public Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new IllegalStateException("Kein authentifizierter Benutzer im Sicherheitskontext gefunden.");
+        }
+
+        CustomUserDetails currentUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        return currentUserDetails.getId();
     }
 }
