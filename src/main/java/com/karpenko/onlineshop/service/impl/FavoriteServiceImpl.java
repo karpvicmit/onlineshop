@@ -47,7 +47,9 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Favorite> getFavoritesForUser(User user) {
-        return favoriteRepository.findByUserIdOrderByProduct_NameAsc(user.getId());
+    public List<Favorite> getFavoritesByUserId(Long userId) {
+        log.info("Lade Favoriten für Benutzer mit ID: {}", userId);
+        return favoriteRepository.findAllByUserIdWithProductAndCategory(userId);
     }
+    
 }

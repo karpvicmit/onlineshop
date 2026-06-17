@@ -2,6 +2,7 @@ package com.karpenko.onlineshop.controller.shop;
 
 
 import com.karpenko.onlineshop.dto.product.ProductDto;
+import com.karpenko.onlineshop.service.CategoryService;
 import com.karpenko.onlineshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ProductController {
 
     private final ProductService productService;
+    private final CategoryService categoryService;
 
     @GetMapping
     public String listProducts(
@@ -44,6 +46,7 @@ public class ProductController {
         model.addAttribute("totalItems", productPage.getTotalElements());
         model.addAttribute("searchQuery", q);
         model.addAttribute("selectedCategory", category);
+        model.addAttribute("categories", categoryService.getAllCategories());
 
         return "shop/products/list";
     }

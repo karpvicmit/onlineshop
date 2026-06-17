@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface FavoriteService {
     void toggleFavorite(User user, Long productId);
-    List<Favorite> getFavoritesForUser(User user);
+    List<Favorite> getFavoritesByUserId(Long userId);
 }

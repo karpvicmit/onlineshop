@@ -24,7 +24,7 @@ public class FavoriteController {
     @GetMapping
     public String getFavorites(Model model) {
         User user = userService.getCurrentUser();
-        List<Favorite> favorites = favoriteService.getFavoritesForUser(user);
+        List<Favorite> favorites = favoriteService.getFavoritesByUserId(user.getId());
         model.addAttribute("favorites", favorites);
         return "shop/favorites";
     }

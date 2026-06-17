@@ -1,87 +1,139 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Products')}"></head>
+<head th:replace="~{fragments/head :: head('Produktkatalog')}"></head>
 <body>
-
-<nav th:replace="~{fragments/navbar :: navbar}"></nav>
-<div th:replace="~{fragments/alerts :: alerts}"></div>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <div class="container mt-4">
-    <div class="row">
 
-        <!-- Боковая панель фильтров -->
-        <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-header bg-secondary text-white">
-                    <i class="fas fa-filter me-2"></i>Filter
-                </div>
-                <div class="card-body">
-                    <form th:action="@{/shop/products}" method="get">
-                        <!-- Поиск по имени -->
-                        <div class="mb-3">
-                            <label for="q" class="form-label">Suche</label>
-                            <input type="text" class="form-control" id="q" name="q"
-                                   th:value="${searchQuery}" placeholder="Produktname...">
-                        </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3"><i class="bi bi-funnel"></i> Filter</h5>
 
-                        <div class="mb-3">
-                            <label for="category" class="form-label">Kategorie</label>
-                            <select class="form-select" id="category" name="category">
-                                <option value="">Alle Kategorien</option>
-                                <option value="elektronik" th:selected="${selectedCategory == 'elektronik'}">Elektronik</option>
-                                <option value="buecher" th:selected="${selectedCategory == 'buecher'}">Bücher</option>
-                            </select>
-                        </div>
+            <form th:action="@{/shop/products}" method="get" id="filterForm">
+                <div class="row g-3">
 
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> Anwenden
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-9">
-            <h2 class="mb-4">Produktkatalog</h2>
-
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                <div class="col" th:each="product : ${products}">
-                    <div class="card h-100 product-card shadow-sm">
-                        <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/placeholder.jpg'}"
-                             class="card-img-top" alt="Produktbild">
-
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title" th:text="${product.name}">Produkt Name</h5>
-                            <p class="card-text text-muted small" th:text="${#strings.abbreviate(product.description, 80)}">Beschreibung...</p>
-
-                            <div class="mt-auto">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="h5 mb-0 text-primary" th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')} + ' €'">0.00 €</span>
-                                    <span class="badge bg-success" th:if="${product.stock > 0}" th:text="'Auf Lager (' + ${product.stock} + ')'">Lager</span>
-                                    <span class="badge bg-danger" th:if="${product.stock <= 0}">Ausverkauft</span>
-                                </div>
-
-                                <a th:href="@{/shop/products/{id}(id=${product.id})}" class="btn btn-outline-dark w-100">
-                                    Details ansehen
-                                </a>
-                            </div>
+                    <div class="col-md-5">
+                        <label for="searchQuery" class="form-label">Suche</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchQuery" name="q"
+                                   th:value="${searchQuery}" placeholder="Produktname eingeben...">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i>
+                            </button>
                         </div>
                     </div>
+
+                    <div class="col-md-5">
+                        <label for="categorySelect" class="form-label">Kategorie</label>
+                        <select class="form-select" id="categorySelect" name="category"
+                                onchange="submitFormWithCategory(this.value)">
+                            <option value="">Alle Kategorien</option>
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.slug}"
+                                    th:text="${cat.name}"
+                                    th:selected="${cat.slug == selectedCategory}">
+                                Kategorie Name
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+                        <a th:href="@{/shop/products}" class="btn btn-outline-secondary w-100" title="Filter zurücksetzen">
+                            <i class="bi bi-x-lg"></i> Zurücksetzen
+                        </a>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Сообщение, если ничего не найдено -->
-            <div th:if="${#lists.isEmpty(products)}" class="alert alert-info mt-4">
-                Keine Produkte gefunden, die Ihren Kriterien entsprechen.
-            </div>
-
-            <!-- Пагинация -->
-            <div th:replace="~{fragments/pagination :: pagination}"></div>
+            </form>
         </div>
     </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Produktkatalog</h3>
+        <span class="text-muted" th:text="${totalItems} + ' Produkte gefunden'">0 Produkte gefunden</span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4 col-lg-3" th:each="product : ${products}">
+            <div class="card h-100 shadow-sm">
+                <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                     th:src="@{${product.imageUrl}}"
+                     class="card-img-top" alt="Produktbild" style="height: 200px; object-fit: cover;">
+                <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                     class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="bi bi-image text-muted fs-1"></i>
+                </div>
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title" th:text="${product.name}">Produkt Name</h5>
+                    <p class="card-text text-muted small flex-grow-1" th:text="${product.description}">Beschreibung...</p>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="fs-5 fw-bold text-primary" th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' €'">0.00 €</span>
+                        <span th:if="${product.stock > 0}" class="badge bg-success">Auf Lager</span>
+                        <span th:unless="${product.stock > 0}" class="badge bg-danger">Ausverkauft</span>
+                    </div>
+
+                    <a th:href="@{/shop/products/{id}(id=${product.id})}" class="btn btn-outline-primary w-100 mt-3">
+                        Details ansehen
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 text-center py-5" th:if="${#lists.isEmpty(products)}">
+            <i class="bi bi-search display-1 text-muted"></i>
+            <h4 class="mt-3 text-muted">Keine Produkte gefunden.</h4>
+            <a th:href="@{/shop/products}" class="btn btn-primary mt-2">Alle Filter zurücksetzen</a>
+        </div>
+    </div>
+
+    <!-- Пагинация -->
+    <div class="mt-5" th:if="${totalPages > 1}">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/shop/products(page=${currentPage - 1}, q=${searchQuery}, category=${selectedCategory})}">
+                        &laquo; Zurück
+                    </a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/shop/products(page=${i}, q=${searchQuery}, category=${selectedCategory})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/shop/products(page=${currentPage + 1}, q=${searchQuery}, category=${selectedCategory})}">
+                        Weiter &raquo;
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
 </div>
 
-<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    function submitFormWithCategory(selectedCategory) {
+        const form = document.getElementById('filterForm');
+        const searchInput = document.getElementById('searchQuery');
+
+        const currentSearch = searchInput.value.trim();
+
+        let url = '/shop/products?';
+        if (selectedCategory) {
+            url += 'category=' + encodeURIComponent(selectedCategory) + '&';
+        }
+        if (currentSearch) {
+            url += 'q=' + encodeURIComponent(currentSearch);
+        }
+
+        window.location.href = url;
+    }
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
