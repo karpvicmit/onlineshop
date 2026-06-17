@@ -21,6 +21,14 @@ public class GlobalExceptionHandler {
         return "error/404";
     }
 
+    @ExceptionHandler(CartNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleCartNotFoundException(CartNotFoundException ex, Model model) {
+        log.warn("Warenkorb nicht gefunden: {}", ex.getMessage());
+        model.addAttribute("errorMessage", "Ihr Warenkorb konnte nicht gefunden werden.");
+        return "error/404";
+    }
+
     @ExceptionHandler(ProductOutOfStockException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleOutOfStock(ProductOutOfStockException ex, Model model) {
@@ -29,12 +37,12 @@ public class GlobalExceptionHandler {
         return "error/409";
     }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleGeneralException(Exception ex, Model model) {
-        log.error("Unerwarteter Fehler aufgetreten", ex);
-        model.addAttribute("errorMessage", "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.");
-        return "error/500";
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleIllegalState(IllegalStateException ex, Model model) {
+        log.warn("Ungültiger Zustand: {}", ex.getMessage());
+        model.addAttribute("errorMessage", ex.getMessage());
+        return "error/400";
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
@@ -45,7 +53,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public void handleNoResourceFoundException(NoResourceFoundException ex) {
-        log.debug("Statische Ressource nicht gefunden (wahrscheinlich favicon.ico): {}", ex.getMessage());
+        // Stille Behandlung für statische Ressourcen (z. B. favicon.ico)
+        log.debug("Statische Ressource nicht gefunden: {}", ex.getMessage());
+    }
+    
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleGenericException(Exception ex, Model model) {
+        log.error("Unerwarteter Fehler aufgetreten", ex);
+        model.addAttribute("errorMessage",
+                "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.");
+        return "error/500";
     }
 }

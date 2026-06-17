@@ -1,21 +1,19 @@
 package com.karpenko.onlineshop.service;
 
-import com.karpenko.onlineshop.entity.Cart;
-import com.karpenko.onlineshop.entity.User;
+import com.karpenko.onlineshop.dto.CartDto;
 
-/**
- * Service-Interface für die Warenkorb-Geschäftslogik.
- * Alle Methoden erwarten das User-Objekt, um JPA-Beziehungen effizient zu verwalten.
- */
 public interface CartService {
 
-    Cart getOrCreateCartForUser(User user);
+    /**
+     * Lädt den Warenkorb des Benutzers als DTO inkl. berechneter Gesamtsumme.
+     */
+    CartDto getCartDtoForUser(Long userId);
 
-    void addItemToCart(User user, Long productId, Integer quantity);
+    void addItemToCart(Long userId, Long productId, Integer quantity);
 
-    void updateItemQuantity(User user, Long productId, Integer quantity);
+    void updateItemQuantity(Long userId, Long productId, Integer quantity);
 
-    void removeItemFromCart(User user, Long productId);
-
-    void clearCart(User user);
+    void removeItemFromCart(Long userId, Long productId);
+    
+    void clearCart(Long userId);
 }

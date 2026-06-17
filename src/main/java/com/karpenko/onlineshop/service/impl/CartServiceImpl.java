@@ -1,17 +1,24 @@
 package com.karpenko.onlineshop.service.impl;
 
+import com.karpenko.onlineshop.dto.CartDto;
 import com.karpenko.onlineshop.entity.Cart;
 import com.karpenko.onlineshop.entity.CartItem;
 import com.karpenko.onlineshop.entity.Product;
 import com.karpenko.onlineshop.entity.User;
+import com.karpenko.onlineshop.exception.CartNotFoundException;
 import com.karpenko.onlineshop.exception.ResourceNotFoundException;
+import com.karpenko.onlineshop.mapper.CartMapper;
 import com.karpenko.onlineshop.repository.CartRepository;
 import com.karpenko.onlineshop.repository.ProductRepository;
+import com.karpenko.onlineshop.repository.UserRepository;
 import com.karpenko.onlineshop.service.CartService;
+import com.karpenko.onlineshop.service.PriceCalculatorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 @Slf4j
 @Service
@@ -20,51 +27,62 @@ public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final PriceCalculatorService priceCalculatorService;
+    private final CartMapper cartMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public Cart getOrCreateCartForUser(User user) {
-        return cartRepository.findByUserId(user.getId()).orElseGet(() -> {
-            log.info("Erstelle neuen Warenkorb für Benutzer: {}", user.getEmail());
-            Cart newCart = new Cart();
-            newCart.setUser(user);
-            return cartRepository.save(newCart);
-        });
+    public CartDto getCartDtoForUser(Long userId) {
+        Cart cart = cartRepository.findWithItemsByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException(
+                        "Warenkorb für Benutzer nicht gefunden"));
+
+        BigDecimal total = priceCalculatorService.calculateTotal(cart);
+        log.debug("Warenkorb für Benutzer {} geladen, Gesamtpreis: {}", userId, total);
+
+        return cartMapper.toDto(cart, total);
     }
 
     @Override
     @Transactional
-    public void addItemToCart(User user, Long productId, Integer quantity) {
-        log.info("Füge Produkt {} (Menge: {}) zum Warenkorb von {} hinzu", productId, quantity, user.getEmail());
+    public void addItemToCart(Long userId, Long productId, Integer quantity) {
+        log.info("Füge Produkt {} (Menge: {}) zum Warenkorb von Benutzer {} hinzu",
+                productId, quantity, userId);
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Produkt mit ID " + productId + " nicht gefunden"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Produkt mit ID " + productId + " nicht gefunden"));
 
-        if (product.getStock() < quantity) {
-            throw new IllegalStateException("Nicht genügend Lagerbestand für Produkt: " + product.getName());
-        }
+        Cart cart = cartRepository.findWithItemsByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException(
+                        "Warenkorb für Benutzer nicht gefunden"));
 
-        Cart cart = getOrCreateCartForUser(user);
-
-        // Prüfen, ob das Produkt bereits im Warenkorb ist
         CartItem existingItem = cart.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst()
                 .orElse(null);
 
+        int newQuantity;
         if (existingItem != null) {
-            // Menge erhöhen und Lagerbestand erneut prüfen
-            int newQuantity = existingItem.getQuantity() + quantity;
-            if (product.getStock() < newQuantity) {
-                throw new IllegalStateException("Nicht genügend Lagerbestand für die gewünschte Gesamtmenge von: " + product.getName());
-            }
+            newQuantity = existingItem.getQuantity() + quantity;
+        } else {
+            newQuantity = quantity;
+        }
+
+        if (product.getStock() < newQuantity) {
+            throw new IllegalStateException(
+                    "Nicht genügend Lagerbestand für Produkt: " + product.getName());
+        }
+
+        if (existingItem != null) {
             existingItem.setQuantity(newQuantity);
         } else {
             CartItem newItem = new CartItem();
             newItem.setCart(cart);
             newItem.setProduct(product);
             newItem.setQuantity(quantity);
-            cart.getItems().add(newItem);
+            cart.addItem(newItem);
         }
 
         cartRepository.save(cart);
@@ -72,51 +90,56 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public void updateItemQuantity(User user, Long productId, Integer quantity) {
+    public void updateItemQuantity(Long userId, Long productId, Integer quantity) {
         if (quantity <= 0) {
-            removeItemFromCart(user, productId);
+            removeItemFromCart(userId, productId);
             return;
         }
 
+        Cart cart = cartRepository.findWithItemsByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException("Warenkorb nicht gefunden"));
+
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Produkt mit ID " + productId + " nicht gefunden"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Produkt mit ID " + productId + " nicht gefunden"));
 
         if (product.getStock() < quantity) {
-            throw new IllegalStateException("Nicht genügend Lagerbestand für Produkt: " + product.getName());
+            throw new IllegalStateException(
+                    "Nicht genügend Lagerbestand für Produkt: " + product.getName());
         }
-
-        Cart cart = cartRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Warenkorb nicht gefunden"));
 
         cart.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst()
-                .ifPresent(item -> {
-                    item.setQuantity(quantity);
-                    cartRepository.save(cart);
-                });
+                .ifPresent(item -> item.setQuantity(quantity));
+
+        cartRepository.save(cart);
     }
 
     @Override
     @Transactional
-    public void removeItemFromCart(User user, Long productId) {
-        Cart cart = cartRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Warenkorb nicht gefunden"));
+    public void removeItemFromCart(Long userId, Long productId) {
+        Cart cart = cartRepository.findWithItemsByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException("Warenkorb nicht gefunden"));
 
-        boolean removed = cart.getItems().removeIf(item -> item.getProduct().getId().equals(productId));
+        boolean removed = cart.getItems().removeIf(
+                item -> item.getProduct().getId().equals(productId));
+
         if (removed) {
             cartRepository.save(cart);
-            log.info("Produkt {} aus dem Warenkorb von {} entfernt", productId, user.getEmail());
+            log.info("Produkt {} aus dem Warenkorb von Benutzer {} entfernt",
+                    productId, userId);
         }
     }
 
     @Override
     @Transactional
-    public void clearCart(User user) {
-        cartRepository.findByUserId(user.getId()).ifPresent(cart -> {
+    public void clearCart(Long userId) {
+        cartRepository.findWithItemsByUserId(userId).ifPresent(cart -> {
             cart.getItems().clear();
             cartRepository.save(cart);
-            log.info("Warenkorb für Benutzer {} vollständig geleert", user.getEmail());
+            log.info("Warenkorb für Benutzer {} vollständig geleert", userId);
         });
     }
+
 }

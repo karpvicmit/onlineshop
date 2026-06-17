@@ -35,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
     public Order checkout(User user) {
         log.info("Starte Checkout-Prozess für Benutzer: {}", user.getEmail());
 
-        Cart cart = cartRepository.findByUserId(user.getId())
+        Cart cart = cartRepository.findWithItemsByUserId(user.getId())
                 .orElseThrow(() -> new IllegalStateException("Warenkorb ist leer oder nicht gefunden"));
 
         if (cart.getItems().isEmpty()) {
@@ -78,7 +78,7 @@ public class OrderServiceImpl implements OrderService {
         Order savedOrder = orderRepository.save(order);
         log.info("Bestellung {} erfolgreich angelegt. Gesamtbetrag: {}", savedOrder.getId(), totalAmount);
 
-        cartService.clearCart(user);
+        cartService.clearCart(user.getId());
 
         return savedOrder;
     }

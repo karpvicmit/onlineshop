@@ -1,6 +1,8 @@
 package com.karpenko.onlineshop.service.impl;
 
+import com.karpenko.onlineshop.entity.Cart;
 import com.karpenko.onlineshop.exception.ResourceNotFoundException;
+import com.karpenko.onlineshop.repository.CartRepository;
 import com.karpenko.onlineshop.security.CustomUserDetails;
 import com.karpenko.onlineshop.dto.user.UserRegistrationDto;
 import com.karpenko.onlineshop.entity.User;
@@ -27,6 +29,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -50,6 +53,8 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(user);
         log.info("Benutzer {} erfolgreich registriert", savedUser.getEmail());
+
+        createEmptyCartForUser(savedUser);
 
         return savedUser;
     }
@@ -119,4 +124,13 @@ public class UserServiceImpl implements UserService {
         CustomUserDetails currentUserDetails = (CustomUserDetails) authentication.getPrincipal();
         return currentUserDetails.getId();
     }
+
+    private void createEmptyCartForUser(User user) {
+        Cart cart = new Cart();
+        cart.setUser(user);
+        cartRepository.save(cart);
+        log.debug("Leerer Warenkorb für Benutzer {} erstellt (Cart-ID: {})",
+                user.getEmail(), cart.getId());
+    }
+
 }
