@@ -8,8 +8,10 @@ CREATE TABLE users (
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     address TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    auth_provider VARCHAR(20) NOT NULL DEFAULT 'LOCAL',
+    provider_id VARCHAR(255)
 );
 
--- Index für schnellere Suche nach E-Mail (wird oft für Login verwendet)
 CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_user_provider_id ON users(provider_id);

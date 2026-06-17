@@ -50,6 +50,6 @@ public class User {
     @Column(name = "auth_provider", nullable = false)
     private AuthProvider authProvider = AuthProvider.LOCAL;
 
-    @Column(name = "provider_id")
+    @Column(name = "provider_id", length = 255)
     private String providerId;
 }

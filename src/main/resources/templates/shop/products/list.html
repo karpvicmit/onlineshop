@@ -24,12 +24,10 @@
                                    th:value="${searchQuery}" placeholder="Produktname...">
                         </div>
 
-                        <!-- Фильтр по категории (пример статического списка, в реальности можно динамически из Model) -->
                         <div class="mb-3">
                             <label for="category" class="form-label">Kategorie</label>
                             <select class="form-select" id="category" name="category">
                                 <option value="">Alle Kategorien</option>
-                                <!-- В реальном проекте здесь будет th:each для списка категорий из Controller -->
                                 <option value="elektronik" th:selected="${selectedCategory == 'elektronik'}">Elektronik</option>
                                 <option value="buecher" th:selected="${selectedCategory == 'buecher'}">Bücher</option>
                             </select>
@@ -43,15 +41,12 @@
             </div>
         </div>
 
-        <!-- Сетка товаров -->
         <div class="col-md-9">
             <h2 class="mb-4">Produktkatalog</h2>
 
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                <!-- Карточка товара -->
                 <div class="col" th:each="product : ${products}">
                     <div class="card h-100 product-card shadow-sm">
-                        <!-- Изображение товара (заглушка, если нет картинки) -->
                         <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/placeholder.jpg'}"
                              class="card-img-top" alt="Produktbild">
 
