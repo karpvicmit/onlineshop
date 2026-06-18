@@ -7,6 +7,8 @@ CREATE TABLE products (
     stock INT NOT NULL DEFAULT 0,
     image_url VARCHAR(500),
     category_id BIGINT NOT NULL,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    version INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
@@ -16,3 +18,4 @@ CREATE TABLE products (
 CREATE INDEX idx_products_name ON products(name);
 CREATE INDEX idx_products_category ON products(category_id);
 CREATE INDEX idx_products_stock ON products(stock);
+CREATE INDEX idx_products_deleted ON products(deleted);

@@ -9,6 +9,7 @@ import com.karpenko.onlineshop.repository.ProductRepository;
 import com.karpenko.onlineshop.service.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,22 +26,26 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Override
     @Transactional
     public void toggleFavorite(User user, Long productId) {
-        log.info("Toggle Favorite: User {}, Product {}", user.getId(), productId);
+        log.info("Toggling favorite: user {}, product {}", user.getId(), productId);
 
         favoriteRepository.findByUserIdAndProductId(user.getId(), productId).ifPresentOrElse(
                 favorite -> {
                     favoriteRepository.delete(favorite);
-                    log.info("Produkt {} aus Favoriten von {} entfernt", productId, user.getEmail());
+                    log.info("Product {} removed from favorites for user {}", productId, user.getEmail());
                 },
                 () -> {
                     Product product = productRepository.findById(productId)
-                            .orElseThrow(() -> new ResourceNotFoundException("Produkt mit ID " + productId + " nicht gefunden"));
+                            .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
                     Favorite favorite = new Favorite();
                     favorite.setUser(user);
                     favorite.setProduct(product);
-                    favoriteRepository.save(favorite);
-                    log.info("Produkt {} zu Favoriten von {} hinzugefügt", productId, user.getEmail());
+                    try {
+                        favoriteRepository.save(favorite);
+                        log.info("Product {} added to favorites for user {}", productId, user.getEmail());
+                    } catch (DataIntegrityViolationException ex) {
+                        log.warn("Duplicate favorite attempt (race condition), ignoring.");
+                    }
                 }
         );
     }
@@ -48,8 +53,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Override
     @Transactional(readOnly = true)
     public List<Favorite> getFavoritesByUserId(Long userId) {
-        log.info("Lade Favoriten für Benutzer mit ID: {}", userId);
+        log.info("Loading favorites for user ID: {}", userId);
         return favoriteRepository.findAllByUserIdWithProductAndCategory(userId);
     }
-    
 }

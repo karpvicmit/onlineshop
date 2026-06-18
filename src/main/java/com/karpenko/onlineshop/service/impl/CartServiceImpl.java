@@ -4,7 +4,6 @@ import com.karpenko.onlineshop.dto.CartDto;
 import com.karpenko.onlineshop.entity.Cart;
 import com.karpenko.onlineshop.entity.CartItem;
 import com.karpenko.onlineshop.entity.Product;
-import com.karpenko.onlineshop.entity.User;
 import com.karpenko.onlineshop.exception.CartNotFoundException;
 import com.karpenko.onlineshop.exception.ResourceNotFoundException;
 import com.karpenko.onlineshop.mapper.CartMapper;
@@ -35,28 +34,27 @@ public class CartServiceImpl implements CartService {
     @Transactional(readOnly = true)
     public CartDto getCartDtoForUser(Long userId) {
         Cart cart = cartRepository.findWithItemsByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException(
-                        "Warenkorb für Benutzer nicht gefunden"));
+                .orElseThrow(() -> new CartNotFoundException("Cart not found for user"));
 
         BigDecimal total = priceCalculatorService.calculateTotal(cart);
-        log.debug("Warenkorb für Benutzer {} geladen, Gesamtpreis: {}", userId, total);
-
+        log.debug("Cart loaded for user {}, total: {}", userId, total);
         return cartMapper.toDto(cart, total);
     }
 
     @Override
     @Transactional
     public void addItemToCart(Long userId, Long productId, Integer quantity) {
-        log.info("Füge Produkt {} (Menge: {}) zum Warenkorb von Benutzer {} hinzu",
-                productId, quantity, userId);
+        log.info("Adding product {} (qty: {}) to cart for user {}", productId, quantity, userId);
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Produkt mit ID " + productId + " nicht gefunden"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + productId + " not found"));
 
-        Cart cart = cartRepository.findWithItemsByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException(
-                        "Warenkorb für Benutzer nicht gefunden"));
+        Cart cart = cartRepository.findWithItemsByUserId(userId).orElseGet(() -> {
+            log.info("Cart not found for user {}, creating new one", userId);
+            Cart newCart = new Cart();
+            newCart.setUser(userRepository.getReferenceById(userId));
+            return cartRepository.save(newCart);
+        });
 
         CartItem existingItem = cart.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
@@ -71,8 +69,7 @@ public class CartServiceImpl implements CartService {
         }
 
         if (product.getStock() < newQuantity) {
-            throw new IllegalStateException(
-                    "Nicht genügend Lagerbestand für Produkt: " + product.getName());
+            throw new IllegalStateException("Insufficient stock for product: " + product.getName());
         }
 
         if (existingItem != null) {
@@ -97,15 +94,13 @@ public class CartServiceImpl implements CartService {
         }
 
         Cart cart = cartRepository.findWithItemsByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Warenkorb nicht gefunden"));
+                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Produkt mit ID " + productId + " nicht gefunden"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + productId + " not found"));
 
         if (product.getStock() < quantity) {
-            throw new IllegalStateException(
-                    "Nicht genügend Lagerbestand für Produkt: " + product.getName());
+            throw new IllegalStateException("Insufficient stock for product: " + product.getName());
         }
 
         cart.getItems().stream()
@@ -120,16 +115,16 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public void removeItemFromCart(Long userId, Long productId) {
         Cart cart = cartRepository.findWithItemsByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Warenkorb nicht gefunden"));
+                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
 
-        boolean removed = cart.getItems().removeIf(
-                item -> item.getProduct().getId().equals(productId));
+        CartItem itemToRemove = cart.getItems().stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found in cart"));
 
-        if (removed) {
-            cartRepository.save(cart);
-            log.info("Produkt {} aus dem Warenkorb von Benutzer {} entfernt",
-                    productId, userId);
-        }
+        cart.removeItem(itemToRemove);
+        cartRepository.save(cart);
+        log.info("Product {} removed from cart for user {}", productId, userId);
     }
 
     @Override
@@ -138,8 +133,7 @@ public class CartServiceImpl implements CartService {
         cartRepository.findWithItemsByUserId(userId).ifPresent(cart -> {
             cart.getItems().clear();
             cartRepository.save(cart);
-            log.info("Warenkorb für Benutzer {} vollständig geleert", userId);
+            log.info("Cart cleared for user {}", userId);
         });
     }
-
 }

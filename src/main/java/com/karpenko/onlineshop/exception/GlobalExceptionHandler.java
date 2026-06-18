@@ -1,6 +1,7 @@
 package com.karpenko.onlineshop.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,23 +17,23 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleResourceNotFound(ResourceNotFoundException ex, Model model) {
-        log.warn("Ressource nicht gefunden: {}", ex.getMessage());
+        log.warn("Resource not found: {}", ex.getMessage());
         model.addAttribute("errorMessage", ex.getMessage());
         return "error/404";
     }
 
     @ExceptionHandler(CartNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleCartNotFoundException(CartNotFoundException ex, Model model) {
-        log.warn("Warenkorb nicht gefunden: {}", ex.getMessage());
-        model.addAttribute("errorMessage", "Ihr Warenkorb konnte nicht gefunden werden.");
+    public String handleCartNotFound(CartNotFoundException ex, Model model) {
+        log.warn("Cart not found: {}", ex.getMessage());
+        model.addAttribute("errorMessage", "Your cart could not be found.");
         return "error/404";
     }
 
     @ExceptionHandler(ProductOutOfStockException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleOutOfStock(ProductOutOfStockException ex, Model model) {
-        log.warn("Nicht genügend Lagerbestand: {}", ex.getMessage());
+        log.warn("Out of stock: {}", ex.getMessage());
         model.addAttribute("errorMessage", ex.getMessage());
         return "error/409";
     }
@@ -40,31 +41,53 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleIllegalState(IllegalStateException ex, Model model) {
-        log.warn("Ungültiger Zustand: {}", ex.getMessage());
+        log.warn("Illegal state: {}", ex.getMessage());
         model.addAttribute("errorMessage", ex.getMessage());
         return "error/400";
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleIllegalArgument(IllegalArgumentException ex, Model model) {
+        log.warn("Illegal argument: {}", ex.getMessage());
+        model.addAttribute("errorMessage", ex.getMessage());
+        return "error/400";
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleEmailExists(EmailAlreadyExistsException ex, Model model) {
+        log.warn("Email already exists: {}", ex.getMessage());
+        model.addAttribute("errorMessage", ex.getMessage());
+        return "error/409";
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleDataIntegrity(DataIntegrityViolationException ex, Model model) {
+        log.warn("Data integrity violation: {}", ex.getMessage());
+        model.addAttribute("errorMessage", "Operation cannot be completed due to data conflict.");
+        return "error/409";
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleNoHandlerFound(NoHandlerFoundException ex, Model model) {
-        log.warn("Seite nicht gefunden: {}", ex.getRequestURL());
+        log.warn("Page not found: {}", ex.getRequestURL());
         return "error/404";
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public void handleNoResourceFoundException(NoResourceFoundException ex) {
-        // Stille Behandlung für statische Ressourcen (z. B. favicon.ico)
-        log.debug("Statische Ressource nicht gefunden: {}", ex.getMessage());
+    public void handleNoResourceFound(NoResourceFoundException ex) {
+        log.debug("Static resource not found: {}", ex.getMessage());
     }
-    
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleGenericException(Exception ex, Model model) {
-        log.error("Unerwarteter Fehler aufgetreten", ex);
-        model.addAttribute("errorMessage",
-                "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.");
+        log.error("Unexpected error occurred", ex);
+        model.addAttribute("errorMessage", "An internal error occurred. Please try again later.");
         return "error/500";
     }
 }

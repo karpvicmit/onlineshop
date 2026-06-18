@@ -1,7 +1,6 @@
 package com.karpenko.onlineshop.service.impl;
 
 import com.karpenko.onlineshop.entity.*;
-import com.karpenko.onlineshop.entity.OrderStatus;
 import com.karpenko.onlineshop.exception.ProductOutOfStockException;
 import com.karpenko.onlineshop.exception.ResourceNotFoundException;
 import com.karpenko.onlineshop.repository.CartRepository;
@@ -9,7 +8,6 @@ import com.karpenko.onlineshop.repository.OrderRepository;
 import com.karpenko.onlineshop.repository.ProductRepository;
 import com.karpenko.onlineshop.service.CartService;
 import com.karpenko.onlineshop.service.OrderService;
-import com.karpenko.onlineshop.service.PriceCalculatorService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,27 +26,21 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final CartService cartService;
     private final CartRepository cartRepository;
-    private final PriceCalculatorService priceCalculatorService;
 
     @Override
     @Transactional
     public Order checkout(User user) {
-        log.info("Starte Checkout-Prozess für Benutzer: {}", user.getEmail());
+        log.info("Starting checkout for user: {}", user.getEmail());
 
-        Cart cart = cartRepository.findWithItemsByUserId(user.getId())
-                .orElseThrow(() -> new IllegalStateException("Warenkorb ist leer oder nicht gefunden"));
-
-        if (cart.getItems().isEmpty()) {
-            throw new IllegalStateException("Warenkorb ist leer. Keine Bestellung möglich.");
+        if (user.getAddress() == null || user.getAddress().isBlank()) {
+            throw new IllegalStateException("Delivery address is missing. Please update your profile.");
         }
 
-        for (CartItem item : cart.getItems()) {
-            Product product = item.getProduct();
-            if (product.getStock() < item.getQuantity()) {
-                log.warn("Nicht genügend Lagerbestand für Produkt: {} (Verfügbar: {}, Benötigt: {})",
-                        product.getName(), product.getStock(), item.getQuantity());
-                throw new ProductOutOfStockException("Nicht genügend Lagerbestand für: " + product.getName());
-            }
+        Cart cart = cartRepository.findWithItemsByUserId(user.getId())
+                .orElseThrow(() -> new IllegalStateException("Cart is empty or not found"));
+
+        if (cart.getItems().isEmpty()) {
+            throw new IllegalStateException("Cart is empty. Cannot place order.");
         }
 
         Order order = new Order();
@@ -61,22 +53,30 @@ public class OrderServiceImpl implements OrderService {
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
 
+            Product lockedProduct = productRepository.findByIdWithLock(product.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + product.getId()));
+
+            if (lockedProduct.getStock() < cartItem.getQuantity()) {
+                log.warn("Insufficient stock for product: {} (available: {}, required: {})",
+                        lockedProduct.getName(), lockedProduct.getStock(), cartItem.getQuantity());
+                throw new ProductOutOfStockException("Insufficient stock for product: " + lockedProduct.getName());
+            }
+
+            lockedProduct.setStock(lockedProduct.getStock() - cartItem.getQuantity());
+
             OrderItem orderItem = new OrderItem();
-            orderItem.setProduct(product);
+            orderItem.setProduct(lockedProduct);
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setUnitPrice(product.getPrice());
+            orderItem.setUnitPrice(lockedProduct.getPrice());
 
             order.addItem(orderItem);
 
-            product.setStock(product.getStock() - cartItem.getQuantity());
-            productRepository.save(product);
-
-            totalAmount = totalAmount.add(product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+            totalAmount = totalAmount.add(lockedProduct.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         }
 
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
-        log.info("Bestellung {} erfolgreich angelegt. Gesamtbetrag: {}", savedOrder.getId(), totalAmount);
+        log.info("Order {} created successfully. Total amount: {}", savedOrder.getId(), totalAmount);
 
         cartService.clearCart(user.getId());
 
@@ -86,31 +86,66 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<Order> getOrderHistory(User user) {
-        return orderRepository.findByUserIdOrderByOrderDateDesc(user.getId());
+        return orderRepository.findByUserIdWithItems(user.getId());
     }
 
     @Override
     @Transactional(readOnly = true)
     public Order getOrderDetails(Long orderId, User user) {
-        return orderRepository.findByIdAndUserId(orderId, user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Bestellung nicht gefunden oder kein Zugriff"));
+        return orderRepository.findByIdAndUserIdWithItems(orderId, user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found or access denied"));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public Order getOrderById(Long id) {
-        log.debug("Bestellung mit ID {} wird gesucht.", id);
+        log.debug("Fetching order by ID: {}", id);
         return orderRepository.findByIdWithItems(id)
-                .orElseThrow(() -> new EntityNotFoundException("Bestellung mit ID " + id + " nicht gefunden"));
+                .orElseThrow(() -> new EntityNotFoundException("Order with ID " + id + " not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Order getOrderForAdmin(Long orderId) {
+        log.debug("Fetching order for admin: {}", orderId);
+        return orderRepository.findByIdWithUserAndItems(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Order> getAllOrders() {
+        log.debug("Fetching all orders for admin");
+        return orderRepository.findAllWithUserAndItems();
     }
 
     @Override
     @Transactional
     public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
-        log.info("Admin aktualisiert Bestellstatus: ID {} auf {}", orderId, newStatus);
+        log.info("Admin updating order status: ID {} to {}", orderId, newStatus);
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Bestellung nicht gefunden"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (!isValidStatusTransition(order.getStatus(), newStatus)) {
+            throw new IllegalStateException("Invalid status transition: " + order.getStatus() + " -> " + newStatus);
+        }
+
         order.setStatus(newStatus);
-        orderRepository.save(order);
+        log.info("Order {} status updated to {}", orderId, newStatus);
     }
-    
+
+    private boolean isValidStatusTransition(OrderStatus current, OrderStatus target) {
+        switch (current) {
+            case NEW:
+                return target == OrderStatus.CONFIRMED || target == OrderStatus.CANCELLED;
+            case CONFIRMED:
+                return target == OrderStatus.SHIPPED || target == OrderStatus.CANCELLED;
+            case SHIPPED:
+                return target == OrderStatus.CANCELLED;
+            case CANCELLED:
+                return false;
+            default:
+                return false;
+        }
+    }
 }

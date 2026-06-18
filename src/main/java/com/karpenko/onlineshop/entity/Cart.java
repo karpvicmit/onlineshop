@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "cart")
@@ -34,5 +35,17 @@ public class Cart {
     public void removeItem(CartItem item) {
         items.remove(item);
         item.setCart(null);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Cart cart)) return false;
+        return id != null && Objects.equals(id, cart.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

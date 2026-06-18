@@ -5,6 +5,7 @@ import com.karpenko.onlineshop.entity.Product;
 import com.karpenko.onlineshop.exception.ResourceNotFoundException;
 import com.karpenko.onlineshop.mapper.ProductMapper;
 import com.karpenko.onlineshop.repository.ProductRepository;
+import com.karpenko.onlineshop.service.FileUploadService;
 import com.karpenko.onlineshop.service.ProductService;
 import com.karpenko.onlineshop.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.karpenko.onlineshop.service.FileUploadService;
 import org.springframework.web.multipart.MultipartFile;
-
 
 @Slf4j
 @Service
@@ -30,12 +29,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProductDto> findProducts(String name, String categorySlug, Pageable pageable) {
-        log.debug("Suche Produkte: name='{}', category='{}', page={}", name, categorySlug, pageable.getPageNumber());
+        log.debug("Searching products: name='{}', category='{}', page={}", name, categorySlug, pageable.getPageNumber());
 
-        Specification<Product> spec = ProductSpecification.hasNameAndCategory(name, categorySlug);
+        Specification<Product> spec = Specification
+                .where(ProductSpecification.hasNameAndCategory(name, categorySlug))
+                .and(ProductSpecification.isNotDeleted());
 
         Page<Product> productPage = productRepository.findAll(spec, pageable);
-
         return productPage.map(productMapper::toDto);
     }
 
@@ -43,13 +43,11 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductDto getProductById(Long id) {
         log.debug("getProductById: {}", id);
-
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findActiveById(id)
                 .orElseThrow(() -> {
-                    log.warn("Produkt mit ID {} nicht gefunden", id);
-                    return new ResourceNotFoundException("Produkt nicht gefunden");
+                    log.warn("Product with ID {} not found or deleted", id);
+                    return new ResourceNotFoundException("Product not found");
                 });
-
         return productMapper.toDto(product);
     }
 
@@ -57,38 +55,38 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public Product getProductEntityById(Long id) {
         log.debug("getProductEntityById: {}", id);
-
-        return productRepository.findById(id)
+        return productRepository.findActiveById(id)
                 .orElseThrow(() -> {
-                    log.warn("Produkt mit ID {} nicht gefunden", id);
-                    return new ResourceNotFoundException("Produkt nicht gefunden");
+                    log.warn("Product with ID {} not found or deleted", id);
+                    return new ResourceNotFoundException("Product not found");
                 });
     }
 
     @Override
     @Transactional
     public Product saveProduct(Product product, MultipartFile imageFile) {
-        log.info("Speichere Produkt: {}", product.getName());
+        log.info("Saving product: {}", product.getName());
 
         if (imageFile != null && !imageFile.isEmpty()) {
             String imageUrl = fileUploadService.storeFile(imageFile);
             product.setImageUrl(imageUrl);
         } else if (product.getId() != null) {
-            Product existingProduct = productRepository.findById(product.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Produkt nicht gefunden"));
+            Product existingProduct = productRepository.findActiveById(product.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
             product.setImageUrl(existingProduct.getImageUrl());
+            product.setVersion(existingProduct.getVersion());
         }
-
+        product.setDeleted(false);
         return productRepository.save(product);
     }
 
     @Override
     @Transactional
     public void deleteProduct(Long id) {
-        log.info("Lösche Produkt mit ID: {}", id);
-        if (!productRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Produkt nicht gefunden");
-        }
-        productRepository.deleteById(id);
+        log.info("Soft deleting product with ID: {}", id);
+        Product product = productRepository.findActiveById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        product.setDeleted(true);
+        log.info("Product {} marked as deleted", product.getName());
     }
 }

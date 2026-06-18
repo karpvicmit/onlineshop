@@ -12,7 +12,7 @@ spring:
         format_sql: true
 
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:onlineshop_db}?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:onlineshop_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${DB_USER:onlineshop_user}
     password: ${DB_PASSWORD:SecurePassword_2026!}
 

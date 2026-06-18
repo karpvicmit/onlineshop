@@ -10,10 +10,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-/**
- * Initialisiert die Anwendung mit einem Standard-Administrator,
- * falls noch kein Admin-Account in der Datenbank existiert.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -26,11 +22,23 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (!userRepository.existsByRole(Role.ADMIN)) {
-            log.warn("Kein Administrator gefunden. Erstelle Standard-Admin mit den konfigurierten Daten...");
+            String adminEmail = adminProperties.getEmail();
+            String adminPassword = adminProperties.getPassword();
 
+            if (adminEmail == null || adminEmail.isBlank() || adminPassword == null || adminPassword.isBlank()) {
+                log.warn("Admin email or password not configured. Skipping admin creation.");
+                return;
+            }
+
+            if (adminPassword.length() < 8) {
+                log.warn("Admin password too short (min 8 characters). Skipping admin creation.");
+                return;
+            }
+
+            log.warn("No admin found. Creating default administrator...");
             User admin = new User();
-            admin.setEmail(adminProperties.getEmail());
-            admin.setPasswordHash(passwordEncoder.encode(adminProperties.getPassword()));
+            admin.setEmail(adminEmail.trim().toLowerCase());
+            admin.setPasswordHash(passwordEncoder.encode(adminPassword));
             admin.setRole(Role.ADMIN);
             admin.setStatus(UserStatus.ACTIVE);
             admin.setFirstName("System");
@@ -40,12 +48,12 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(admin);
 
             log.warn("=================================================================");
-            log.warn("Standard-Admin erfolgreich erstellt!");
-            log.warn("E-Mail: {}", adminProperties.getEmail());
-            log.warn("BITTE ÄNDERN SIE DAS PASSWORT NACH DEM ERSTEN LOGIN!");
+            log.warn("Default administrator created successfully!");
+            log.warn("Email: {}", adminEmail);
+            log.warn("PLEASE CHANGE THE PASSWORD AFTER FIRST LOGIN!");
             log.warn("=================================================================");
         } else {
-            log.debug("Mindestens ein Administrator ist bereits vorhanden. Initialisierung übersprungen.");
+            log.debug("Admin user already exists. Initialization skipped.");
         }
     }
 }

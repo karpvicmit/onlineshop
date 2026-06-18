@@ -11,11 +11,38 @@ import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    List<Order> findByUserIdOrderByOrderDateDesc(Long userId);
-    Optional<Order> findByIdAndUserId(Long id, Long userId);
+
     @Query("SELECT DISTINCT o FROM Order o " +
+            "LEFT JOIN FETCH o.orderItems oi " +
+            "LEFT JOIN FETCH oi.product p " +
+            "WHERE o.user.id = :userId " +
+            "ORDER BY o.orderDate DESC")
+    List<Order> findByUserIdWithItems(@Param("userId") Long userId);
+
+    @Query("SELECT DISTINCT o FROM Order o " +
+            "LEFT JOIN FETCH o.orderItems oi " +
+            "LEFT JOIN FETCH oi.product p " +
+            "WHERE o.id = :id AND o.user.id = :userId")
+    Optional<Order> findByIdAndUserIdWithItems(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Query("SELECT DISTINCT o FROM Order o " +
+            "LEFT JOIN FETCH o.orderItems oi " +
+            "LEFT JOIN FETCH oi.product p " +
+            "WHERE o.id = :id")
+    Optional<Order> findByIdWithItems(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT o FROM Order o " +
+            "LEFT JOIN FETCH o.user " +
             "LEFT JOIN FETCH o.orderItems oi " +
             "LEFT JOIN FETCH oi.product " +
             "WHERE o.id = :id")
-    Optional<Order> findByIdWithItems(@Param("id") Long id);
+    Optional<Order> findByIdWithUserAndItems(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT o FROM Order o " +
+            "LEFT JOIN FETCH o.user " +
+            "LEFT JOIN FETCH o.orderItems oi " +
+            "LEFT JOIN FETCH oi.product " +
+            "ORDER BY o.orderDate DESC")
+    List<Order> findAllWithUserAndItems();
+
 }

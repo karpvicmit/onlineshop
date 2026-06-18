@@ -26,3 +26,5 @@ target/
 .env.*.local
 .gitattributes
 /.mvn/
+/collect_files.sh
+/wait-for-it.sh.sh

@@ -1,25 +1,23 @@
 package com.karpenko.onlineshop.service.impl;
 
-import com.karpenko.onlineshop.entity.Cart;
-import com.karpenko.onlineshop.exception.ResourceNotFoundException;
-import com.karpenko.onlineshop.repository.CartRepository;
-import com.karpenko.onlineshop.security.CustomUserDetails;
 import com.karpenko.onlineshop.dto.user.UserRegistrationDto;
-import com.karpenko.onlineshop.entity.User;
 import com.karpenko.onlineshop.entity.Role;
+import com.karpenko.onlineshop.entity.User;
 import com.karpenko.onlineshop.entity.UserStatus;
 import com.karpenko.onlineshop.exception.EmailAlreadyExistsException;
+import com.karpenko.onlineshop.exception.ResourceNotFoundException;
 import com.karpenko.onlineshop.repository.UserRepository;
+import com.karpenko.onlineshop.security.CustomUserDetails;
 import com.karpenko.onlineshop.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 
 import java.util.List;
 
@@ -29,21 +27,15 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public User registerUser(UserRegistrationDto dto) {
-        log.info("Registrierungsversuch für E-Mail: {}", dto.getEmail());
-
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            log.warn("Registrierung fehlgeschlagen: E-Mail {} ist bereits registriert", dto.getEmail());
-            throw new EmailAlreadyExistsException("Diese E-Mail-Adresse ist bereits registriert.");
-        }
+        log.info("Registration attempt for email: {}", dto.getEmail());
 
         User user = new User();
-        user.setEmail(dto.getEmail());
+        user.setEmail(dto.getEmail().trim().toLowerCase());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.USER);
         user.setStatus(UserStatus.ACTIVE);
@@ -51,29 +43,30 @@ public class UserServiceImpl implements UserService {
         user.setLastName(dto.getLastName());
         user.setAddress(dto.getAddress());
 
-        User savedUser = userRepository.save(user);
-        log.info("Benutzer {} erfolgreich registriert", savedUser.getEmail());
-
-        createEmptyCartForUser(savedUser);
-
-        return savedUser;
+        try {
+            User savedUser = userRepository.save(user);
+            log.info("User {} registered successfully", savedUser.getEmail());
+            return savedUser;
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("Registration failed: email {} already exists", dto.getEmail());
+            throw new EmailAlreadyExistsException("This email is already registered.");
+        }
     }
 
     @Override
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // Проверяем, что пользователь действительно аутентифицирован и не аноним
-        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-            throw new IllegalStateException("Benutzer ist nicht authentifiziert");
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new IllegalStateException("User is not authenticated");
         }
 
-        // Извлекаем нашего CustomUserDetails (теперь он будет и для Form, и для OAuth2)
-        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails customUserDetails) {
             return customUserDetails.getUser();
         }
-
-        throw new IllegalStateException("Unbekannter Principal-Typ: " + authentication.getPrincipal().getClass().getName());
+        throw new IllegalStateException("Unknown principal type: " + principal.getClass().getName());
     }
 
     @Override
@@ -86,51 +79,43 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateUserRole(Long userId, Role newRole) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Benutzer nicht gefunden"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Long currentUserId = getCurrentUserId();
 
         if (user.getId().equals(currentUserId)) {
-            throw new IllegalStateException("Ein Administrator kann seine eigene Rolle nicht ändern.");
+            throw new IllegalStateException("Admin cannot change their own role.");
         }
 
         user.setRole(newRole);
         userRepository.save(user);
-        log.info("Rolle von Benutzer {} auf {} geändert", user.getEmail(), newRole);
+        log.info("Role of user {} changed to {}", user.getEmail(), newRole);
     }
 
     @Override
     @Transactional
     public void updateUserStatus(Long userId, UserStatus newStatus) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Benutzer nicht gefunden"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Long currentUserId = getCurrentUserId();
 
         if (user.getId().equals(currentUserId)) {
-            throw new IllegalStateException("Ein Administrator kann sich nicht selbst sperren oder entsperren.");
+            throw new IllegalStateException("Admin cannot block/unblock themselves.");
         }
         user.setStatus(newStatus);
         userRepository.save(user);
-        log.info("Status von Benutzer {} auf {} geändert", user.getEmail(), newStatus);
+        log.info("Status of user {} changed to {}", user.getEmail(), newStatus);
     }
 
     @Override
     public Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new IllegalStateException("Kein authentifizierter Benutzer im Sicherheitskontext gefunden.");
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new IllegalStateException("No authenticated user found in security context.");
         }
 
         CustomUserDetails currentUserDetails = (CustomUserDetails) authentication.getPrincipal();
         return currentUserDetails.getId();
     }
-
-    private void createEmptyCartForUser(User user) {
-        Cart cart = new Cart();
-        cart.setUser(user);
-        cartRepository.save(cart);
-        log.debug("Leerer Warenkorb für Benutzer {} erstellt (Cart-ID: {})",
-                user.getEmail(), cart.getId());
-    }
-
 }

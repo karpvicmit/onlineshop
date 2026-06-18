@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Slf4j
 @Controller
 @RequestMapping("/shop/cart")
@@ -25,8 +28,13 @@ public class CartController {
     @GetMapping
     public String viewCart(Model model,
                            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        CartDto cartDto = cartService.getCartDtoForUser(userDetails.getId());
-        model.addAttribute("cart", cartDto);
+        try {
+            CartDto cartDto = cartService.getCartDtoForUser(userDetails.getId());
+            model.addAttribute("cart", cartDto);
+        } catch (Exception e) {
+            log.debug("Cart not found, showing empty cart.");
+            model.addAttribute("cart", CartDto.builder().items(List.of()).total(BigDecimal.ZERO).itemCount(0).build());
+        }
         return "shop/cart";
     }
 
@@ -37,11 +45,11 @@ public class CartController {
                             RedirectAttributes redirectAttributes) {
         try {
             cartService.addItemToCart(userDetails.getId(), productId, quantity);
-            log.info("Benutzer {} hat Produkt {} (Menge: {}) zum Warenkorb hinzugefügt",
+            log.info("User {} added product {} (qty: {}) to cart",
                     userDetails.getId(), productId, quantity);
         } catch (IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            log.warn("Hinzufügen zum Warenkorb fehlgeschlagen: {}", ex.getMessage());
+            log.warn("Add to cart failed: {}", ex.getMessage());
         }
         return "redirect:/shop/cart";
     }
@@ -55,7 +63,7 @@ public class CartController {
             cartService.updateItemQuantity(userDetails.getId(), productId, quantity);
         } catch (IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            log.warn("Mengenänderung fehlgeschlagen: {}", ex.getMessage());
+            log.warn("Quantity update failed: {}", ex.getMessage());
         }
         return "redirect:/shop/cart";
     }

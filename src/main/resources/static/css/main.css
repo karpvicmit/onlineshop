@@ -3,6 +3,19 @@
     --admin-bg: #f8f9fa;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+main {
+    flex: 1;
+}
+footer {
+    flex-shrink: 0;
+}
+
 body.admin-mode {
     background-color: var(--admin-bg);
     border-top: 4px solid var(--admin-primary);
