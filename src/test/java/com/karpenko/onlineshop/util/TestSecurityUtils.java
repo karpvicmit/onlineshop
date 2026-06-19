@@ -1,4 +1,3 @@
-// src/test/java/com/karpenko/onlineshop/util/TestSecurityUtils.java
 package com.karpenko.onlineshop.util;
 
 import com.karpenko.onlineshop.entity.Role;
