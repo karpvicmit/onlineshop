@@ -27,11 +27,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/register", "/login", "/error",
+                        .requestMatchers(
+                                "/", "/register", "/login", "/error",
                                 "/css/**", "/js/**", "/images/**", "/uploads/**",
-                                "/favicon.ico", "/webjars/**").permitAll()
-                        .requestMatchers("/shop/**").permitAll()
-                        .requestMatchers("/cart/**", "/profile/**", "/orders/**").authenticated()
+                                "/favicon.ico", "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers("/shop/products", "/shop/products/**").permitAll()
+                        .requestMatchers(
+                                "/shop/cart/**",
+                                "/shop/orders/**",
+                                "/shop/checkout/**",
+                                "/shop/favorites/**",
+                                "/profile/**"
+                        ).authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -43,7 +51,8 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.userService(customOAuth2UserService))
                         .successHandler(authSuccessHandler)
                 )
                 .logout(logout -> logout
@@ -53,7 +62,9 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                );
 
         return http.build();
     }
@@ -62,6 +73,7 @@ public class SecurityConfig {
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
+        authProvider.setHideUserNotFoundExceptions(false);
         return authProvider;
     }
 }

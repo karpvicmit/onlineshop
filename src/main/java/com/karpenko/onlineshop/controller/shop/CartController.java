@@ -29,6 +29,7 @@ public class CartController {
     @GetMapping
     public String viewCart(Model model,
                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("User details: {}", userDetails);
         try {
             CartDto cartDto = cartService.getCartDtoForUser(userDetails.getId());
             model.addAttribute("cart", cartDto);
