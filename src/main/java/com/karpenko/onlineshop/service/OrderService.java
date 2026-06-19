@@ -3,6 +3,8 @@ package com.karpenko.onlineshop.service;
 import com.karpenko.onlineshop.entity.Order;
 import com.karpenko.onlineshop.entity.OrderStatus;
 import com.karpenko.onlineshop.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -12,6 +14,6 @@ public interface OrderService {
     List<Order> getOrderHistory(User user);
     Order getOrderById(Long id);
     void updateOrderStatus(Long orderId, OrderStatus newStatus);
-    List<Order> getAllOrders();
     Order getOrderForAdmin(Long orderId);
+    Page<Order> getAllOrdersForAdmin(Pageable pageable);
 }

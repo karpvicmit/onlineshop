@@ -4,47 +4,40 @@ import com.karpenko.onlineshop.dto.CartDto;
 import com.karpenko.onlineshop.dto.CartItemDto;
 import com.karpenko.onlineshop.entity.Cart;
 import com.karpenko.onlineshop.entity.CartItem;
-import org.springframework.stereotype.Component;
+import com.karpenko.onlineshop.service.PriceCalculatorService;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
-import java.util.List;
 
-/**
- * Manueller Mapper für Cart → CartDto.
- * Einfache native Java-Lösung ohne MapStruct.
- */
-@Component
-public class CartMapper {
+@Mapper(componentModel = "spring")
+public abstract class CartMapper {
 
-    public CartDto toDto(Cart cart, BigDecimal total) {
-        List<CartItemDto> items = cart.getItems().stream()
-                .map(this::toItemDto)
-                .toList();
+    @Autowired
+    protected PriceCalculatorService priceCalculatorService;
 
-        int itemCount = items.stream()
+    @Mapping(target = "items", source = "cart.items")
+    @Mapping(target = "total", ignore = true)
+    @Mapping(target = "itemCount", ignore = true)
+    public abstract CartDto toDto(Cart cart);
+
+    @AfterMapping
+    protected void setTotalAndCount(Cart cart, @MappingTarget CartDto dto) {
+        BigDecimal total = priceCalculatorService.calculateTotal(cart);
+        dto.setTotal(total);
+        int count = dto.getItems().stream()
                 .mapToInt(CartItemDto::getQuantity)
                 .sum();
-
-        return CartDto.builder()
-                .id(cart.getId())
-                .items(items)
-                .total(total)
-                .itemCount(itemCount)
-                .build();
+        dto.setItemCount(count);
     }
 
-    private CartItemDto toItemDto(CartItem item) {
-        BigDecimal subtotal = item.getProduct().getPrice()
-                .multiply(BigDecimal.valueOf(item.getQuantity()));
-
-        return CartItemDto.builder()
-                .id(item.getId())
-                .productId(item.getProduct().getId())
-                .productName(item.getProduct().getName())
-                .productImageUrl(item.getProduct().getImageUrl())
-                .unitPrice(item.getProduct().getPrice())
-                .quantity(item.getQuantity())
-                .subtotal(subtotal)
-                .build();
-    }
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "productImageUrl", source = "product.imageUrl")
+    @Mapping(target = "unitPrice", source = "product.price")
+    @Mapping(target = "subtotal", expression = "java(item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))")
+    public abstract CartItemDto toItemDto(CartItem item);
 }

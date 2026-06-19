@@ -8,13 +8,11 @@
 
 <div class="container mt-5">
     <div class="row">
-        <!-- Изображение -->
         <div class="col-md-6">
             <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/placeholder.jpg'}"
                  class="img-fluid rounded shadow" alt="Produktdetail">
         </div>
 
-        <!-- Информация -->
         <div class="col-md-6">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
@@ -39,7 +37,6 @@
                         <span th:text="${product.stock}">0</span>
                     </div>
 
-                    <!-- Форма добавления в корзину -->
                     <form th:action="@{/shop/cart/add}" method="post" sec:authorize="isAuthenticated()">
                         <input type="hidden" name="productId" th:value="${product.id}">
 
@@ -69,7 +66,6 @@
                         Bitte <a th:href="@{/login}">melden Sie sich an</a>, um dieses Produkt in den Warenkorb zu legen.
                     </div>
 
-                    <!-- Кнопка Избранное (Wunschkriterium /F08/) -->
                     <div class="mt-3" sec:authorize="isAuthenticated()">
                         <form th:action="@{/shop/favorites/toggle/{id}(id=${product.id})}" method="post" class="d-inline">
                             <button type="submit" class="btn btn-outline-danger">

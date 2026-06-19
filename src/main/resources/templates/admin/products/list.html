@@ -51,7 +51,6 @@
                                     <a th:href="@{/admin/products/edit/{id}(id=${product.id})}" class="btn btn-outline-primary" title="Bearbeiten">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <!-- POST-Request zum Löschen für CSRF-Schutz (Anforderung /F17/) -->
                                     <form th:action="@{/admin/products/delete/{id}(id=${product.id})}" method="post" class="d-inline"
                                           onsubmit="return confirm('Möchten Sie dieses Produkt wirklich löschen?');">
                                         <button type="submit" class="btn btn-outline-danger" title="Löschen">
@@ -66,6 +65,7 @@
                         </tr>
                         </tbody>
                     </table>
+                    <div th:replace="~{fragments/pagination :: pagination(page=${productPage}, baseUrl=${baseUrl})}">
                 </div>
             </div>
         </div>

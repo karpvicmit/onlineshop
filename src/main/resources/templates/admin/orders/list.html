@@ -66,10 +66,33 @@
                         </tbody>
                     </table>
                 </div>
+                <div th:if="${orderPage.totalPages > 1}" class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${orderPage.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number - 1}, size=${orderPage.size})}">
+                                    &laquo; Zurück
+                                </a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, orderPage.totalPages - 1)}"
+                                th:classappend="${i == orderPage.number} ? 'active'">
+                                <a class="page-link" th:href="@{/admin/orders(page=${i}, size=${orderPage.size})}"
+                                   th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${orderPage.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number + 1}, size=${orderPage.size})}">
+                                    Weiter &raquo;
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
+        <div th:replace="~{fragments/pagination :: pagination(page=${orderPage}, baseUrl=${baseUrl})}"></div>
     </main>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

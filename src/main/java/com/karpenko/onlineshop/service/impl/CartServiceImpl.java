@@ -27,7 +27,6 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    private final PriceCalculatorService priceCalculatorService;
     private final CartMapper cartMapper;
 
     @Override
@@ -36,9 +35,8 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findWithItemsByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found for user"));
 
-        BigDecimal total = priceCalculatorService.calculateTotal(cart);
-        log.debug("Cart loaded for user {}, total: {}", userId, total);
-        return cartMapper.toDto(cart, total);
+        log.debug("Cart loaded for user {}", userId);
+        return cartMapper.toDto(cart);
     }
 
     @Override

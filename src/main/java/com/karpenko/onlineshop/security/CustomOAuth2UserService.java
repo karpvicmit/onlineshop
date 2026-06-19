@@ -8,6 +8,7 @@ import com.karpenko.onlineshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -25,6 +26,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private final UserRepository userRepository;
     private final DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -46,7 +48,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             newUser.setFirstName(firstName != null ? firstName : "Unknown");
             newUser.setLastName(lastName != null ? lastName : "Unknown");
             // Random password for OAuth users as they don't use password login
-            newUser.setPasswordHash(UUID.randomUUID().toString());
+            newUser.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
             newUser.setRole(Role.USER);
             newUser.setStatus(UserStatus.ACTIVE);
             newUser.setAuthProvider(AuthProvider.GOOGLE);

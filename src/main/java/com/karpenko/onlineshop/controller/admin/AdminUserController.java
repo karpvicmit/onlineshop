@@ -6,6 +6,10 @@ import com.karpenko.onlineshop.entity.UserStatus;
 import com.karpenko.onlineshop.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -29,9 +33,17 @@ public class AdminUserController {
     public String activeMenu() { return "users"; }
 
     @GetMapping
-    public String listUsers(Model model) {
-        List<User> users = userService.getAllUsers();
-        model.addAttribute("users", users);
+    public String listUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+        Page<User> userPage = userService.getAllUsers(pageable);
+
+        model.addAttribute("userPage", userPage);
+        model.addAttribute("users", userPage.getContent());
+        model.addAttribute("baseUrl", "/admin/users");
         model.addAttribute("roles", Arrays.asList(Role.values()));
         model.addAttribute("statuses", Arrays.asList(UserStatus.values()));
 

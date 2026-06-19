@@ -1,6 +1,7 @@
 package com.karpenko.onlineshop.controller.shop;
 
 import com.karpenko.onlineshop.dto.CartDto;
+import com.karpenko.onlineshop.exception.CartNotFoundException;
 import com.karpenko.onlineshop.security.CustomUserDetails;
 import com.karpenko.onlineshop.service.CartService;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class CartController {
         try {
             CartDto cartDto = cartService.getCartDtoForUser(userDetails.getId());
             model.addAttribute("cart", cartDto);
-        } catch (Exception e) {
+        } catch (CartNotFoundException e) {
             log.debug("Cart not found, showing empty cart.");
             model.addAttribute("cart", CartDto.builder().items(List.of()).total(BigDecimal.ZERO).itemCount(0).build());
         }

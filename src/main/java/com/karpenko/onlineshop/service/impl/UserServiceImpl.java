@@ -12,6 +12,8 @@ import com.karpenko.onlineshop.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,6 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -63,16 +66,41 @@ public class UserServiceImpl implements UserService {
         }
 
         Object principal = authentication.getPrincipal();
-        if (principal instanceof CustomUserDetails customUserDetails) {
-            return customUserDetails.getUser();
+        if (!(principal instanceof CustomUserDetails customUserDetails)) {
+            throw new IllegalStateException("Unknown principal type: " + principal.getClass().getName());
         }
-        throw new IllegalStateException("Unknown principal type: " + principal.getClass().getName());
+
+        Long userId = customUserDetails.getId();
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User no longer exists"));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
+        log.warn("Calling deprecated getAllUsers() without pagination - use with caution on large datasets.");
         return userRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<User> getAllUsers(Pageable pageable) {
+        log.debug("Fetching users with pagination: page={}, size={}",
+                pageable.getPageNumber(), pageable.getPageSize());
+        return userRepository.findAll(pageable);
+    }
+
+    @Override
+    public Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new IllegalStateException("No authenticated user found in security context.");
+        }
+
+        CustomUserDetails currentUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        return currentUserDetails.getId();
     }
 
     @Override
@@ -104,18 +132,5 @@ public class UserServiceImpl implements UserService {
         user.setStatus(newStatus);
         userRepository.save(user);
         log.info("Status of user {} changed to {}", user.getEmail(), newStatus);
-    }
-
-    @Override
-    public Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new IllegalStateException("No authenticated user found in security context.");
-        }
-
-        CustomUserDetails currentUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        return currentUserDetails.getId();
     }
 }

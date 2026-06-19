@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -114,9 +116,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Order> getAllOrders() {
-        log.debug("Fetching all orders for admin");
-        return orderRepository.findAllWithUserAndItems();
+    public Page<Order> getAllOrdersForAdmin(Pageable pageable) {
+        log.debug("Fetching orders for admin with pagination: page={}, size={}",
+                pageable.getPageNumber(), pageable.getPageSize());
+        return orderRepository.findAllWithUserAndItems(pageable);
     }
 
     @Override

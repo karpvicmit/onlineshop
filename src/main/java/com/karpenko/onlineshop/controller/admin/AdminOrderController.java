@@ -3,8 +3,12 @@ package com.karpenko.onlineshop.controller.admin;
 import com.karpenko.onlineshop.entity.Order;
 import com.karpenko.onlineshop.entity.OrderStatus;
 import com.karpenko.onlineshop.service.OrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -27,16 +30,24 @@ public class AdminOrderController {
     public String activeMenu() { return "orders"; }
 
     @GetMapping
-    public String listOrders(Model model) {
-        List<Order> orders = orderService.getAllOrders();
-        model.addAttribute("orders", orders);
+    public String listOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate"));
+        Page<Order> orderPage = orderService.getAllOrdersForAdmin(pageable);
+
+        model.addAttribute("orders", orderPage.getContent());
+        model.addAttribute("orderPage", orderPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", orderPage.getTotalPages());
         model.addAttribute("statuses", Arrays.asList(OrderStatus.values()));
         return "admin/orders/list";
     }
 
     @GetMapping("/detail/{id}")
     public String orderDetail(@PathVariable Long id, Model model) {
-        // Используем новый метод, который загружает пользователя
         model.addAttribute("order", orderService.getOrderForAdmin(id));
         return "admin/orders/detail";
     }

@@ -52,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Product getProductEntityById(Long id) {
         log.debug("getProductEntityById: {}", id);
         return productRepository.findActiveById(id)

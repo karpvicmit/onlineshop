@@ -1,12 +1,17 @@
 package com.karpenko.onlineshop.controller.admin;
 
+import com.karpenko.onlineshop.dto.product.ProductDto;
 import com.karpenko.onlineshop.entity.Product;
 import com.karpenko.onlineshop.repository.CategoryRepository;
+import com.karpenko.onlineshop.service.CategoryService;
 import com.karpenko.onlineshop.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,21 +29,28 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminProductController {
 
     private final ProductService productService;
-    private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
 
     @ModelAttribute("activeMenu")
     public String activeMenu() { return "products"; }
 
     @GetMapping
-    public String listProducts(Model model) {
-        model.addAttribute("products", productService.findProducts(null, null, PageRequest.of(0, 100)).getContent());
+    public String listProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            Model model) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Page<ProductDto> productPage = productService.findProducts(null, null, pageable);
+
+        model.addAttribute("productPage", productPage);
+        model.addAttribute("baseUrl", "/admin/products");
         return "admin/products/list";
     }
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("product", new Product());
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryService.getAllCategories());
         return "admin/products/form";
     }
 
@@ -51,7 +63,7 @@ public class AdminProductController {
                               RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("categories", categoryService.getAllCategories());
             return "admin/products/form";
         }
 
@@ -69,7 +81,7 @@ public class AdminProductController {
     public String showEditForm(@PathVariable Long id, Model model) {
         Product product = productService.getProductEntityById(id);
         model.addAttribute("product", product);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryService.getAllCategories());
         return "admin/products/form";
     }
 

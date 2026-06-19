@@ -1,6 +1,8 @@
 package com.karpenko.onlineshop.repository;
 
 import com.karpenko.onlineshop.entity.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -43,6 +45,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "LEFT JOIN FETCH o.orderItems oi " +
             "LEFT JOIN FETCH oi.product " +
             "ORDER BY o.orderDate DESC")
-    List<Order> findAllWithUserAndItems();
+    Page<Order> findAllWithUserAndItems(Pageable pageable);
 
 }
