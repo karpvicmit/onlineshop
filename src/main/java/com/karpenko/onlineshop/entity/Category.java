@@ -28,7 +28,6 @@ public class Category {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @NotBlank(message = "Slug is required")
     @Column(nullable = false, unique = true)
     private String slug;
 
