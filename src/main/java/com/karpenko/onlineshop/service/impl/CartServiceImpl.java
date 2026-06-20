@@ -1,6 +1,6 @@
 package com.karpenko.onlineshop.service.impl;
 
-import com.karpenko.onlineshop.dto.CartDto;
+import com.karpenko.onlineshop.dto.cart.CartDto;
 import com.karpenko.onlineshop.entity.Cart;
 import com.karpenko.onlineshop.entity.CartItem;
 import com.karpenko.onlineshop.entity.Product;
@@ -11,13 +11,10 @@ import com.karpenko.onlineshop.repository.CartRepository;
 import com.karpenko.onlineshop.repository.ProductRepository;
 import com.karpenko.onlineshop.repository.UserRepository;
 import com.karpenko.onlineshop.service.CartService;
-import com.karpenko.onlineshop.service.PriceCalculatorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 
 @Slf4j
 @Service

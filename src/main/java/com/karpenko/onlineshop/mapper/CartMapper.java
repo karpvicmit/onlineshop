@@ -1,7 +1,7 @@
 package com.karpenko.onlineshop.mapper;
 
-import com.karpenko.onlineshop.dto.CartDto;
-import com.karpenko.onlineshop.dto.CartItemDto;
+import com.karpenko.onlineshop.dto.cart.CartDto;
+import com.karpenko.onlineshop.dto.cart.CartItemDto;
 import com.karpenko.onlineshop.entity.Cart;
 import com.karpenko.onlineshop.entity.CartItem;
 import com.karpenko.onlineshop.service.PriceCalculatorService;

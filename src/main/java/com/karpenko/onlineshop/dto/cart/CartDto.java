@@ -1,4 +1,4 @@
-package com.karpenko.onlineshop.dto;
+package com.karpenko.onlineshop.dto.cart;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

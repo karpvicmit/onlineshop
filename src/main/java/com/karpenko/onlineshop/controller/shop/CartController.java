@@ -1,6 +1,6 @@
 package com.karpenko.onlineshop.controller.shop;
 
-import com.karpenko.onlineshop.dto.CartDto;
+import com.karpenko.onlineshop.dto.cart.CartDto;
 import com.karpenko.onlineshop.exception.CartNotFoundException;
 import com.karpenko.onlineshop.security.CustomUserDetails;
 import com.karpenko.onlineshop.service.CartService;

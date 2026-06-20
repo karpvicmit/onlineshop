@@ -1,6 +1,6 @@
 package com.karpenko.onlineshop.service;
 
-import com.karpenko.onlineshop.dto.CartDto;
+import com.karpenko.onlineshop.dto.cart.CartDto;
 
 public interface CartService {
 
