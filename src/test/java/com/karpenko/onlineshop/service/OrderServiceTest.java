@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.karpenko.onlineshop.service.PriceCalculatorService;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -32,6 +33,7 @@ class OrderServiceTest {
     @Mock private ProductRepository productRepository;
     @Mock private CartService cartService;
     @Mock private CartRepository cartRepository;
+    @Mock private PriceCalculatorService priceCalculatorService;
 
     @InjectMocks
     private OrderServiceImpl orderService;
@@ -70,6 +72,8 @@ class OrderServiceTest {
         void shouldCheckoutSuccessfully() {
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
             when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("1998.00"));
             when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
                 Order o = inv.getArgument(0);
                 o.setId(100L);
@@ -136,7 +140,8 @@ class OrderServiceTest {
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
             when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
             when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
-
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("1998.00"));
             Order result = orderService.checkout(user);
 
             // Simulate later price change
@@ -207,7 +212,8 @@ class OrderServiceTest {
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
             when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
             when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
-
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("200.00"));
             Order order = orderService.checkout(user);
 
             // when: product price changes to 200€ later
@@ -231,7 +237,8 @@ class OrderServiceTest {
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
             when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
             when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
-
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("300.00"));
             orderService.checkout(user);
 
             assertThat(product.getStock()).isEqualTo(7); // 10 - 3 = 7

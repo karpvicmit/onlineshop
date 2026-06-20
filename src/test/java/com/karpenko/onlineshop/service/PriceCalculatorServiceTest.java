@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -57,5 +59,30 @@ class PriceCalculatorServiceTest {
     @DisplayName("Should return ZERO for null cart")
     void shouldReturnZeroForNullCart() {
         assertThat(priceCalculatorService.calculateTotal(null)).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    @DisplayName("Should calculate total with locked product prices")
+    void shouldCalculateTotalWithLockedPrices() {
+        Product p1 = new Product();
+        p1.setId(1L);
+        p1.setPrice(new BigDecimal("100.00"));
+
+        CartItem item = new CartItem();
+        item.setProduct(p1);
+        item.setQuantity(2);
+
+        Product lockedP1 = new Product();
+        lockedP1.setId(1L);
+        lockedP1.setPrice(new BigDecimal("120.00")); // price increased!
+
+        Map<Long, Product> lockedProducts = Map.of(1L, lockedP1);
+
+        BigDecimal total = priceCalculatorService
+                .calculateTotalWithLockedPrices(List.of(item), lockedProducts);
+
+        // Should use LOCKED price (120), not cart's cached price (100)
+        // 120 * 2 = 240
+        assertThat(total).isEqualByComparingTo("240.00");
     }
 }

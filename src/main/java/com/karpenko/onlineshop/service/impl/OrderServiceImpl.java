@@ -8,6 +8,7 @@ import com.karpenko.onlineshop.repository.OrderRepository;
 import com.karpenko.onlineshop.repository.ProductRepository;
 import com.karpenko.onlineshop.service.CartService;
 import com.karpenko.onlineshop.service.OrderService;
+import com.karpenko.onlineshop.service.PriceCalculatorService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final CartService cartService;
     private final CartRepository cartRepository;
+    private final PriceCalculatorService priceCalculatorService;
 
     @Override
     @Transactional
@@ -62,7 +64,6 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(user);
         order.setDeliveryAddress(user.getAddress());
         order.setStatus(OrderStatus.NEW);
-        BigDecimal totalAmount = BigDecimal.ZERO;
 
         for (CartItem cartItem : cart.getItems()) {
             Product lockedProduct = lockedProducts.get(cartItem.getProduct().getId());
@@ -70,7 +71,8 @@ public class OrderServiceImpl implements OrderService {
             if (lockedProduct.getStock() < cartItem.getQuantity()) {
                 log.warn("Insufficient stock for product: {} (available: {}, required: {})",
                         lockedProduct.getName(), lockedProduct.getStock(), cartItem.getQuantity());
-                throw new ProductOutOfStockException("Insufficient stock for product: " + lockedProduct.getName());
+                throw new ProductOutOfStockException(
+                        "Insufficient stock for product: " + lockedProduct.getName());
             }
 
             lockedProduct.setStock(lockedProduct.getStock() - cartItem.getQuantity());
@@ -80,16 +82,16 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setUnitPrice(lockedProduct.getPrice());
             order.addItem(orderItem);
-
-            totalAmount = totalAmount.add(lockedProduct.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         }
 
+        BigDecimal totalAmount = priceCalculatorService
+                .calculateTotalWithLockedPrices(cart.getItems(), lockedProducts);
         order.setTotalAmount(totalAmount);
+
         Order savedOrder = orderRepository.save(order);
-
         log.info("Order {} created successfully. Total amount: {}", savedOrder.getId(), totalAmount);
-        cartService.clearCart(user.getId());
 
+        cartService.clearCart(user.getId());
         return savedOrder;
     }
 
