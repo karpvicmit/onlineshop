@@ -9,10 +9,15 @@ public class ProductSpecification {
         return (root, query, cb) -> {
             var predicate = cb.conjunction();
             if (name != null && !name.isBlank()) {
-                predicate = cb.and(predicate, cb.like(cb.lower(root.get("name")), "%" + name.trim().toLowerCase() + "%"));
+                String escapedName = name.trim().toLowerCase()
+                        .replace("%", "\\%")
+                        .replace("_", "\\_");
+                predicate = cb.and(predicate,
+                        cb.like(cb.lower(root.get("name")), "%" + escapedName + "%", '\\'));
             }
             if (categorySlug != null && !categorySlug.isBlank()) {
-                predicate = cb.and(predicate, cb.equal(root.get("category").get("slug"), categorySlug.trim().toLowerCase()));
+                predicate = cb.and(predicate,
+                        cb.equal(root.get("category").get("slug"), categorySlug.trim().toLowerCase()));
             }
             return predicate;
         };
