@@ -67,17 +67,25 @@ public class ProductServiceImpl implements ProductService {
     public Product saveProduct(Product product, MultipartFile imageFile) {
         log.info("Saving product: {}", product.getName());
 
+        Product managed = product.getId() != null
+                ? productRepository.findActiveById(product.getId())
+                  .orElseThrow(() -> new ResourceNotFoundException("Product not found"))
+                : new Product();
+
+        managed.setName(product.getName());
+        managed.setDescription(product.getDescription());
+        managed.setPrice(product.getPrice());
+        managed.setStock(product.getStock());
+        managed.setCategory(product.getCategory());
+
         if (imageFile != null && !imageFile.isEmpty()) {
             String imageUrl = fileUploadService.storeFile(imageFile);
-            product.setImageUrl(imageUrl);
-        } else if (product.getId() != null) {
-            Product existingProduct = productRepository.findActiveById(product.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-            product.setImageUrl(existingProduct.getImageUrl());
-            product.setVersion(existingProduct.getVersion());
+            managed.setImageUrl(imageUrl);
         }
-        product.setDeleted(false);
-        return productRepository.save(product);
+
+        managed.setDeleted(false);
+
+        return productRepository.save(managed);
     }
 
     @Override

@@ -59,11 +59,11 @@ class UserServiceTest {
     }
 
     @Nested
-    @DisplayName("registerUser() - /T01/, /T02/")
+    @DisplayName("registerUser()")
     class Registration {
 
         @Test
-        @DisplayName("/T01/ Should register user with valid data, BCrypt hash, role USER")
+        @DisplayName("Should register user with valid data, BCrypt hash, role USER")
         void shouldRegisterUserSuccessfully() {
             // given
             when(passwordEncoder.encode(anyString())).thenReturn("$2a$12$hashed");
@@ -88,7 +88,7 @@ class UserServiceTest {
         }
 
         @Test
-        @DisplayName("/T01/ Should normalize email to lowercase and trim whitespace")
+        @DisplayName("Should normalize email to lowercase and trim whitespace")
         void shouldNormalizeEmail() {
             when(passwordEncoder.encode(anyString())).thenReturn("hash");
             when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -102,7 +102,7 @@ class UserServiceTest {
         }
 
         @Test
-        @DisplayName("/T02/ Should throw EmailAlreadyExistsException on duplicate email")
+        @DisplayName("Should throw EmailAlreadyExistsException on duplicate email")
         void shouldThrowWhenEmailExists() {
             when(passwordEncoder.encode(anyString())).thenReturn("hash");
             when(userRepository.save(any(User.class)))
@@ -115,11 +115,11 @@ class UserServiceTest {
     }
 
     @Nested
-    @DisplayName("updateUserStatus() - /T11/")
+    @DisplayName("updateUserStatus()")
     class StatusManagement {
 
         @Test
-        @DisplayName("/T11/ Admin should block active user")
+        @DisplayName("Admin should block active user")
         void shouldBlockUser() {
             // given
             User admin = buildUser(1L, "admin@test.de", Role.ADMIN);

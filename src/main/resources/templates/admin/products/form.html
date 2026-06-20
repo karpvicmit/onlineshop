@@ -11,9 +11,10 @@
 
         <div th:replace="~{fragments/alerts :: alerts}"></div>
 
-        <!-- enctype ist zwingend erforderlich für Datei-Uploads (Anforderung /F09/) -->
+        <!-- enctype ist zwingend erforderlich für Datei-Uploads -->
         <form th:action="@{/admin/products/save}" th:object="${product}" method="post" enctype="multipart/form-data">
             <input type="hidden" th:field="*{id}"/>
+            <input type="hidden" th:field="*{version}"/>
 
             <div class="row">
                 <div class="col-md-8">

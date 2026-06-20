@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("FavoriteService - Toggle Logic /T10/")
+@DisplayName("FavoriteService - Toggle Logic")
 class FavoriteServiceTest {
 
     @Mock private FavoriteRepository favoriteRepository;
@@ -47,7 +47,7 @@ class FavoriteServiceTest {
     }
 
     @Test
-    @DisplayName("/T10/ Should ADD favorite when not yet present")
+    @DisplayName("Should ADD favorite when not yet present")
     void shouldAddFavorite() {
         when(favoriteRepository.findByUserIdAndProductId(1L, 10L)).thenReturn(Optional.empty());
         when(productRepository.findById(10L)).thenReturn(Optional.of(product));
@@ -60,7 +60,7 @@ class FavoriteServiceTest {
     }
 
     @Test
-    @DisplayName("/T10/ Should REMOVE favorite when already present (toggle)")
+    @DisplayName("Should REMOVE favorite when already present (toggle)")
     void shouldRemoveFavorite() {
         Favorite existing = new Favorite();
         existing.setUser(user);

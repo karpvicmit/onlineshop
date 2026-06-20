@@ -13,7 +13,7 @@ CREATE TABLE order_items (
                              order_id BIGINT NOT NULL,
                              product_id BIGINT NOT NULL,
                              quantity INT NOT NULL,
-                             unit_price DECIMAL(10, 2) NOT NULL, -- WICHTIG: Preis zum Zeitpunkt der Bestellung (Anforderung /D07/)
+                             unit_price DECIMAL(10, 2) NOT NULL, -- WICHTIG: Preis zum Zeitpunkt der Bestellung
                              CONSTRAINT fk_orderitem_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
                              CONSTRAINT fk_orderitem_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT
 );

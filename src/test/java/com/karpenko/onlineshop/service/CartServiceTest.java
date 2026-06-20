@@ -54,11 +54,11 @@ class CartServiceTest {
     }
 
     @Nested
-    @DisplayName("addItemToCart() - /T04/")
+    @DisplayName("addItemToCart()")
     class AddItem {
 
         @Test
-        @DisplayName("/T04/ Should create cart and add product when cart does not exist")
+        @DisplayName("Should create cart and add product when cart does not exist")
         void shouldCreateCartIfMissing() {
             when(productRepository.findById(10L)).thenReturn(Optional.of(product));
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.empty());
@@ -78,7 +78,7 @@ class CartServiceTest {
         }
 
         @Test
-        @DisplayName("/T04/ Should increase quantity when product already in cart")
+        @DisplayName("Should increase quantity when product already in cart")
         void shouldIncreaseQuantityForExistingProduct() {
             Cart cart = new Cart();
             cart.setUser(user);

@@ -32,7 +32,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="product : ${products}">
+                        <tr th:each="product : ${productPage}">
                             <td th:text="${product.id}">1</td>
                             <td>
                                 <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
@@ -60,12 +60,12 @@
                                 </div>
                             </td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(products)}">
+                        <tr th:if="${#lists.isEmpty(productPage)}">
                             <td colspan="7" class="text-center text-muted py-4">Keine Produkte gefunden.</td>
                         </tr>
                         </tbody>
                     </table>
-                    <div th:replace="~{fragments/pagination :: pagination(page=${productPage}, baseUrl=${baseUrl})}">
+                    <div th:replace="~{fragments/pagination :: pagination(page=${productPage}, baseUrl=${baseUrl})}"></div>
                 </div>
             </div>
         </div>

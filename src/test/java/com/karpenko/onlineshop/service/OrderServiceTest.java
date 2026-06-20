@@ -94,7 +94,7 @@ class OrderServiceTest {
         }
 
         @Test
-        @DisplayName("/T05/ Should throw ProductOutOfStockException when stock < required")
+        @DisplayName("Should throw ProductOutOfStockException when stock < required")
         void shouldThrowWhenOutOfStock() {
             product.setStock(1); // less than requested 2
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
@@ -131,7 +131,7 @@ class OrderServiceTest {
         }
 
         @Test
-        @DisplayName("OrderItem should store unitPrice at checkout time (/D07/ requirement)")
+        @DisplayName("OrderItem should store unitPrice at checkout time")
         void shouldStoreUnitPriceAtOrderTime() {
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
             when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
@@ -213,7 +213,7 @@ class OrderServiceTest {
             // when: product price changes to 200€ later
             product.setPrice(new BigDecimal("200.00"));
 
-            // then: OrderItem still has original price (requirement /D07/)
+            // then: OrderItem still has original price
             assertThat(order.getOrderItems().get(0).getUnitPrice())
                     .isEqualByComparingTo("100.00");
         }
