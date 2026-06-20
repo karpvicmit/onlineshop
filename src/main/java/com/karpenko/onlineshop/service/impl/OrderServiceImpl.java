@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,18 +47,25 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException("Cart is empty. Cannot place order.");
         }
 
+        List<Long> productIds = cart.getItems().stream()
+                .map(item -> item.getProduct().getId())
+                .distinct()
+                .sorted()
+                .toList();
+
+        Map<Long, Product> lockedProducts = productIds.stream()
+                .map(id -> productRepository.findByIdWithLock(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id)))
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
         Order order = new Order();
         order.setUser(user);
         order.setDeliveryAddress(user.getAddress());
         order.setStatus(OrderStatus.NEW);
-
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         for (CartItem cartItem : cart.getItems()) {
-            Product product = cartItem.getProduct();
-
-            Product lockedProduct = productRepository.findByIdWithLock(product.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + product.getId()));
+            Product lockedProduct = lockedProducts.get(cartItem.getProduct().getId());
 
             if (lockedProduct.getStock() < cartItem.getQuantity()) {
                 log.warn("Insufficient stock for product: {} (available: {}, required: {})",
@@ -70,7 +79,6 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setProduct(lockedProduct);
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setUnitPrice(lockedProduct.getPrice());
-
             order.addItem(orderItem);
 
             totalAmount = totalAmount.add(lockedProduct.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
@@ -78,8 +86,8 @@ public class OrderServiceImpl implements OrderService {
 
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
-        log.info("Order {} created successfully. Total amount: {}", savedOrder.getId(), totalAmount);
 
+        log.info("Order {} created successfully. Total amount: {}", savedOrder.getId(), totalAmount);
         cartService.clearCart(user.getId());
 
         return savedOrder;
