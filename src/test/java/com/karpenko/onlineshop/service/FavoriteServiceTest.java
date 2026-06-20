@@ -83,7 +83,6 @@ class FavoriteServiceTest {
         when(favoriteRepository.save(any(Favorite.class)))
                 .thenThrow(new DataIntegrityViolationException("Duplicate"));
 
-        // Should NOT throw - race condition is logged and ignored
         favoriteService.toggleFavorite(user, 10L);
     }
 
@@ -95,5 +94,22 @@ class FavoriteServiceTest {
 
         assertThatThrownBy(() -> favoriteService.toggleFavorite(user, 99L))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("Should swallow DataIntegrityViolationException without propagating to caller")
+    void shouldSwallowDataIntegrityViolationWithoutPropagating() {
+        when(favoriteRepository.findByUserIdAndProductId(1L, 10L)).thenReturn(Optional.empty());
+        when(productRepository.findById(10L)).thenReturn(Optional.of(product));
+
+        when(favoriteRepository.save(any(Favorite.class)))
+                .thenThrow(new DataIntegrityViolationException("Duplicate entry 'user_id-product_id'"));
+
+        org.assertj.core.api.Assertions.assertThatCode(() -> favoriteService.toggleFavorite(user, 10L))
+                .as("DataIntegrityViolationException must be caught internally and not propagated")
+                .doesNotThrowAnyException();
+
+        verify(favoriteRepository).save(any(Favorite.class));
+        verify(favoriteRepository, never()).delete(any(Favorite.class));
     }
 }

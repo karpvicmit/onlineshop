@@ -40,12 +40,7 @@ public class FavoriteServiceImpl implements FavoriteService {
                     Favorite favorite = new Favorite();
                     favorite.setUser(user);
                     favorite.setProduct(product);
-                    try {
-                        favoriteRepository.save(favorite);
-                        log.info("Product {} added to favorites for user {}", productId, user.getEmail());
-                    } catch (DataIntegrityViolationException ex) {
-                        log.warn("Duplicate favorite attempt (race condition), ignoring.");
-                    }
+                    saveFavoriteSafely(favorite);
                 }
         );
     }
@@ -55,5 +50,15 @@ public class FavoriteServiceImpl implements FavoriteService {
     public List<Favorite> getFavoritesByUserId(Long userId) {
         log.info("Loading favorites for user ID: {}", userId);
         return favoriteRepository.findAllByUserIdWithProductAndCategory(userId);
+    }
+
+    @Transactional(noRollbackFor = DataIntegrityViolationException.class)
+    private void saveFavoriteSafely(Favorite favorite) {
+        try {
+            favoriteRepository.save(favorite);
+            log.info("Product {} added to favorites for user {}", favorite.getProduct().getId(), favorite.getUser().getEmail());
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("Duplicate favorite attempt (race condition), ignoring.");
+        }
     }
 }
