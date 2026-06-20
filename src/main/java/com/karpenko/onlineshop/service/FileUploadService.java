@@ -60,8 +60,12 @@ public class FileUploadService {
 
         String extension = "";
         int dotIndex = originalFileName.lastIndexOf('.');
-        if (dotIndex > 0) {
+        if (dotIndex > 0 && dotIndex < originalFileName.length() - 1) {
             extension = originalFileName.substring(dotIndex).toLowerCase();
+            if (extension.contains("/") || extension.contains("\\")) {
+                log.error("Path traversal attempt in file extension: {}", extension);
+                throw new IllegalArgumentException("Invalid file extension");
+            }
         }
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
             log.error("Invalid file extension: {}", extension);
