@@ -20,10 +20,6 @@ public final class TestSecurityUtils {
 
     /**
      * Sets the authentication with CustomUserDetails in the SecurityContext.
-     *
-     * @param userId ID пользователя
-     * @param email  email пользователя
-     * @param role   роль (USER или ADMIN)
      */
     public static void authenticateAs(Long userId, String email, Role role) {
         User user = new User();

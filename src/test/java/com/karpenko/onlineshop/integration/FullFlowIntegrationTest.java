@@ -29,7 +29,6 @@ class FullFlowIntegrationTest {
     @Autowired private OrderService orderService;
     @Autowired private FavoriteService favoriteService;
     @Autowired private ProductRepository productRepository;
-    @Autowired private CategoryRepository categoryRepository;
 
     private User testUser;
     private Product testProduct;
@@ -62,11 +61,11 @@ class FullFlowIntegrationTest {
         // Step 1: Add product to cart
         cartService.addItemToCart(testUser.getId(), testProduct.getId(), 2);
 
-        // Step 2: Verify cart (теперь total должен рассчитываться!)
+        // Step 2: Verify cart
         var cartDto = cartService.getCartDtoForUser(testUser.getId());
         assertThat(cartDto.getItems()).hasSize(1);
-        assertThat(cartDto.getItems().get(0).getQuantity()).isEqualTo(2);
-        assertThat(cartDto.getItems().get(0).getProductName()).isEqualTo("Test Product");
+        assertThat(cartDto.getItems().getFirst().getQuantity()).isEqualTo(2);
+        assertThat(cartDto.getItems().getFirst().getProductName()).isEqualTo("Test Product");
         assertThat(cartDto.getItemCount()).isEqualTo(2);
         assertThat(cartDto.getTotal()).isEqualByComparingTo("199.98");
 
@@ -78,8 +77,8 @@ class FullFlowIntegrationTest {
         assertThat(order.getStatus()).isEqualTo(OrderStatus.NEW);
         assertThat(order.getTotalAmount()).isEqualByComparingTo("199.98");
         assertThat(order.getOrderItems()).hasSize(1);
-        assertThat(order.getOrderItems().get(0).getUnitPrice()).isEqualByComparingTo("99.99");
-        assertThat(order.getOrderItems().get(0).getQuantity()).isEqualTo(2);
+        assertThat(order.getOrderItems().getFirst().getUnitPrice()).isEqualByComparingTo("99.99");
+        assertThat(order.getOrderItems().getFirst().getQuantity()).isEqualTo(2);
 
         // Step 5: Verify stock decreased
         Product updatedProduct = productRepository.findById(testProduct.getId()).orElseThrow();
@@ -93,7 +92,7 @@ class FullFlowIntegrationTest {
         // Step 7: Verify order in history
         var history = orderService.getOrderHistory(testUser);
         assertThat(history).hasSize(1);
-        assertThat(history.get(0).getId()).isEqualTo(order.getId());
+        assertThat(history.getFirst().getId()).isEqualTo(order.getId());
     }
 
     @Test
