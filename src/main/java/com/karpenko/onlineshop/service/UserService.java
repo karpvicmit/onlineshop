@@ -13,6 +13,8 @@ public interface UserService {
 
     User registerUser(UserRegistrationDto registrationDto);
 
+    boolean confirmEmail(String token);
+
     User getCurrentUser();
     
     @Deprecated

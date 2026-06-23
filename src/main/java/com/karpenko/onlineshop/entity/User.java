@@ -56,6 +56,15 @@ public class User {
     @Column(name = "provider_id", length = 255)
     private String providerId;
 
+    @Column(name = "email_confirmed", nullable = false)
+    private boolean emailConfirmed = false;
+
+    @Column(name = "email_confirmation_token", length = 255)
+    private String emailConfirmationToken;
+
+    @Column(name = "token_expiry_date")
+    private LocalDateTime tokenExpiryDate;
+
     public void setEmail(String email) {
         if (email != null) {
             this.email = email.trim().toLowerCase();

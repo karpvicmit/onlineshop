@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 
+import com.karpenko.onlineshop.service.UserService;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 @Controller
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
-
     private final UserService userService;
 
     @GetMapping("/login")
@@ -45,8 +48,8 @@ public class AuthController {
 
         try {
             userService.registerUser(dto);
-            log.info("Registrierung erfolgreich. Weiterleitung zur Login-Seite.");
-            return "redirect:/login?registered";
+            log.info("Registrierung erfolgreich. E-Mail-Bestätigung gesendet.");
+            return "redirect:/auth/email-sent";
         } catch (EmailAlreadyExistsException e) {
             log.warn("Registrierung abgelehnt: {}", e.getMessage());
             model.addAttribute("errorMessage", e.getMessage());
@@ -56,5 +59,25 @@ public class AuthController {
             model.addAttribute("errorMessage", "Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.");
             return "auth/register";
         }
+    }
+
+    @GetMapping("/confirm-email")
+    public String confirmEmail(@RequestParam String token, RedirectAttributes redirectAttributes) {
+        try {
+            userService.confirmEmail(token);
+            redirectAttributes.addFlashAttribute("successMessage", "E-Mail erfolgreich bestätigt! Sie können sich jetzt anmelden.");
+            return "redirect:/login";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Ungültiger Bestätigungslink.");
+            return "redirect:/login";
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bestätigungslink ist abgelaufen. Bitte registrieren Sie sich erneut.");
+            return "redirect:/register";
+        }
+    }
+
+    @GetMapping("/auth/email-sent")
+    public String emailSent() {
+        return "auth/email-sent";
     }
 }

@@ -11,6 +11,7 @@ import com.karpenko.onlineshop.security.CustomUserDetails;
 import com.karpenko.onlineshop.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,16 +21,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.karpenko.onlineshop.service.EmailService;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+
+    @Value("${app.base-url:http://localhost:8080}")
+    private String baseUrl;
 
     @Override
     @Transactional
@@ -45,14 +51,47 @@ public class UserServiceImpl implements UserService {
         user.setLastName(dto.getLastName());
         user.setAddress(dto.getAddress());
 
+        String token = UUID.randomUUID().toString();
+        user.setEmailConfirmationToken(token);
+        user.setTokenExpiryDate(LocalDateTime.now().plusHours(24));
+        user.setEmailConfirmed(false);
+
         try {
             User savedUser = userRepository.save(user);
-            log.info("User {} registered successfully", savedUser.getEmail());
+            log.info("User {} registered successfully, sending confirmation email", savedUser.getEmail());
+
+            emailService.sendConfirmationEmail(savedUser.getEmail(), token, baseUrl);
+
             return savedUser;
         } catch (DataIntegrityViolationException ex) {
             log.warn("Registration failed: email {} already exists", dto.getEmail());
             throw new EmailAlreadyExistsException("This email is already registered.");
         }
+    }
+
+    @Override
+    @Transactional
+    public boolean confirmEmail(String token) {
+        log.info("Email confirmation attempt with token");
+
+        User user = userRepository.findByEmailConfirmationToken(token)
+                .orElseThrow(() -> {
+                    log.warn("Invalid confirmation token");
+                    return new IllegalArgumentException("Invalid confirmation token");
+                });
+
+        if (user.getTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            log.warn("Confirmation token expired for user: {}", user.getEmail());
+            throw new IllegalStateException("Confirmation token has expired");
+        }
+
+        user.setEmailConfirmed(true);
+        user.setEmailConfirmationToken(null);
+        user.setTokenExpiryDate(null);
+        userRepository.save(user);
+
+        log.info("Email confirmed successfully for user: {}", user.getEmail());
+        return true;
     }
 
     @Override

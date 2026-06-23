@@ -22,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,6 +41,9 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -54,7 +58,6 @@ class UserServiceTest {
         validDto.setLastName("Mustermann");
         validDto.setAddress("Berlin, Str. 1");
 
-        // Clear security context before each test
         SecurityContextHolder.clearContext();
     }
 
@@ -65,7 +68,6 @@ class UserServiceTest {
         @Test
         @DisplayName("Should register user with valid data, BCrypt hash, role USER")
         void shouldRegisterUserSuccessfully() {
-            // given
             when(passwordEncoder.encode(anyString())).thenReturn("$2a$12$hashed");
             when(userRepository.save(any(User.class))).thenAnswer(inv -> {
                 User u = inv.getArgument(0);
@@ -73,16 +75,13 @@ class UserServiceTest {
                 return u;
             });
 
-            // when
             User saved = userService.registerUser(validDto);
 
-            // then
             assertThat(saved.getId()).isEqualTo(1L);
             assertThat(saved.getEmail()).isEqualTo("test@example.com");
             assertThat(saved.getRole()).isEqualTo(Role.USER);
             assertThat(saved.getStatus()).isEqualTo(UserStatus.ACTIVE);
             assertThat(saved.getPasswordHash()).isEqualTo("$2a$12$hashed");
-
             verify(passwordEncoder).encode("SecurePass123");
             verify(userRepository).save(any(User.class));
         }
@@ -94,7 +93,6 @@ class UserServiceTest {
             when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
             validDto.setEmail("  USER@Example.COM  ");
-
             userService.registerUser(validDto);
 
             verify(userRepository).save(argThat(user ->
@@ -111,6 +109,25 @@ class UserServiceTest {
             assertThatThrownBy(() -> userService.registerUser(validDto))
                     .isInstanceOf(EmailAlreadyExistsException.class)
                     .hasMessageContaining("already registered");
+        }
+
+        @Test
+        @DisplayName("Should generate confirmation token and send email")
+        void registerUser_shouldGenerateTokenAndSendEmail() {
+            when(passwordEncoder.encode(anyString())).thenReturn("hashedPass");
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            User result = userService.registerUser(validDto);
+
+            assertThat(result.getEmailConfirmationToken()).isNotNull();
+            assertThat(result.isEmailConfirmed()).isFalse();
+            assertThat(result.getTokenExpiryDate()).isNotNull();
+
+            verify(emailService).sendConfirmationEmail(
+                    eq("test@example.com"),
+                    eq(result.getEmailConfirmationToken()),
+                    any()
+            );
         }
     }
 

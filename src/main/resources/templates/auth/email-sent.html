@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('E-Mail bestätigt')}"></head>
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">
+            <i class="bi bi-shop"></i> OnlineShop
+        </a>
+    </div>
+</nav>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4 text-center">
+                    <i class="bi bi-envelope-check display-1 text-success mb-3"></i>
+                    <h3 class="mb-3">Bestätigungs-E-Mail gesendet</h3>
+                    <p class="text-muted">
+                        Wir haben eine Bestätigungs-E-Mail an Ihre E-Mail-Adresse gesendet.
+                        Bitte überprüfen Sie Ihren Posteingang und klicken Sie auf den Bestätigungslink,
+                        um Ihre Registrierung abzuschließen.
+                    </p>
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Tipp:</strong> Überprüfen Sie auch Ihren Spam-Ordner, falls Sie die E-Mail nicht finden.
+                    </div>
+                    <div class="mt-4">
+                        <a th:href="@{/login}" class="btn btn-primary">Zum Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

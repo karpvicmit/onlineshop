@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -29,6 +30,10 @@ class FullFlowIntegrationTest {
     @Autowired private OrderService orderService;
     @Autowired private FavoriteService favoriteService;
     @Autowired private ProductRepository productRepository;
+    @Autowired private UserRepository userRepository;
+
+    @MockitoBean
+    private EmailService emailService;
 
     private User testUser;
     private Product testProduct;
@@ -41,7 +46,15 @@ class FullFlowIntegrationTest {
         dto.setFirstName("Integration");
         dto.setLastName("Test");
         dto.setAddress("Test Street 1, 12345 Berlin");
+
         testUser = userService.registerUser(dto);
+
+        // Confirming the email for the test user
+        String token = testUser.getEmailConfirmationToken();
+        userService.confirmEmail(token);
+
+        // Reload the user from the database after confirmation.
+        testUser = userRepository.findById(testUser.getId()).orElseThrow();
 
         Category category = new Category();
         category.setName("Test Category");
@@ -56,7 +69,7 @@ class FullFlowIntegrationTest {
     }
 
     @Test
-    @DisplayName("Complete shopping flow: register → add to cart → checkout → verify order")
+    @DisplayName("Complete shopping flow: register → confirm email → add to cart → checkout → verify order")
     void completeShoppingFlow() {
         // Step 1: Add product to cart
         cartService.addItemToCart(testUser.getId(), testProduct.getId(), 2);

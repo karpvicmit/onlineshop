@@ -47,12 +47,11 @@ class AuthControllerTest extends BaseWebMvcTest {
     }
 
     @Test
-    @DisplayName("POST /register with valid data should redirect to login")
+    @DisplayName("POST /register with valid data should redirect to email-sent page")
     void shouldRegisterUserSuccessfully() throws Exception {
         User mockUser = new User();
         mockUser.setId(1L);
         mockUser.setEmail("newuser@test.de");
-
         when(userService.registerUser(any(UserRegistrationDto.class)))
                 .thenReturn(mockUser);
 
@@ -64,7 +63,7 @@ class AuthControllerTest extends BaseWebMvcTest {
                         .param("lastName", "Mustermann")
                         .param("address", "Berlin, Str. 1"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?registered"));
+                .andExpect(redirectedUrl("/auth/email-sent")); // <-- ИСПРАВЛЕНО: было /login?registered
 
         verify(userService).registerUser(any(UserRegistrationDto.class));
     }
