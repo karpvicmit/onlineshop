@@ -1,6 +1,8 @@
 package com.karpenko.onlineshop.service;
 
+import com.karpenko.onlineshop.dto.user.PasswordChangeDto;
 import com.karpenko.onlineshop.dto.user.UserRegistrationDto;
+import com.karpenko.onlineshop.entity.AuthProvider;
 import com.karpenko.onlineshop.entity.Role;
 import com.karpenko.onlineshop.entity.User;
 import com.karpenko.onlineshop.entity.UserStatus;
@@ -22,7 +24,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,16 +35,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserService - Registration and User Management")
 class UserServiceTest {
-
     @Mock
     private UserRepository userRepository;
-
     @Mock
     private PasswordEncoder passwordEncoder;
-
     @Mock
     private EmailService emailService;
-
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -57,14 +54,12 @@ class UserServiceTest {
         validDto.setFirstName("Max");
         validDto.setLastName("Mustermann");
         validDto.setAddress("Berlin, Str. 1");
-
         SecurityContextHolder.clearContext();
     }
 
     @Nested
     @DisplayName("registerUser()")
     class Registration {
-
         @Test
         @DisplayName("Should register user with valid data, BCrypt hash, role USER")
         void shouldRegisterUserSuccessfully() {
@@ -122,7 +117,6 @@ class UserServiceTest {
             assertThat(result.getEmailConfirmationToken()).isNotNull();
             assertThat(result.isEmailConfirmed()).isFalse();
             assertThat(result.getTokenExpiryDate()).isNotNull();
-
             verify(emailService).sendConfirmationEmail(
                     eq("test@example.com"),
                     eq(result.getEmailConfirmationToken()),
@@ -134,22 +128,17 @@ class UserServiceTest {
     @Nested
     @DisplayName("updateUserStatus()")
     class StatusManagement {
-
         @Test
         @DisplayName("Admin should block active user")
         void shouldBlockUser() {
-            // given
             User admin = buildUser(1L, "admin@test.de", Role.ADMIN);
             User target = buildUser(2L, "victim@test.de", Role.USER);
             mockAuthenticatedUser(admin);
-
             when(userRepository.findById(2L)).thenReturn(Optional.of(target));
             when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-            // when
             userService.updateUserStatus(2L, UserStatus.BLOCKED);
 
-            // then
             assertThat(target.getStatus()).isEqualTo(UserStatus.BLOCKED);
             verify(userRepository).save(target);
         }
@@ -181,14 +170,12 @@ class UserServiceTest {
     @Nested
     @DisplayName("updateUserRole()")
     class RoleManagement {
-
         @Test
         @DisplayName("Admin should change USER to ADMIN")
         void shouldChangeRole() {
             User admin = buildUser(1L, "admin@test.de", Role.ADMIN);
             User target = buildUser(2L, "user@test.de", Role.USER);
             mockAuthenticatedUser(admin);
-
             when(userRepository.findById(2L)).thenReturn(Optional.of(target));
             when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -209,7 +196,114 @@ class UserServiceTest {
         }
     }
 
-    // ========= Helper methods =========
+    @Nested
+    @DisplayName("changePassword()")
+    class PasswordChange {
+
+        @Test
+        @DisplayName("Should change password when current password is correct and new passwords match")
+        void shouldChangePasswordSuccessfully() {
+            User user = buildLocalUser(1L, "user@test.de");
+            user.setPasswordHash("$2a$12$oldHash");
+
+            PasswordChangeDto dto = new PasswordChangeDto();
+            dto.setCurrentPassword("OldPass123");
+            dto.setNewPassword("NewPass456");
+            dto.setConfirmPassword("NewPass456");
+
+            when(passwordEncoder.matches("OldPass123", "$2a$12$oldHash")).thenReturn(true);
+            when(passwordEncoder.encode("NewPass456")).thenReturn("$2a$12$newHash");
+            when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            userService.changePassword(user, dto);
+
+            assertThat(user.getPasswordHash()).isEqualTo("$2a$12$newHash");
+            verify(passwordEncoder).matches("OldPass123", "$2a$12$oldHash");
+            verify(passwordEncoder).encode("NewPass456");
+            verify(userRepository).save(user);
+        }
+
+        @Test
+        @DisplayName("Should throw when current password is incorrect")
+        void shouldThrowWhenCurrentPasswordWrong() {
+            User user = buildLocalUser(1L, "user@test.de");
+            user.setPasswordHash("$2a$12$oldHash");
+
+            PasswordChangeDto dto = new PasswordChangeDto();
+            dto.setCurrentPassword("WrongPass");
+            dto.setNewPassword("NewPass456");
+            dto.setConfirmPassword("NewPass456");
+
+            when(passwordEncoder.matches("WrongPass", "$2a$12$oldHash")).thenReturn(false);
+
+            assertThatThrownBy(() -> userService.changePassword(user, dto))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("aktuelle Passwort");
+
+            verify(passwordEncoder, never()).encode(anyString());
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw when new passwords do not match")
+        void shouldThrowWhenPasswordsDoNotMatch() {
+            User user = buildLocalUser(1L, "user@test.de");
+            user.setPasswordHash("$2a$12$oldHash");
+
+            PasswordChangeDto dto = new PasswordChangeDto();
+            dto.setCurrentPassword("OldPass123");
+            dto.setNewPassword("NewPass456");
+            dto.setConfirmPassword("DifferentPass");
+
+            when(passwordEncoder.matches("OldPass123", "$2a$12$oldHash")).thenReturn(true);
+
+            assertThatThrownBy(() -> userService.changePassword(user, dto))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("überein");
+
+            verify(passwordEncoder, never()).encode(anyString());
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw when user is OAuth2 (GOOGLE) provider")
+        void shouldThrowForOAuth2User() {
+            User user = buildLocalUser(1L, "oauth@test.de");
+            user.setAuthProvider(AuthProvider.GOOGLE);
+
+            PasswordChangeDto dto = new PasswordChangeDto();
+            dto.setCurrentPassword("AnyPass");
+            dto.setNewPassword("NewPass456");
+            dto.setConfirmPassword("NewPass456");
+
+            assertThatThrownBy(() -> userService.changePassword(user, dto))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("externen Anbieter");
+
+            verify(passwordEncoder, never()).matches(anyString(), anyString());
+            verify(passwordEncoder, never()).encode(anyString());
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should not save user when validation fails")
+        void shouldNotSaveWhenValidationFails() {
+            User user = buildLocalUser(1L, "user@test.de");
+            user.setPasswordHash("$2a$12$oldHash");
+
+            PasswordChangeDto dto = new PasswordChangeDto();
+            dto.setCurrentPassword("WrongPass");
+            dto.setNewPassword("NewPass456");
+            dto.setConfirmPassword("NewPass456");
+
+            when(passwordEncoder.matches("WrongPass", "$2a$12$oldHash")).thenReturn(false);
+
+            assertThatThrownBy(() -> userService.changePassword(user, dto))
+                    .isInstanceOf(IllegalArgumentException.class);
+
+            verify(userRepository, never()).save(any());
+        }
+    }
 
     private User buildUser(Long id, String email, Role role) {
         User u = new User();
@@ -217,6 +311,12 @@ class UserServiceTest {
         u.setEmail(email);
         u.setRole(role);
         u.setStatus(UserStatus.ACTIVE);
+        return u;
+    }
+
+    private User buildLocalUser(Long id, String email) {
+        User u = buildUser(id, email, Role.USER);
+        u.setAuthProvider(AuthProvider.LOCAL);
         return u;
     }
 

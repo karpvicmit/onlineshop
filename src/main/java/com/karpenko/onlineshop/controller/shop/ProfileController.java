@@ -1,5 +1,6 @@
 package com.karpenko.onlineshop.controller.shop;
 
+import com.karpenko.onlineshop.dto.user.PasswordChangeDto;
 import com.karpenko.onlineshop.dto.user.ProfileUpdateDto;
 import com.karpenko.onlineshop.entity.User;
 import com.karpenko.onlineshop.service.ProfileService;
@@ -21,7 +22,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/profile")
 @RequiredArgsConstructor
 public class ProfileController {
-
     private final UserService userService;
     private final ProfileService profileService;
 
@@ -35,8 +35,10 @@ public class ProfileController {
         dto.setAddress(currentUser.getAddress());
 
         model.addAttribute("profileDto", dto);
+        model.addAttribute("passwordDto", new PasswordChangeDto());
         model.addAttribute("userEmail", currentUser.getEmail());
-
+        model.addAttribute("isOAuth2User",
+                currentUser.getAuthProvider() != com.karpenko.onlineshop.entity.AuthProvider.LOCAL);
         return "/profile";
     }
 
@@ -47,11 +49,34 @@ public class ProfileController {
         if (bindingResult.hasErrors()) {
             return "/profile";
         }
-
         User currentUser = userService.getCurrentUser();
         profileService.updateProfile(currentUser, dto);
-
         redirectAttributes.addFlashAttribute("successMessage", "Profil erfolgreich aktualisiert.");
         return "redirect:/profile";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(@ModelAttribute("passwordDto") @Valid PasswordChangeDto dto,
+                                 BindingResult bindingResult,
+                                 RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "/profile";
+        }
+
+        User currentUser = userService.getCurrentUser();
+        try {
+            userService.changePassword(currentUser, dto);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Passwort erfolgreich geändert.");
+            return "redirect:/profile";
+        } catch (IllegalArgumentException ex) {
+            log.warn("Password change failed: {}", ex.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/profile";
+        } catch (IllegalStateException ex) {
+            log.warn("Password change rejected: {}", ex.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/profile";
+        }
     }
 }

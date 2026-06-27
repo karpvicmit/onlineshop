@@ -10,50 +10,64 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.regex.Pattern;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AdminInitProperties adminProperties;
 
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
     @Override
     public void run(String... args) {
-        if (!userRepository.existsByRole(Role.ADMIN)) {
-            String adminEmail = adminProperties.getEmail();
-            String adminPassword = adminProperties.getPassword();
-
-            if (adminEmail == null || adminEmail.isBlank() || adminPassword == null || adminPassword.isBlank()) {
-                log.warn("Admin email or password not configured. Skipping admin creation.");
-                return;
-            }
-
-            if (adminPassword.length() < 8) {
-                log.warn("Admin password too short (min 8 characters). Skipping admin creation.");
-                return;
-            }
-
-            log.warn("No admin found. Creating default administrator...");
-            User admin = new User();
-            admin.setEmail(adminEmail.trim().toLowerCase());
-            admin.setPasswordHash(passwordEncoder.encode(adminPassword));
-            admin.setRole(Role.ADMIN);
-            admin.setStatus(UserStatus.ACTIVE);
-            admin.setFirstName("System");
-            admin.setLastName("Administrator");
-            admin.setAddress("Admin Street 1, 12345 Berlin");
-
-            userRepository.save(admin);
-
-            log.warn("=================================================================");
-            log.warn("Default administrator created successfully!");
-            log.warn("Email: {}", adminEmail);
-            log.warn("PLEASE CHANGE THE PASSWORD AFTER FIRST LOGIN!");
-            log.warn("=================================================================");
-        } else {
+        if (userRepository.existsByRole(Role.ADMIN)) {
             log.debug("Admin user already exists. Initialization skipped.");
+            return;
         }
+
+        String adminEmail = adminProperties.getEmail();
+        String adminPassword = adminProperties.getPassword();
+
+        // Validate email
+        if (adminEmail == null || adminEmail.isBlank()
+                || adminPassword == null || adminPassword.isBlank()) {
+            log.warn("Admin email or password not configured. Skipping admin creation.");
+            return;
+        }
+
+        if (!EMAIL_PATTERN.matcher(adminEmail.trim()).matches()) {
+            log.warn("Admin email '{}' has invalid format. Skipping admin creation.", adminEmail);
+            return;
+        }
+
+        if (adminPassword.length() < 8) {
+            log.warn("Admin password too short (min 8 characters). Skipping admin creation.");
+            return;
+        }
+
+        log.warn("No admin found. Creating default administrator...");
+        User admin = new User();
+        admin.setEmail(adminEmail.trim().toLowerCase());
+        admin.setPasswordHash(passwordEncoder.encode(adminPassword));
+        admin.setRole(Role.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
+        admin.setFirstName("System");
+        admin.setLastName("Administrator");
+        admin.setAddress("Admin Street 1, 12345 Berlin");
+        admin.setEmailConfirmed(true);
+        admin.setAuthProvider(com.karpenko.onlineshop.entity.AuthProvider.LOCAL);
+
+        userRepository.save(admin);
+
+        log.warn("=================================================================");
+        log.warn("Default administrator created successfully!");
+        log.warn("Email: {}", adminEmail);
+        log.warn("PLEASE CHANGE THE PASSWORD AFTER FIRST LOGIN!");
+        log.warn("=================================================================");
     }
 }

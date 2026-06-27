@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Seite nicht gefunden')}"></head>
+<head th:replace="~{fragments/head :: head('Ungültige Anfrage')}"></head>
 <body>
-<div th:replace="~{fragments/navbar :: navbar}"></div>
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
 <div class="container mt-5 text-center">
-    <h1 class="display-1 text-warning">404</h1>
-    <h2>Seite nicht gefunden</h2>
-    <p class="lead">Die angeforderte Ressource existiert nicht oder wurde verschoben.</p>
+    <h1 class="display-1 text-warning">400</h1>
+    <h2>Ungültige Anfrage</h2>
+    <p class="lead" th:text="${errorMessage} ?: 'Die Anfrage konnte nicht verarbeitet werden.'">
+        Die Anfrage konnte nicht verarbeitet werden.
+    </p>
     <a th:href="@{/}" class="btn btn-primary mt-3">Zurück zur Startseite</a>
 </div>
 <div th:replace="~{fragments/footer :: footer}"></div>

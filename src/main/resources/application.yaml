@@ -51,5 +51,5 @@ logging:
 app:
   init:
     admin:
-      email: ${ADMIN_EMAIL:admin@onlineshop.de}
-      password: ${ADMIN_PASSWORD:AdminSecure2026!}
+      email: ${ADMIN_EMAIL}
+      password: ${ADMIN_PASSWORD}

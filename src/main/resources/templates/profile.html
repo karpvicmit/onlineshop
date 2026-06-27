@@ -2,30 +2,24 @@
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Profil')}"></head>
 <body>
-
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 <div th:replace="~{fragments/alerts :: alerts}"></div>
-
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Mein Profil</h4>
                 </div>
                 <div class="card-body">
-
                     <div class="mb-4 p-3 bg-light rounded">
                         <h5>Kontoinformationen</h5>
                         <p class="mb-1"><strong>E-Mail:</strong> <span th:text="${userEmail}">user@email.com</span></p>
-                        <p class="mb-0 text-muted small">E-Mail-Adresse und Passwort können aktuell nicht über das Web-Interface geändert werden.</p>
                     </div>
 
                     <hr>
-
                     <h5 class="mb-3">Persönliche Daten & Lieferadresse</h5>
                     <form th:action="@{/profile/update}" th:object="${profileDto}" method="post">
-
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="firstName" class="form-label">Vorname</label>
@@ -42,7 +36,6 @@
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
                             </div>
                         </div>
-
                         <div class="mb-3">
                             <label for="address" class="form-label">Lieferadresse (für Bestellungen)</label>
                             <textarea class="form-control"
@@ -51,20 +44,61 @@
                             <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
                             <div class="form-text">Diese Adresse wird beim Checkout automatisch vorausgefüllt.</div>
                         </div>
-
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save me-1"></i> Änderungen speichern
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
 
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0"><i class="fas fa-key me-2"></i>Passwort ändern</h4>
+                </div>
+                <div class="card-body">
+                    <div th:if="${isOAuth2User}" class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Sie sind über einen externen Anbieter (z. B. Google) angemeldet.
+                        Das Passwort wird dort verwaltet und kann hier nicht geändert werden.
+                    </div>
+                    <form th:unless="${isOAuth2User}"
+                          th:action="@{/profile/change-password}"
+                          th:object="${passwordDto}"
+                          method="post">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Aktuelles Passwort</label>
+                            <input type="password" class="form-control"
+                                   th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'"
+                                   id="currentPassword" th:field="*{currentPassword}" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Neues Passwort (min. 8 Zeichen)</label>
+                            <input type="password" class="form-control"
+                                   th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'"
+                                   id="newPassword" th:field="*{newPassword}" required minlength="8">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Neues Passwort bestätigen</label>
+                            <input type="password" class="form-control"
+                                   th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                                   id="confirmPassword" th:field="*{confirmPassword}" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-lock me-1"></i> Passwort ändern
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

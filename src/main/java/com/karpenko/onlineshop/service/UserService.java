@@ -1,5 +1,6 @@
 package com.karpenko.onlineshop.service;
 
+import com.karpenko.onlineshop.dto.user.PasswordChangeDto;
 import com.karpenko.onlineshop.dto.user.UserRegistrationDto;
 import com.karpenko.onlineshop.entity.Role;
 import com.karpenko.onlineshop.entity.User;
@@ -27,4 +28,6 @@ public interface UserService {
     void updateUserRole(Long userId, Role newRole);
 
     void updateUserStatus(Long userId, UserStatus newStatus);
+
+    void changePassword(User currentUser, PasswordChangeDto dto);
 }

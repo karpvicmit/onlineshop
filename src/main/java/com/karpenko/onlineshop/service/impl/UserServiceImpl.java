@@ -1,6 +1,8 @@
 package com.karpenko.onlineshop.service.impl;
 
+import com.karpenko.onlineshop.dto.user.PasswordChangeDto;
 import com.karpenko.onlineshop.dto.user.UserRegistrationDto;
+import com.karpenko.onlineshop.entity.AuthProvider;
 import com.karpenko.onlineshop.entity.Role;
 import com.karpenko.onlineshop.entity.User;
 import com.karpenko.onlineshop.entity.UserStatus;
@@ -8,6 +10,7 @@ import com.karpenko.onlineshop.exception.EmailAlreadyExistsException;
 import com.karpenko.onlineshop.exception.ResourceNotFoundException;
 import com.karpenko.onlineshop.repository.UserRepository;
 import com.karpenko.onlineshop.security.CustomUserDetails;
+import com.karpenko.onlineshop.service.EmailService;
 import com.karpenko.onlineshop.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +24,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.karpenko.onlineshop.service.EmailService;
+
 import java.time.LocalDateTime;
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -41,7 +44,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User registerUser(UserRegistrationDto dto) {
         log.info("Registration attempt for email: {}", dto.getEmail());
-
         User user = new User();
         user.setEmail(dto.getEmail().trim().toLowerCase());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
@@ -59,9 +61,7 @@ public class UserServiceImpl implements UserService {
         try {
             User savedUser = userRepository.save(user);
             log.info("User {} registered successfully, sending confirmation email", savedUser.getEmail());
-
             emailService.sendConfirmationEmail(savedUser.getEmail(), token, baseUrl);
-
             return savedUser;
         } catch (DataIntegrityViolationException ex) {
             log.warn("Registration failed: email {} already exists", dto.getEmail());
@@ -73,7 +73,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public boolean confirmEmail(String token) {
         log.info("Email confirmation attempt with token");
-
         User user = userRepository.findByEmailConfirmationToken(token)
                 .orElseThrow(() -> {
                     log.warn("Invalid confirmation token");
@@ -98,23 +97,21 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication == null || !authentication.isAuthenticated()
                 || authentication instanceof AnonymousAuthenticationToken) {
             throw new IllegalStateException("User is not authenticated");
         }
-
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof CustomUserDetails customUserDetails)) {
             throw new IllegalStateException("Unknown principal type: " + principal.getClass().getName());
         }
-
         Long userId = customUserDetails.getId();
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("User no longer exists"));
     }
 
     @Override
+    @Deprecated
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
         log.warn("Calling deprecated getAllUsers() without pagination - use with caution on large datasets.");
@@ -132,12 +129,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication == null || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getPrincipal())) {
             throw new IllegalStateException("No authenticated user found in security context.");
         }
-
         CustomUserDetails currentUserDetails = (CustomUserDetails) authentication.getPrincipal();
         return currentUserDetails.getId();
     }
@@ -147,8 +142,8 @@ public class UserServiceImpl implements UserService {
     public void updateUserRole(Long userId, Role newRole) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Long currentUserId = getCurrentUserId();
 
+        Long currentUserId = getCurrentUserId();
         if (user.getId().equals(currentUserId)) {
             throw new IllegalStateException("Admin cannot change their own role.");
         }
@@ -163,13 +158,49 @@ public class UserServiceImpl implements UserService {
     public void updateUserStatus(Long userId, UserStatus newStatus) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Long currentUserId = getCurrentUserId();
 
+        Long currentUserId = getCurrentUserId();
         if (user.getId().equals(currentUserId)) {
             throw new IllegalStateException("Admin cannot block/unblock themselves.");
         }
+
         user.setStatus(newStatus);
         userRepository.save(user);
         log.info("Status of user {} changed to {}", user.getEmail(), newStatus);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(User currentUser, PasswordChangeDto dto) {
+        log.info("Password change attempt for user: {}", currentUser.getEmail());
+
+        if (currentUser.getAuthProvider() != AuthProvider.LOCAL) {
+            log.warn("Password change rejected for OAuth2 user: {}", currentUser.getEmail());
+            throw new IllegalStateException(
+                    "Passwort kann nicht geändert werden. Sie sind über einen externen Anbieter angemeldet.");
+        }
+
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), currentUser.getPasswordHash())) {
+            log.warn("Invalid current password for user: {}", currentUser.getEmail());
+            throw new IllegalArgumentException("Das aktuelle Passwort ist falsch.");
+        }
+
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            log.warn("Password mismatch for user: {}", currentUser.getEmail());
+            throw new IllegalArgumentException("Die neuen Passwörter stimmen nicht überein.");
+        }
+
+        currentUser.setPasswordHash(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(currentUser);
+
+        // Send email notification
+        try {
+            emailService.sendPasswordChangeNotification(currentUser.getEmail(), LocalDateTime.now());
+            log.info("Password change notification email sent to: {}", currentUser.getEmail());
+        } catch (Exception e) {
+            log.warn("Failed to send password change notification email: {}", e.getMessage());
+        }
+
+        log.info("Password changed successfully for user: {}", currentUser.getEmail());
     }
 }
