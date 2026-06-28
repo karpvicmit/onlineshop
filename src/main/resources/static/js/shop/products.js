@@ -1,6 +1,4 @@
-/**
- * Submitting the filter form upon category selection
- */
+ // Submitting the filter form upon category selection
 function submitFormWithCategory(selectedCategory) {
     const form = document.getElementById('filterForm');
     const searchInput = document.getElementById('searchQuery');

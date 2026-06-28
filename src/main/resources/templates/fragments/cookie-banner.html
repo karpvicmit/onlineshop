@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="cookie-banner">
+    <div id="cookieBanner" class="cookie-banner" style="display: none;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mb-3 mb-lg-0">
+                    <h5 class="mb-2"><i class="bi bi-shield-lock me-2"></i>Cookie-Einstellungen</h5>
+                    <p class="mb-0 small">
+                        Wir verwenden Cookies, um Ihnen die bestmögliche Erfahrung zu bieten.
+                        Sie können auswählen, welche Kategorien Sie zulassen möchten.
+                        Weitere Informationen finden Sie in unserer
+                        <a th:href="@{/datenschutz}" class="text-decoration-underline">Datenschutzerklärung</a>.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <button id="cookieSettingsBtn" class="btn btn-outline-primary btn-sm me-2 mb-2 mb-lg-0">
+                        <i class="bi bi-gear me-1"></i> Einstellungen
+                    </button>
+                    <button id="acceptAllCookies" class="btn btn-success btn-sm mb-2 mb-lg-0">
+                        <i class="bi bi-check-lg me-1"></i> Alle akzeptieren
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cookieSettingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-shield-lock me-2"></i>Cookie-Einstellungen
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-4">
+                        Hier können Sie auswählen, welche Kategorien von Cookies Sie zulassen möchten.
+                        Notwendige Cookies sind für die Grundfunktionen der Website erforderlich.
+                    </p>
+
+                    <div class="cookie-category mb-3 p-3 border rounded">
+                        <div class="form-check form-switch d-flex justify-content-between align-items-start">
+                            <div class="me-3">
+                                <h6 class="mb-1"><i class="bi bi-lock-fill text-primary me-2"></i>Notwendige Cookies</h6>
+                                <p class="small text-muted mb-0">
+                                    Für die Grundfunktionen der Website erforderlich (Session, Sicherheit).
+                                </p>
+                            </div>
+                            <input class="form-check-input" type="checkbox" checked disabled data-category="necessary">
+                        </div>
+                    </div>
+
+                    <div class="cookie-category mb-3 p-3 border rounded">
+                        <div class="form-check form-switch d-flex justify-content-between align-items-start">
+                            <div class="me-3">
+                                <h6 class="mb-1"><i class="bi bi-gear-fill text-info me-2"></i>Funktionale Cookies</h6>
+                                <p class="small text-muted mb-0">
+                                    Erweiterte Funktionen wie Spracheinstellungen und personalisierte Inhalte.
+                                </p>
+                            </div>
+                            <input class="form-check-input" type="checkbox" id="cookieFunctional" data-category="functional">
+                        </div>
+                    </div>
+
+                    <div class="cookie-category mb-3 p-3 border rounded">
+                        <div class="form-check form-switch d-flex justify-content-between align-items-start">
+                            <div class="me-3">
+                                <h6 class="mb-1"><i class="bi bi-graph-up text-success me-2"></i>Analytics Cookies</h6>
+                                <p class="small text-muted mb-0">
+                                    Helfen uns zu verstehen, wie Besucher die Website nutzen.
+                                </p>
+                            </div>
+                            <input class="form-check-input" type="checkbox" id="cookieAnalytics" data-category="analytics">
+                        </div>
+                    </div>
+
+                    <div class="cookie-category mb-3 p-3 border rounded">
+                        <div class="form-check form-switch d-flex justify-content-between align-items-start">
+                            <div class="me-3">
+                                <h6 class="mb-1"><i class="bi bi-megaphone-fill text-warning me-2"></i>Marketing Cookies</h6>
+                                <p class="small text-muted mb-0">
+                                    Für personalisierte Werbung und Messung von Marketingkampagnen.
+                                </p>
+                            </div>
+                            <input class="form-check-input" type="checkbox" id="cookieMarketing" data-category="marketing">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-outline-primary" id="rejectOptionalCookies">Nur notwendige</button>
+                    <button type="button" class="btn btn-primary" id="saveCookieSettings">Einstellungen speichern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            border-top: 3px solid #0d6efd;
+            padding: 1.5rem 0;
+            z-index: 9999;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+        }
+        .cookie-banner h5 { color: #0d6efd; font-weight: 600; }
+        .cookie-category { background-color: #f8f9fa; transition: background-color 0.2s; }
+        .cookie-category:hover { background-color: #e9ecef; }
+        .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
+    </style>
+</div>
+</html>
