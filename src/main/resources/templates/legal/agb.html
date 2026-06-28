@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('AGB')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4">Allgemeine Geschäftsbedingungen (AGB)</h1>
+
+    <h4>§ 1 Geltungsbereich</h4>
+    <p>
+        Diese Allgemeinen Geschäftsbedingungen (nachfolgend "AGB") gelten für alle Bestellungen,
+        die über den Online-Shop der OnlineShop GmbH (nachfolgend "Anbieter") abgegeben werden.
+    </p>
+
+    <h4 class="mt-4">§ 2 Vertragspartner</h4>
+    <p>
+        Der Kaufvertrag kommt zustande mit der OnlineShop GmbH, Musterstraße 1, 12345 Berlin.
+    </p>
+
+    <h4 class="mt-4">§ 3 Vertragsschluss</h4>
+    <p>
+        Die Darstellung der Produkte im Online-Shop stellt kein rechtlich bindendes Angebot dar.
+        Durch Anklicken des Buttons "Kostenpflichtig bestellen" geben Sie ein verbindliches Angebot ab.
+        Die Annahme des Angebots erfolgt durch die Bestellbestätigung per E-Mail.
+    </p>
+
+    <h4 class="mt-4">§ 4 Preise und Versandkosten</h4>
+    <p>
+        Alle Preise verstehen sich inklusive der gesetzlichen Mehrwertsteuer.
+        Versandkosten werden gesondert ausgewiesen.
+    </p>
+
+    <h4 class="mt-4">§ 5 Zahlungsbedingungen</h4>
+    <p>
+        Die Zahlung erfolgt wahlweise per Vorkasse, Rechnung oder PayPal.
+        Bei Zahlung per Vorkasse ist die Zahlung sofort nach Vertragsabschluss fällig.
+    </p>
+
+    <h4 class="mt-4">§ 6 Lieferung</h4>
+    <p>
+        Die Lieferzeit beträgt 3-5 Werktage, sofern nicht anders angegeben.
+        Der Anbieter liefert innerhalb Deutschlands.
+    </p>
+
+    <h4 class="mt-4">§ 7 Eigentumsvorbehalt</h4>
+    <p>
+        Die Ware bleibt bis zur vollständigen Bezahlung Eigentum des Anbieters.
+    </p>
+
+    <h4 class="mt-4">§ 8 Widerrufsrecht</h4>
+    <p>
+        Verbraucher haben ein 14-tägiges Widerrufsrecht. Details finden Sie in unserer
+        <a th:href="@{/widerruf}">Widerrufsbelehrung</a>.
+    </p>
+
+    <h4 class="mt-4">§ 9 Gewährleistung</h4>
+    <p>
+        Es gelten die gesetzlichen Gewährleistungsrechte.
+    </p>
+
+    <h4 class="mt-4">§ 10 Haftung</h4>
+    <p>
+        Der Anbieter haftet unbeschränkt für Vorsatz und grobe Fahrlässigkeit.
+        Für leichte Fahrlässigkeit haftet der Anbieter nur bei Verletzung wesentlicher Vertragspflichten.
+    </p>
+
+    <h4 class="mt-4">§ 11 Schlussbestimmungen</h4>
+    <p>
+        Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts.
+        Gerichtsstand ist Berlin, sofern der Kunde Kaufmann ist.
+    </p>
+
+    <p class="mt-4 text-muted small">
+        Stand: Juni 2026
+    </p>
+</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

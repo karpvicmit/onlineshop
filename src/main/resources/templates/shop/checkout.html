@@ -2,10 +2,8 @@
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Kasse')}"></head>
 <body>
-
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 <div th:replace="~{fragments/alerts :: alerts}"></div>
-
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -14,25 +12,28 @@
                     <h4 class="mb-0"><i class="fas fa-credit-card me-2"></i>Kasse / Checkout</h4>
                 </div>
                 <div class="card-body">
-
                     <h5 class="mb-3">Lieferadresse bestätigen</h5>
                     <p class="text-muted small">Diese Adresse wird für die Lieferung verwendet.</p>
-
                     <form th:action="@{/shop/checkout/confirm}" method="post">
                         <div class="mb-3">
                             <label for="address" class="form-label">Adresse</label>
                             <textarea class="form-control" id="address" name="address" rows="3"
                                       th:text="${user.address}" required></textarea>
                         </div>
-
                         <hr>
-
                         <h5 class="mb-3">Zusammenfassung</h5>
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
                             Die Zahlung erfolgt bei Lieferung oder per Vorkasse (simuliert).
                         </div>
-
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="acceptTerms" required>
+                            <label class="form-check-label" for="acceptTerms">
+                                Ich akzeptiere die
+                                <a th:href="@{/agb}" target="_blank">AGB</a> und habe die
+                                <a th:href="@{/datenschutz}" target="_blank">Datenschutzerklärung</a> zur Kenntnis genommen.
+                            </label>
+                        </div>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                             <a th:href="@{/shop/cart}" class="btn btn-outline-secondary me-md-2">Zurück zum Warenkorb</a>
                             <button type="submit" class="btn btn-success px-4">
@@ -40,13 +41,11 @@
                             </button>
                         </div>
                     </form>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

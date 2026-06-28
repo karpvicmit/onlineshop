@@ -2,7 +2,6 @@
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Registrierung')}"></head>
 <body class="bg-light">
-
 <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container">
         <a class="navbar-brand" th:href="@{/}">
@@ -10,18 +9,14 @@
         </a>
     </div>
 </nav>
-
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <h3 class="text-center mb-4">Registrierung</h3>
-
                     <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-
                     <form th:action="@{/register}" th:object="${registrationDto}" method="post">
-
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="firstName" class="form-label">Vorname</label>
@@ -32,7 +27,6 @@
                                 <input type="text" class="form-control" id="lastName" th:field="*{lastName}">
                             </div>
                         </div>
-
                         <div class="mb-3">
                             <label for="email" class="form-label">E-Mail-Adresse</label>
                             <input type="email" class="form-control"
@@ -40,7 +34,6 @@
                                    id="email" th:field="*{email}" required>
                             <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                         </div>
-
                         <div class="mb-3">
                             <label for="address" class="form-label">Lieferadresse</label>
                             <textarea class="form-control"
@@ -48,7 +41,6 @@
                                       id="address" th:field="*{address}" rows="2" required></textarea>
                             <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
                         </div>
-
                         <div class="mb-3">
                             <label for="password" class="form-label">Passwort (min. 8 Zeichen)</label>
                             <input type="password" class="form-control"
@@ -56,12 +48,18 @@
                                    id="password" th:field="*{password}" required minlength="8">
                             <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                         </div>
-
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="acceptAgb" required>
+                            <label class="form-check-label" for="acceptAgb">
+                                Ich akzeptiere die
+                                <a th:href="@{/agb}" target="_blank">AGB</a> und habe die
+                                <a th:href="@{/datenschutz}" target="_blank">Datenschutzerklärung</a> zur Kenntnis genommen.
+                            </label>
+                        </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success">Konto erstellen</button>
                         </div>
                     </form>
-
                     <div class="text-center mt-3">
                         <p>Bereits registriert? <a th:href="@{/login}">Zum Login</a></p>
                     </div>
@@ -70,7 +68,6 @@
         </div>
     </div>
 </div>
-
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

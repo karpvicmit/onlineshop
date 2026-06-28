@@ -31,7 +31,8 @@ public class SecurityConfig {
                                 "/", "/register", "/login", "/error",
                                 "/confirm-email", "/auth/email-sent",
                                 "/css/**", "/js/**", "/images/**", "/uploads/**",
-                                "/favicon.ico", "/webjars/**"
+                                "/favicon.ico", "/webjars/**",
+                                "/impressum", "/agb", "/datenschutz", "/widerruf"
                         ).permitAll()
                         .requestMatchers("/shop/products", "/shop/products/**").permitAll()
                         .requestMatchers(
