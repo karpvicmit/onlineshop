@@ -2,7 +2,10 @@ package com.karpenko.onlineshop.controller.shop;
 
 
 import com.karpenko.onlineshop.dto.product.ProductDto;
+import com.karpenko.onlineshop.dto.review.ReviewStatsDto;
+import com.karpenko.onlineshop.entity.ProductReview;
 import com.karpenko.onlineshop.service.CategoryService;
+import com.karpenko.onlineshop.service.ProductReviewService;
 import com.karpenko.onlineshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 
 @Slf4j
@@ -26,6 +26,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final ProductReviewService productReviewService;
 
     @GetMapping
     public String listProducts(
@@ -52,12 +53,44 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public String productDetail(@PathVariable Long id, Model model) {
+    public String productDetail(@PathVariable Long id, Model model,
+                                @org.springframework.security.core.annotation.AuthenticationPrincipal
+                                com.karpenko.onlineshop.security.CustomUserDetails userDetails) {
         log.info("Anfrage Produktdetail für ID: {}", id);
-
         ProductDto product = productService.getProductById(id);
         model.addAttribute("product", product);
 
+        // Reviews logic
+        Page<ProductReview> reviewsPage = productReviewService.getApprovedReviews(id, org.springframework.data.domain.PageRequest.of(0, 5));
+        ReviewStatsDto stats = productReviewService.getReviewStats(id);
+
+        model.addAttribute("reviews", reviewsPage.getContent());
+        model.addAttribute("reviewStats", stats);
+
+        // Check if current user can write a review
+        boolean canWriteReview = false;
+        if (userDetails != null) {
+            canWriteReview = productReviewService.hasUserPurchasedAndNotReviewed(userDetails.getId(), id);
+        }
+        model.addAttribute("canWriteReview", canWriteReview);
+
         return "shop/products/detail";
+    }
+
+    @PostMapping("/{id}/reviews")
+    public String submitReview(@PathVariable Long id,
+                               @RequestParam Integer rating,
+                               @RequestParam String title,
+                               @RequestParam String comment,
+                               @org.springframework.security.core.annotation.AuthenticationPrincipal
+                               com.karpenko.onlineshop.security.CustomUserDetails userDetails,
+                               org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            productReviewService.addReview(userDetails.getId(), id, rating, title, comment);
+            redirectAttributes.addFlashAttribute("successMessage", "Vielen Dank! Ihre Bewertung wird nach einer Überprüfung angezeigt.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/shop/products/" + id;
     }
 }
