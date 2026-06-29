@@ -8,17 +8,24 @@ public class ProductSpecification {
     public static Specification<Product> hasNameAndCategory(String name, String categorySlug) {
         return (root, query, cb) -> {
             var predicate = cb.conjunction();
+
             if (name != null && !name.isBlank()) {
                 String escapedName = name.trim().toLowerCase()
                         .replace("%", "\\%")
                         .replace("_", "\\_");
+
                 predicate = cb.and(predicate,
-                        cb.like(cb.lower(root.get("name")), "%" + escapedName + "%", '\\'));
+                        cb.or(
+                                cb.like(cb.lower(root.get("name")), "%" + escapedName + "%", '\\'),
+                                cb.like(cb.lower(root.get("description")), "%" + escapedName + "%", '\\')
+                        ));
             }
+
             if (categorySlug != null && !categorySlug.isBlank()) {
                 predicate = cb.and(predicate,
                         cb.equal(root.get("category").get("slug"), categorySlug.trim().toLowerCase()));
             }
+
             return predicate;
         };
     }

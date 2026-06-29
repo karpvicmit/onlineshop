@@ -1,6 +1,5 @@
 package com.karpenko.onlineshop.controller.shop;
 
-
 import com.karpenko.onlineshop.dto.product.ProductDto;
 import com.karpenko.onlineshop.dto.review.ReviewStatsDto;
 import com.karpenko.onlineshop.entity.ProductReview;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-
 @Slf4j
 @Controller
 @RequestMapping("/shop/products")
@@ -32,12 +30,16 @@ public class ProductController {
     public String listProducts(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false, defaultValue = "date_desc") String sort,
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
-        log.info("Anfrage Produktliste: q='{}', category='{}', page={}", q, category, page);
+        log.info("Anfrage Produktliste: q='{}', category='{}', sort='{}', page={}",
+                q, category, sort, page);
 
-        Pageable pageable = PageRequest.of(page, 12, Sort.by(Sort.Direction.DESC, "id"));
+        // Определяем сортировку
+        Sort sortBy = getSortBy(sort);
+        Pageable pageable = PageRequest.of(page, 12, sortBy);
 
         Page<ProductDto> productPage = productService.findProducts(q, category, pageable);
 
@@ -47,30 +49,45 @@ public class ProductController {
         model.addAttribute("totalItems", productPage.getTotalElements());
         model.addAttribute("searchQuery", q);
         model.addAttribute("selectedCategory", category);
+        model.addAttribute("selectedSort", sort);
         model.addAttribute("categories", categoryService.getAllCategories());
 
         return "shop/products/list";
+    }
+
+    private Sort getSortBy(String sort) {
+        return switch (sort) {
+            case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
+            case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+            case "name_asc" -> Sort.by(Sort.Direction.ASC, "name");
+            case "name_desc" -> Sort.by(Sort.Direction.DESC, "name");
+            case "date_asc" -> Sort.by(Sort.Direction.ASC, "createdAt");
+            case "date_desc" -> Sort.by(Sort.Direction.DESC, "createdAt");
+            default -> Sort.by(Sort.Direction.DESC, "createdAt"); // По умолчанию: сначала новые
+        };
     }
 
     @GetMapping("/{id}")
     public String productDetail(@PathVariable Long id, Model model,
                                 @org.springframework.security.core.annotation.AuthenticationPrincipal
                                 com.karpenko.onlineshop.security.CustomUserDetails userDetails) {
+
         log.info("Anfrage Produktdetail für ID: {}", id);
         ProductDto product = productService.getProductById(id);
         model.addAttribute("product", product);
 
         // Reviews logic
-        Page<ProductReview> reviewsPage = productReviewService.getApprovedReviews(id, org.springframework.data.domain.PageRequest.of(0, 5));
+        Page<ProductReview> reviewsPage = productReviewService.getApprovedReviews(
+                id, org.springframework.data.domain.PageRequest.of(0, 5));
         ReviewStatsDto stats = productReviewService.getReviewStats(id);
 
         model.addAttribute("reviews", reviewsPage.getContent());
         model.addAttribute("reviewStats", stats);
 
-        // Check if current user can write a review
         boolean canWriteReview = false;
         if (userDetails != null) {
-            canWriteReview = productReviewService.hasUserPurchasedAndNotReviewed(userDetails.getId(), id);
+            canWriteReview = productReviewService.hasUserPurchasedAndNotReviewed(
+                    userDetails.getId(), id);
         }
         model.addAttribute("canWriteReview", canWriteReview);
 
@@ -85,12 +102,15 @@ public class ProductController {
                                @org.springframework.security.core.annotation.AuthenticationPrincipal
                                com.karpenko.onlineshop.security.CustomUserDetails userDetails,
                                org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+
         try {
             productReviewService.addReview(userDetails.getId(), id, rating, title, comment);
-            redirectAttributes.addFlashAttribute("successMessage", "Vielen Dank! Ihre Bewertung wird nach einer Überprüfung angezeigt.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Vielen Dank! Ihre Bewertung wird nach einer Überprüfung angezeigt.");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
+
         return "redirect:/shop/products/" + id;
     }
 }
