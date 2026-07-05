@@ -9,9 +9,20 @@
     <main class="flex-grow-1 p-4">
         <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
             <h2 class="mb-0"><i class="bi bi-box-seam text-primary me-2"></i>Produktverwaltung</h2>
-            <a th:href="@{/admin/products/new}" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> Neues Produkt
-            </a>
+            <div class="d-flex gap-2">
+                <a th:href="@{/admin/products/new}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Neues Produkt
+                </a>
+                <a th:href="@{/admin/products/export}" class="btn btn-outline-success">
+                    <i class="bi bi-download"></i> CSV exportieren
+                </a>
+                <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#importModal">
+                    <i class="bi bi-upload"></i> CSV importieren
+                </button>
+                <a th:href="@{/admin/products/categories/export}" class="btn btn-outline-secondary">
+                    <i class="bi bi-tags"></i> Kategorien CSV
+                </a>
+            </div>
         </div>
 
         <div th:replace="~{fragments/alerts :: alerts}"></div>
@@ -69,8 +80,55 @@
                 </div>
             </div>
         </div>
+
+        <!-- CSV Import Modal -->
+        <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <form th:action="@{/admin/products/import/preview}" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="bi bi-upload me-2"></i>CSV-Import (Preview)</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <strong>Format:</strong> <code>sku;name;description;price;stock;categorySlug;imageUrl</code><br>
+                                <strong>Trennzeichen:</strong> Semikolon (<code>;</code>)<br>
+                                <strong>Kodierung:</strong> UTF-8<br>
+                                <strong>Max. Größe:</strong> 50 MB
+                            </div>
+                            <div class="mb-3">
+                                <label for="csvFile" class="form-label">CSV-Datei auswählen</label>
+                                <input type="file" class="form-control" id="csvFile" name="csvFile"
+                                       accept=".csv" required>
+                            </div>
+                            <div class="small text-muted">
+                                <p class="mb-1">Beispiel:</p>
+                                <pre class="bg-light p-2 rounded">sku;name;description;price;stock;categorySlug;imageUrl
+SKU-0001;iPhone 15;Das neueste Apple Smartphone;1199.99;15;elektronik;/uploads/iphone.jpg
+SKU-0002;Clean Code;Ein Buch von Robert C. Martin;35.50;40;buecher;/uploads/cleancode.jpg</pre>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-eye"></i> Vorschau anzeigen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('csvFile').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            window._previewFile = e.target.files[0];
+        }
+    });
+</script>
 </body>
 </html>

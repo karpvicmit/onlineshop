@@ -52,6 +52,7 @@ class AdminProductControllerTest extends BaseWebMvcTest {
         product.setPrice(new BigDecimal("999.00"));
         product.setStock(10);
         product.setCategory(new Category());
+        product.setSku("SKU-001");
 
         when(productService.saveProduct(any(Product.class), any(MultipartFile.class)))
                 .thenReturn(product);
@@ -66,6 +67,7 @@ class AdminProductControllerTest extends BaseWebMvcTest {
                         .param("price", "999.00")
                         .param("stock", "10")
                         .param("category.id", "1")
+                        .param("sku", "SKU-001")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/products"));

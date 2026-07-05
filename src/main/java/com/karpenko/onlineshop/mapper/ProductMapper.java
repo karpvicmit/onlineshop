@@ -19,6 +19,7 @@ public class ProductMapper {
         dto.setPrice(product.getPrice());
         dto.setStock(product.getStock());
         dto.setImageUrl(product.getImageUrl());
+        dto.setSku(product.getSku());
 
         if (product.getCategory() != null) {
             dto.setCategoryName(product.getCategory().getName());

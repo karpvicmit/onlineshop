@@ -37,10 +37,11 @@ class ProductReviewRepositoryTest {
     private User user3;
     private Product product1;
     private Product product2;
+    private int skuCounter = 1;
 
     @BeforeEach
     void setUp() {
-        // Очистка в правильном порядке (из-за FK constraints)
+        skuCounter = 1;
         reviewRepository.deleteAll();
         productRepository.deleteAll();
         categoryRepository.deleteAll();
@@ -48,23 +49,17 @@ class ProductReviewRepositoryTest {
         entityManager.flush();
         entityManager.clear();
 
-        // Создаём пользователей
         user1 = createUser("user1@test.de", "Max", "Mustermann");
         user2 = createUser("user2@test.de", "Anna", "Schmidt");
         user3 = createUser("user3@test.de", "Tom", "Weber");
 
-        // Создаём категории
         Category electronics = createCategory("Elektronik", "elektronik");
         Category books = createCategory("Bücher", "buecher");
 
-        // Создаём продукты
         product1 = createProduct("iPhone 15", electronics, new BigDecimal("999.00"), 10);
         product2 = createProduct("Clean Code", books, new BigDecimal("35.50"), 20);
     }
 
-    // ==========================================
-    // findApprovedByProductId()
-    // ==========================================
     @Nested
     @DisplayName("findApprovedByProductId()")
     class FindApprovedReviews {
@@ -72,23 +67,19 @@ class ProductReviewRepositoryTest {
         @Test
         @DisplayName("Should return only approved reviews, ordered by createdAt DESC")
         void shouldReturnOnlyApprovedReviews() {
-            // given
             ProductReview approved1 = createReview(user1, product1, 5, "Great!", "Love it", true);
             createReview(user2, product1, 3, "Okay", "Not bad", false); // pending — должен быть исключён
             ProductReview approved2 = createReview(user3, product1, 4, "Good", "Nice product", true);
 
             entityManager.flush();
 
-            // when
             Page<ProductReview> result = reviewRepository.findApprovedByProductId(
                     product1.getId(), PageRequest.of(0, 10));
 
-            // then
             assertThat(result.getContent()).hasSize(2);
             assertThat(result.getContent())
                     .allMatch(ProductReview::isApproved)
                     .extracting(ProductReview::getId)
-                    // DESC order: approved2 создан позже → первый
                     .containsExactly(approved2.getId(), approved1.getId());
         }
 
@@ -428,6 +419,7 @@ class ProductReviewRepositoryTest {
         product.setPrice(price);
         product.setStock(stock);
         product.setCategory(category);
+        product.setSku("SKU-" + String.format("%04d", skuCounter++));
         return productRepository.save(product);
     }
 

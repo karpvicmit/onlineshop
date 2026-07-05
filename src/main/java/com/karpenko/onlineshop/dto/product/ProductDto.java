@@ -13,5 +13,6 @@ public class ProductDto {
     private Integer stock;
     private String imageUrl;
     private String categoryName;
-    private String categorySlug; 
+    private String categorySlug;
+    private String sku;
 }

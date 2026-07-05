@@ -65,6 +65,7 @@ class FullFlowIntegrationTest {
         testProduct.setPrice(new BigDecimal("99.99"));
         testProduct.setStock(10);
         testProduct.setCategory(category);
+        testProduct.setSku("FULLFLOW-" + System.nanoTime());
         testProduct = productRepository.save(testProduct);
     }
 
@@ -134,6 +135,7 @@ class FullFlowIntegrationTest {
         newProduct.setPrice(new BigDecimal("599.00"));
         newProduct.setStock(20);
         newProduct.setCategory(newCategory);
+        newProduct.setSku("ADMIN-WF-" + System.nanoTime());
         newProduct = productRepository.save(newProduct);
 
         productService.deleteProduct(newProduct.getId());

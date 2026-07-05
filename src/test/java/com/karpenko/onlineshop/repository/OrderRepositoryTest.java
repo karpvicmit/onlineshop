@@ -51,6 +51,7 @@ class OrderRepositoryTest {
         product.setPrice(new BigDecimal("100.00"));
         product.setStock(100);
         product.setCategory(category);
+        product.setSku("ORDER-TEST-SKU");
         product = productRepository.save(product);
     }
 

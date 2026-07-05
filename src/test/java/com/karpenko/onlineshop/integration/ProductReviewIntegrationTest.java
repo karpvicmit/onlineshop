@@ -79,6 +79,7 @@ class ProductReviewIntegrationTest {
         product.setPrice(new BigDecimal("99.99"));
         product.setStock(10);
         product.setCategory(category);
+        product.setSku("REVIEW-" + System.nanoTime());
         product = productRepository.save(product);
     }
 

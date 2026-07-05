@@ -21,4 +21,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("SELECT p FROM Product p WHERE p.deleted = false AND p.id = :id")
     Optional<Product> findActiveById(@Param("id") Long id);
+
+    Optional<Product> findBySku(String sku);
 }

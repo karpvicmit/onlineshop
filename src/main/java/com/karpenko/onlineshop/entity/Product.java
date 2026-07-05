@@ -65,6 +65,10 @@ public class Product {
     @Column(name = "version", nullable = false)
     private Integer version = 0;
 
+    @NotBlank(message = "SKU is required")
+    @Column(nullable = false, unique = true, length = 50)
+    private String sku;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

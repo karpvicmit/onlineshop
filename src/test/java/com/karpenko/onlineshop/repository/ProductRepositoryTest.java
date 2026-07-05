@@ -30,9 +30,11 @@ class ProductRepositoryTest {
 
     private Category electronics;
     private Category books;
+    private int skuCounter = 1;
 
     @BeforeEach
     void setUp() {
+        skuCounter = 1;
         productRepository.deleteAll();
         categoryRepository.deleteAll();
 
@@ -165,6 +167,7 @@ class ProductRepositoryTest {
         product.setPrice(price);
         product.setStock(stock);
         product.setCategory(category);
+        product.setSku("SKU-" + String.format("%04d", skuCounter++)); // <-- ДОБАВИТЬ
         return productRepository.save(product);
     }
 }

@@ -37,7 +37,6 @@
         if (settingsLink) {
             settingsLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                // Если баннер скрыт — сначала показываем его
                 if (banner.style.display === 'none') {
                     banner.style.display = 'block';
                 }
