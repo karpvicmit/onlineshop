@@ -80,4 +80,22 @@ public class Product {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    public boolean isOutOfStock() {
+        return stock == 0;
+    }
+
+    public boolean isLowStock() {
+        return stock > 0 && stock <= 5;
+    }
+
+    public boolean isInStock() {
+        return stock > 5;
+    }
+
+    public String getStockStatus() {
+        if (isOutOfStock()) return "OUT_OF_STOCK";
+        if (isLowStock()) return "LOW_STOCK";
+        return "IN_STOCK";
+    }
 }

@@ -32,23 +32,44 @@
 
             <div class="card bg-light mb-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <strong>Lagerbestand:</strong>
-                        <span th:text="${product.stock}">0</span>
+                        <div>
+                            <span th:if="${product.stock == 0}" class="badge bg-danger fs-6">
+                                <i class="bi bi-x-circle-fill"></i> Ausverkauft
+                            </span>
+                            <span th:if="${product.stock > 0 && product.stock <= 5}" class="badge bg-warning text-dark fs-6">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                Nur noch <span th:text="${product.stock}">3</span> auf Lager!
+                            </span>
+                            <span th:if="${product.stock > 5}" class="badge bg-success fs-6">
+                                <i class="bi bi-check-circle-fill"></i> Auf Lager (<span th:text="${product.stock}">50</span> verfügbar)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div th:if="${product.stock > 0 && product.stock <= 5}" class="mb-3">
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated"
+                                 th:style="'width: ' + ${product.stock * 20} + '%'">
+                            </div>
+                        </div>
                     </div>
 
                     <form th:action="@{/shop/cart/add}" method="post" sec:authorize="isAuthenticated()">
                         <input type="hidden" name="productId" th:value="${product.id}">
 
-                        <div class="input-group mb-3" th:if="${product.stock > 0}">
+                        <div class="input-group mb-3" th:if="${!product.outOfStock}">
                             <span class="input-group-text">Menge</span>
-                            <input type="number" class="form-control" name="quantity" value="1" min="1" th:max="${product.stock}">
+                            <input type="number" class="form-control" name="quantity" value="1"
+                                   min="1" th:max="${product.stock}">
                             <button class="btn btn-success" type="submit">
                                 <i class="fas fa-cart-plus me-2"></i>In den Warenkorb
                             </button>
                         </div>
 
-                        <div th:if="${product.stock <= 0}" class="alert alert-warning mb-0">
+                        <div th:if="${product.outOfStock}" class="alert alert-danger mb-0">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
                             Dieses Produkt ist derzeit nicht auf Lager.
                         </div>
                     </form>

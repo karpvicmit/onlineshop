@@ -87,8 +87,33 @@
                         <p class="card-text text-muted small flex-grow-1" th:text="${product.description}">Beschreibung...</p>
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <span class="fs-5 fw-bold text-primary" th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' €'">0.00 €</span>
-                            <span th:if="${product.stock > 0}" class="badge bg-success">Auf Lager</span>
-                            <span th:unless="${product.stock > 0}" class="badge bg-danger">Ausverkauft</span>
+
+                            <div class="text-end">
+                                <span th:if="${product.stock == 0}" class="badge bg-danger">
+                                    <i class="bi bi-x-circle-fill"></i> Ausverkauft
+                                </span>
+
+                                <span th:if="${product.stock > 0 && product.stock <= 5}" class="badge bg-warning text-dark">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    Nur noch <span th:text="${product.stock}">3</span> verfügbar!
+                                </span>
+
+                                <span th:if="${product.stock > 5}" class="badge bg-success">
+                                    <i class="bi bi-check-circle-fill"></i> Auf Lager
+                                </span>
+                            </div>
+                        </div>
+
+                        <div th:if="${product.stock > 0 && product.stock <= 5}" class="mb-3">
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated"
+                                     th:style="'width: ' + ${product.stock * 20} + '%'">
+                                </div>
+                            </div>
+
+                            <small class="text-warning">
+                                <i class="bi bi-fire"></i> Schnell vergriffen!
+                            </small>
                         </div>
                     </div>
                 </div>

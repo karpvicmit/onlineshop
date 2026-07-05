@@ -55,7 +55,14 @@
                             <td th:text="${product.categoryName != null and !product.categoryName.isEmpty()} ? ${product.categoryName} : '-'">Kategorie</td>
                             <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' €'">0.00 €</td>
                             <td class="text-center">
-                                <span th:class="${product.stock <= 5} ? 'badge bg-danger' : 'badge bg-success'" th:text="${product.stock}">0</span>
+                                <div>
+                                    <span th:if="${product.stock == 0}" class="badge bg-danger" th:text="${product.stock}">0</span>
+                                    <span th:if="${product.stock > 0 && product.stock <= 5}" class="badge bg-warning text-dark" th:text="${product.stock}">3</span>
+                                    <span th:if="${product.stock > 5}" class="badge bg-success" th:text="${product.stock}">50</span>
+                                </div>
+                                <div th:if="${product.stock > 0 && product.stock <= 5}" class="small text-warning mt-1">
+                                    <i class="bi bi-exclamation-triangle"></i> Niedrig
+                                </div>
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm" role="group">
