@@ -3,11 +3,17 @@
 <head th:replace="~{fragments/head :: head('Warenkorb')}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
-
 <div class="container mt-4">
-    <h1>Ihr Warenkorb</h1>
+    <h1><i class="bi bi-cart-fill me-2"></i>Ihr Warenkorb</h1>
 
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
     <div th:if="${cart.items.isEmpty()}" class="alert alert-info">
         Ihr Warenkorb ist leer.
@@ -15,88 +21,139 @@
     </div>
 
     <div th:if="${!cart.items.isEmpty()}">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="table-light">
-                <tr>
-                    <th>Produkt</th>
-                    <th>Einzelpreis</th>
-                    <th>Menge</th>
-                    <th>Zwischensumme</th>
-                    <th>Aktionen</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item : ${cart.items}">
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img th:src="${item.productImageUrl ?: '/images/placeholder.jpg'}"
-                                 th:alt="${item.productName}"
-                                 class="me-3"
-                                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
-                            <div>
-                                <strong th:text="${item.productName}">Produktname</strong>
-                                <br>
-                                <small class="text-muted">
-                                    ID: <span th:text="${item.productId}">1</span>
-                                </small>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Produkt</th>
+                            <th>Einzelpreis</th>
+                            <th>Menge</th>
+                            <th>Zwischensumme</th>
+                            <th>Aktionen</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${cart.items}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img th:src="${item.productImageUrl ?: '/images/placeholder.jpg'}"
+                                         th:alt="${item.productName}"
+                                         class="me-3"
+                                         style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                                    <strong th:text="${item.productName}">Produktname</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:text="${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}">0.00</span> €
+                            </td>
+                            <td>
+                                <form th:action="@{/shop/cart/update}" method="post" class="d-inline">
+                                    <input type="hidden" name="productId" th:value="${item.productId}">
+                                    <div class="input-group" style="width: 120px;">
+                                        <input type="number" name="quantity"
+                                               th:value="${item.quantity}"
+                                               min="1" max="99"
+                                               class="form-control form-control-sm"
+                                               onchange="this.form.submit()">
+                                    </div>
+                                </form>
+                            </td>
+                            <td>
+                                <strong th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">0.00</strong> €
+                            </td>
+                            <td>
+                                <form th:action="@{/shop/cart/remove}" method="post" class="d-inline">
+                                    <input type="hidden" name="productId" th:value="${item.productId}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-light fw-bold">
+                        <i class="bi bi-tag-fill me-2"></i>Promo-Code
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${cart.appliedPromoCode != null}" class="mb-0">
+                            <div class="alert alert-success py-2 mb-2">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <strong th:text="${cart.appliedPromoCode}">CODE</strong> angewendet
                             </div>
+                            <form th:action="@{/shop/cart/promo/remove}" method="post">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
+                                    <i class="bi bi-x-lg"></i> Promo-Code entfernen
+                                </button>
+                            </form>
                         </div>
-                    </td>
 
-                    <td>
-                        <span th:text="${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}">0.00</span> €
-                    </td>
-
-                    <td>
-                        <form th:action="@{/shop/cart/update}" method="post" class="d-inline">
-                            <input type="hidden" name="productId" th:value="${item.productId}">
-                            <div class="input-group" style="width: 120px;">
-                                <input type="number" name="quantity"
-                                       th:value="${item.quantity}"
-                                       min="1" max="99"
-                                       class="form-control form-control-sm"
-                                       onchange="this.form.submit()">
+\                       <form th:unless="${cart.appliedPromoCode != null}"
+                              th:action="@{/shop/cart/promo/apply}" method="post">
+                            <div class="input-group">
+                                <input type="text" name="promoCode" class="form-control"
+                                       placeholder="z.B. SAVE10" required>
+                                <button type="submit" class="btn btn-primary">
+                                    Anwenden
+                                </button>
                             </div>
+                            <small class="text-muted mt-1 d-block">
+                                Haben Sie einen Promo-Code? Geben Sie ihn hier ein.
+                            </small>
                         </form>
-                    </td>
 
-                    <td>
-                        <strong th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">0.00</strong> €
-                    </td>
+\                        <div th:if="${cart.promoErrorMessage != null}" class="alert alert-warning py-2 mt-2 mb-0 small">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span th:text="${cart.promoErrorMessage}">Error</span>
+                        </div>
+                    </div>
+                </div>
 
-                    <td>
-                        <form th:action="@{/shop/cart/remove}" method="post" class="d-inline">
-                            <input type="hidden" name="productId" th:value="${item.productId}">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash"></i> Entfernen
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-                <tfoot class="table-light">
-                <tr>
-                    <td colspan="3" class="text-end"><strong>Gesamt:</strong></td>
-                    <td colspan="2">
-                        <strong class="fs-5" th:text="${#numbers.formatDecimal(cart.total, 1, 'COMMA', 2, 'POINT')}">0.00</strong> €
-                    </td>
-                </tr>
-                </tfoot>
-            </table>
-        </div>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white fw-bold">
+                        Zusammenfassung
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Zwischensumme:</span>
+                            <strong th:text="${#numbers.formatDecimal(cart.total, 1, 'COMMA', 2, 'POINT')} + ' €'">0.00 €</strong>
+                        </div>
 
-        <div class="d-flex justify-content-between mt-4">
-            <a th:href="@{/shop/products}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Weiter einkaufen
-            </a>
-            <a th:href="@{/shop/checkout}" class="btn btn-primary btn-lg">
-                Zur Kasse <i class="bi bi-arrow-right"></i>
-            </a>
+                        <div th:if="${cart.appliedPromoCode != null and cart.discountAmount != null}"
+                             class="d-flex justify-content-between mb-2 text-success">
+                            <span>
+                                <i class="bi bi-tag-fill"></i>
+                                Rabatt (<span th:text="${cart.appliedPromoCode}">CODE</span>):
+                            </span>
+                            <strong th:text="'- ' + ${#numbers.formatDecimal(cart.discountAmount, 1, 'COMMA', 2, 'POINT')} + ' €'">-0.00 €</strong>
+                        </div>
+
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <strong class="fs-5">Gesamt:</strong>
+                            <strong class="fs-5 text-primary"
+                                    th:text="${#numbers.formatDecimal(cart.finalTotal, 1, 'COMMA', 2, 'POINT')} + ' €'">0.00 €</strong>
+                        </div>
+
+                        <a th:href="@{/shop/checkout}" class="btn btn-success w-100 mt-3">
+                            Zur Kasse <i class="bi bi-arrow-right"></i>
+                        </a>
+                        <a th:href="@{/shop/products}" class="btn btn-outline-secondary w-100 mt-2">
+                            <i class="bi bi-arrow-left"></i> Weiter einkaufen
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

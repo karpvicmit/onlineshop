@@ -16,5 +16,11 @@ public class CartDto {
     private Long id;
     private List<CartItemDto> items;
     private BigDecimal total;
-    private int itemCount; 
+    private int itemCount;
+
+    // === PROMO CODE FIELDS ===
+    private String appliedPromoCode;
+    private BigDecimal discountAmount;
+    private BigDecimal finalTotal;
+    private String promoErrorMessage;
 }

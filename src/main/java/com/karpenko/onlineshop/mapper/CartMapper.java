@@ -2,6 +2,7 @@ package com.karpenko.onlineshop.mapper;
 
 import com.karpenko.onlineshop.dto.cart.CartDto;
 import com.karpenko.onlineshop.dto.cart.CartItemDto;
+import com.karpenko.onlineshop.dto.promo.PromoCodeValidationResult;
 import com.karpenko.onlineshop.entity.Cart;
 import com.karpenko.onlineshop.entity.CartItem;
 import com.karpenko.onlineshop.service.PriceCalculatorService;
@@ -19,6 +20,12 @@ public class CartMapper {
     private final PriceCalculatorService priceCalculatorService;
 
     public CartDto toDto(Cart cart) {
+        return toDto(cart, null, null);
+    }
+
+    public CartDto toDto(Cart cart,
+                         PromoCodeValidationResult promoResult,
+                         String promoErrorMessage) {
         if (cart == null) {
             return CartDto.builder()
                     .items(Collections.emptyList())
@@ -33,27 +40,38 @@ public class CartMapper {
                   .map(this::toItemDto)
                   .toList();
 
-        BigDecimal total = priceCalculatorService.calculateTotal(cart);
+        BigDecimal subtotal = priceCalculatorService.calculateTotal(cart);
         int itemCount = itemDtos.stream()
                 .mapToInt(CartItemDto::getQuantity)
                 .sum();
 
-        return CartDto.builder()
+        CartDto.CartDtoBuilder builder = CartDto.builder()
                 .id(cart.getId())
                 .items(itemDtos)
-                .total(total)
-                .itemCount(itemCount)
-                .build();
+                .total(subtotal)
+                .itemCount(itemCount);
+
+        if (promoResult != null && promoResult.isValid()) {
+            builder.appliedPromoCode(promoResult.getPromoCode().getCode());
+            builder.discountAmount(promoResult.getDiscountAmount());
+            builder.finalTotal(promoResult.getFinalTotal());
+        } else {
+            builder.finalTotal(subtotal);
+        }
+
+        if (promoErrorMessage != null) {
+            builder.promoErrorMessage(promoErrorMessage);
+        }
+
+        return builder.build();
     }
 
     public CartItemDto toItemDto(CartItem item) {
         if (item == null || item.getProduct() == null) {
             return null;
         }
-
         BigDecimal subtotal = item.getProduct().getPrice()
                 .multiply(BigDecimal.valueOf(item.getQuantity()));
-
         return CartItemDto.builder()
                 .id(item.getId())
                 .productId(item.getProduct().getId())

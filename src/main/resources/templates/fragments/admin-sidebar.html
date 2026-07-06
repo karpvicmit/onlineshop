@@ -52,6 +52,12 @@
                 <i class="bi bi-chat-left-text me-2"></i> Bewertungen
             </a>
         </li>
+        <li>
+            <a th:href="@{/admin/promocodes}" class="nav-link text-white d-flex align-items-center"
+               th:classappend="${activeMenu == 'promocodes'} ? 'active bg-primary' : 'text-white-50'">
+                <i class="bi bi-tag-fill me-2"></i> Promo-Codes
+            </a>
+        </li>
     </ul>
 
     <hr class="text-white-50">

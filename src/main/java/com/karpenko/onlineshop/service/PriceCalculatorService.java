@@ -7,6 +7,7 @@ import com.karpenko.onlineshop.entity.Product;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -43,6 +44,16 @@ public class PriceCalculatorService {
                     return locked.getPrice();
                 }
         );
+    }
+
+    public BigDecimal calculateFinalTotal(BigDecimal subtotal, BigDecimal discount) {
+        if (subtotal == null) return BigDecimal.ZERO;
+        if (discount == null || discount.compareTo(BigDecimal.ZERO) <= 0) {
+            return subtotal.setScale(2, RoundingMode.HALF_UP);
+        }
+        return subtotal.subtract(discount)
+                .max(BigDecimal.ZERO)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     /**

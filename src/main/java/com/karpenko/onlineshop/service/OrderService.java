@@ -16,4 +16,5 @@ public interface OrderService {
     void updateOrderStatus(Long orderId, OrderStatus newStatus);
     Order getOrderForAdmin(Long orderId);
     Page<Order> getAllOrdersForAdmin(Pageable pageable);
+    Order checkout(User user, String promoCode);
 }

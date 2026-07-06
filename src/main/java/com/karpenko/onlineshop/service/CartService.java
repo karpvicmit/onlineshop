@@ -16,4 +16,6 @@ public interface CartService {
     void removeItemFromCart(Long userId, Long productId);
     
     void clearCart(Long userId);
+
+    CartDto getCartDtoForUser(Long userId, String promoCode);
 }

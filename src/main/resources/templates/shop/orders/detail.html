@@ -60,10 +60,20 @@
                         </tr>
                         </tbody>
                         <tfoot class="table-light">
-                        <tr>
-                            <td colspan="3" class="text-end fw-bold">Endsumme:</td>
-                            <td class="text-end fw-bold fs-5 text-primary" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')} + ' €'">0.00 €</td>
-                        </tr>
+                            <tr th:if="${order.discountAmount != null and order.discountAmount > 0}">
+                                <td colspan="3" class="text-end text-success">
+                                    <i class="bi bi-tag-fill me-1"></i>
+                                    <span th:if="${order.promoCode != null}" th:text="'Rabatt (' + ${order.promoCode.code} + ')'">Rabatt</span>
+                                    <span th:unless="${order.promoCode != null}">Rabatt</span>:
+                                </td>
+                                <td class="text-end text-success fw-bold"
+                                    th:text="'- ' + ${#numbers.formatDecimal(order.discountAmount, 1, 'COMMA', 2, 'POINT')} + ' €'">-0.00 €</td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="3" class="text-end fw-bold">Endsumme:</td>
+                                <td class="text-end fw-bold fs-5 text-primary" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')} + ' €'">0.00 €</td>
+                            </tr>
                         </tfoot>
                     </table>
                 </div>
