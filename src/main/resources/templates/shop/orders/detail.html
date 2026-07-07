@@ -34,6 +34,20 @@
                         <strong>Lieferadresse:</strong><br>
                         <span th:text="${order.deliveryAddress}">Adresse</span>
                     </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><i class="bi bi-credit-card me-1"></i>Zahlungsart:</span>
+                        <strong th:text="${order.paymentMethod.displayName}">Vorkasse</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><i class="bi bi-truck me-1"></i>Versandart:</span>
+                        <strong th:text="${order.shippingMethod.displayName}">Standard</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Versandkosten:</span>
+                        <strong th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' €'">
+                            0.00 €
+                        </strong>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -71,8 +85,17 @@
                             </tr>
 
                             <tr>
-                                <td colspan="3" class="text-end fw-bold">Endsumme:</td>
-                                <td class="text-end fw-bold fs-5 text-primary" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')} + ' €'">0.00 €</td>
+                                <td colspan="3" class="text-end">Zwischensumme:</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' €'">0.00 €</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end">Versandkosten:</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' €'">0.00 €</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end fw-bold fs-5">Gesamtsumme:</td>
+                                <td class="text-end fw-bold fs-5 text-primary"
+                                    th:text="${#numbers.formatDecimal(order.grandTotal, 1, 2)} + ' €'">0.00 €</td>
                             </tr>
                         </tfoot>
                     </table>

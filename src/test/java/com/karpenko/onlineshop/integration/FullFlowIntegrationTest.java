@@ -46,14 +46,11 @@ class FullFlowIntegrationTest {
         dto.setFirstName("Integration");
         dto.setLastName("Test");
         dto.setAddress("Test Street 1, 12345 Berlin");
-
         testUser = userService.registerUser(dto);
 
-        // Confirming the email for the test user
         String token = testUser.getEmailConfirmationToken();
         userService.confirmEmail(token);
 
-        // Reload the user from the database after confirmation.
         testUser = userRepository.findById(testUser.getId()).orElseThrow();
 
         Category category = new Category();
@@ -83,13 +80,22 @@ class FullFlowIntegrationTest {
         assertThat(cartDto.getItemCount()).isEqualTo(2);
         assertThat(cartDto.getTotal()).isEqualByComparingTo("199.98");
 
-        // Step 3: Checkout
+        // Step 3: Checkout (default: VORKASSE, STANDARD shipping = 4.99€)
         Order order = orderService.checkout(testUser);
 
         // Step 4: Verify order
         assertThat(order.getId()).isNotNull();
         assertThat(order.getStatus()).isEqualTo(OrderStatus.NEW);
+
+        // totalAmount = subtotal - discount (WITHOUT shipping) = 199.98
         assertThat(order.getTotalAmount()).isEqualByComparingTo("199.98");
+
+        // shippingCost = STANDARD = 4.99
+        assertThat(order.getShippingCost()).isEqualByComparingTo("4.99");
+
+        // grandTotal = totalAmount + shippingCost = 199.98 + 4.99 = 204.97
+        assertThat(order.getGrandTotal()).isEqualByComparingTo("204.97");
+
         assertThat(order.getOrderItems()).hasSize(1);
         assertThat(order.getOrderItems().getFirst().getUnitPrice()).isEqualByComparingTo("99.99");
         assertThat(order.getOrderItems().getFirst().getQuantity()).isEqualTo(2);
@@ -114,10 +120,8 @@ class FullFlowIntegrationTest {
     void favoriteToggleFlow() {
         favoriteService.toggleFavorite(testUser, testProduct.getId());
         assertThat(favoriteService.getFavoritesByUserId(testUser.getId())).hasSize(1);
-
         favoriteService.toggleFavorite(testUser, testProduct.getId());
         assertThat(favoriteService.getFavoritesByUserId(testUser.getId())).isEmpty();
-
         favoriteService.toggleFavorite(testUser, testProduct.getId());
         assertThat(favoriteService.getFavoritesByUserId(testUser.getId())).hasSize(1);
     }

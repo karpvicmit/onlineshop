@@ -34,7 +34,10 @@
                                     <span th:case="*" class="badge bg-secondary" th:text="${order.status}">STATUS</span>
                                 </span>
                     </td>
-                    <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')} + ' €'">0.00 €</td>
+                    <td class="text-end fw-bold"
+                        th:text="${#numbers.formatDecimal(order.grandTotal, 1, 'COMMA', 2, 'POINT')} + ' €'">
+                        0.00 €
+                    </td>
                     <td class="text-end">
                         <a th:href="@{/shop/orders/{id}(id=${order.id})}" class="btn btn-outline-primary btn-sm">
                             Details ansehen

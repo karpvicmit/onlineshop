@@ -1,12 +1,10 @@
 spring:
   application:
     name: onlineshop
-
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 55MB
-
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -18,10 +16,8 @@ spring:
           auth: true
           starttls:
             enable: true
-
   jpa:
     open-in-view: false
-
   security:
     oauth2:
       client:
@@ -34,14 +30,14 @@ spring:
               - profile
             client-name: Google
 
-  management:
-    endpoints:
-      web:
-        exposure:
-          include: health
-    endpoint:
-      health:
-        show-details: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
 
 logging:
   level:
@@ -53,3 +49,15 @@ app:
     admin:
       email: ${ADMIN_EMAIL}
       password: ${ADMIN_PASSWORD}
+  invoice:
+    account-holder: ${INVOICE_ACCOUNT_HOLDER:OnlineShop GmbH}
+    iban: ${INVOICE_IBAN:DE89370400440532013000}
+    bic: ${INVOICE_BIC:COBADEFFXXX}
+    bank-name: ${INVOICE_BANK_NAME:Commerzbank Berlin}
+    payment-term-days: ${INVOICE_PAYMENT_TERM_DAYS:14}
+    support-email: ${INVOICE_SUPPORT_EMAIL:rechnung@onlineshop.de}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:sk_test_your_test_key_here}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_your_webhook_secret_here}
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY:pk_test_your_publishable_key_here}

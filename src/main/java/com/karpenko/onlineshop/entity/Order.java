@@ -58,6 +58,35 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false, length = 20)
+    private PaymentMethod paymentMethod = PaymentMethod.VORKASSE;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "shipping_method", nullable = false, length = 20)
+    private ShippingMethod shippingMethod = ShippingMethod.STANDARD;
+
+    @NotNull
+    @Column(name = "shipping_cost", nullable = false, precision = 10, scale = 2)
+    private BigDecimal shippingCost = BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_provider", length = 30)
+    private PaymentProvider paymentProvider = PaymentProvider.VORKASSE;
+
+    @Column(name = "payment_provider_id", length = 255)
+    private String paymentProviderId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 30)
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
     public void addItem(OrderItem item) {
         orderItems.add(item);
         item.setOrder(this);
@@ -73,5 +102,11 @@ public class Order {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public BigDecimal getGrandTotal() {
+        BigDecimal total = totalAmount != null ? totalAmount : BigDecimal.ZERO;
+        BigDecimal shipping = shippingCost != null ? shippingCost : BigDecimal.ZERO;
+        return total.add(shipping);
     }
 }

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Zahlung')}"></head>
+<body>
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+<div th:replace="~{fragments/alerts :: alerts}"></div>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-credit-card me-2"></i>Bezahlung mit Stripe</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Sie werden zu einer sicheren Zahlungsseite weitergeleitet.
+                    </div>
+
+                    <div id="payment-message" class="hidden alert alert-danger"></div>
+
+                    <form id="payment-form">
+                        <div id="payment-element">
+                            <!-- Stripe Elements will be inserted here -->
+                        </div>
+
+                        <button id="submit" class="btn btn-success w-100 mt-3">
+                            <span id="button-text">
+                                <i class="bi bi-lock me-2"></i>Jetzt bezahlen
+                            </span>
+                            <span id="spinner" class="hidden">
+                                <span class="spinner-border spinner-border-sm me-2"></span>Verarbeitung...
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const stripePublishableKey = /*[[${stripePublishableKey}]]*/ '';
+    const orderId = /*[[${orderId}]]*/ '';
+</script>
+<script src="https://js.stripe.com/v3/"></script>
+<script th:src="@{/js/shop/payment.js}"></script>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

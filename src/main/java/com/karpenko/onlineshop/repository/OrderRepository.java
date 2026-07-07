@@ -17,6 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT DISTINCT o FROM Order o " +
             "LEFT JOIN FETCH o.orderItems oi " +
             "LEFT JOIN FETCH oi.product p " +
+            "LEFT JOIN FETCH o.promoCode " +
             "WHERE o.user.id = :userId " +
             "ORDER BY o.orderDate DESC")
     List<Order> findByUserIdWithItems(@Param("userId") Long userId);
@@ -24,12 +25,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT DISTINCT o FROM Order o " +
             "LEFT JOIN FETCH o.orderItems oi " +
             "LEFT JOIN FETCH oi.product p " +
+            "LEFT JOIN FETCH o.promoCode " +
             "WHERE o.id = :id AND o.user.id = :userId")
     Optional<Order> findByIdAndUserIdWithItems(@Param("id") Long id, @Param("userId") Long userId);
 
     @Query("SELECT DISTINCT o FROM Order o " +
             "LEFT JOIN FETCH o.orderItems oi " +
             "LEFT JOIN FETCH oi.product p " +
+            "LEFT JOIN FETCH o.promoCode " +
             "WHERE o.id = :id")
     Optional<Order> findByIdWithItems(@Param("id") Long id);
 
@@ -37,6 +40,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "LEFT JOIN FETCH o.user " +
             "LEFT JOIN FETCH o.orderItems oi " +
             "LEFT JOIN FETCH oi.product " +
+            "LEFT JOIN FETCH o.promoCode " +
             "WHERE o.id = :id")
     Optional<Order> findByIdWithUserAndItems(@Param("id") Long id);
 
@@ -44,7 +48,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "LEFT JOIN FETCH o.user " +
             "LEFT JOIN FETCH o.orderItems oi " +
             "LEFT JOIN FETCH oi.product " +
+            "LEFT JOIN FETCH o.promoCode " +
             "ORDER BY o.orderDate DESC")
     Page<Order> findAllWithUserAndItems(Pageable pageable);
-
 }

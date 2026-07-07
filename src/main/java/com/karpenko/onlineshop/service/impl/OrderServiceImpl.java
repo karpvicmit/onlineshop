@@ -38,18 +38,41 @@ public class OrderServiceImpl implements OrderService {
     private final PromoCodeService promoCodeService;
     private final PromoCodeUsageRepository promoCodeUsageRepository;
 
+    // === CHECKOUT OVERLOADS ===
+
     @Override
     @Transactional
     public Order checkout(User user) {
-        return checkout(user, null);
+        return checkout(user, null, PaymentProvider.VORKASSE, ShippingMethod.STANDARD);
     }
 
     @Override
     @Transactional
     public Order checkout(User user, String promoCode) {
-        log.info("Starting checkout for user: {} with promo code: {}",
-                user.getEmail(), promoCode != null ? "***" : "none");
+        return checkout(user, promoCode, PaymentProvider.VORKASSE, ShippingMethod.STANDARD);
+    }
 
+    @Override
+    @Transactional
+    public Order checkout(User user, String promoCode, PaymentProvider paymentProvider) {
+        return checkout(user, promoCode, paymentProvider, ShippingMethod.STANDARD);
+    }
+
+    @Override
+    @Transactional
+    public Order checkout(User user, String promoCode,
+                          PaymentProvider paymentProvider,
+                          ShippingMethod shippingMethod) {
+
+        log.info("Starting checkout for user: {} | payment: {} | shipping: {}",
+                user.getEmail(), paymentProvider, shippingMethod);
+
+        if (paymentProvider == null) {
+            throw new IllegalStateException("Payment provider is required");
+        }
+        if (shippingMethod == null) {
+            throw new IllegalStateException("Shipping method is required");
+        }
         if (user.getAddress() == null || user.getAddress().isBlank()) {
             throw new IllegalStateException("Delivery address is missing. Please update your profile.");
         }
@@ -77,46 +100,56 @@ public class OrderServiceImpl implements OrderService {
         for (CartItem cartItem : cart.getItems()) {
             Product lockedProduct = lockedProducts.get(cartItem.getProduct().getId());
             if (lockedProduct.getStock() < cartItem.getQuantity()) {
-                log.warn("Insufficient stock for product: {} (available: {}, required: {})",
-                        lockedProduct.getName(), lockedProduct.getStock(), cartItem.getQuantity());
                 throw new ProductOutOfStockException(
                         "Insufficient stock for product: " + lockedProduct.getName());
             }
         }
 
-        // Calculate subtotal with locked prices
         BigDecimal subtotal = priceCalculatorService
                 .calculateTotalWithLockedPrices(cart.getItems(), lockedProducts);
 
-        // Validate and apply promo code
+        // Promo code
         BigDecimal discountAmount = BigDecimal.ZERO;
         PromoCode appliedPromoCode = null;
-
         if (promoCode != null && !promoCode.isBlank()) {
             PromoCodeValidationResult promoResult =
                     promoCodeService.validatePromoCode(promoCode, subtotal);
-
             if (promoResult.isValid()) {
                 appliedPromoCode = promoResult.getPromoCode();
                 discountAmount = promoResult.getDiscountAmount();
-                log.info("Promo code {} applied. Discount: {} €",
-                        appliedPromoCode.getCode(), discountAmount);
             } else {
-                log.warn("Invalid promo code: {}. Error: {}", promoCode, promoResult.getErrorMessage());
                 throw new IllegalStateException("Invalid promo code: " + promoResult.getErrorMessage());
             }
         }
 
-        BigDecimal finalTotal = priceCalculatorService.calculateFinalTotal(subtotal, discountAmount);
+        // CORRECT LOGIC:
+        // totalAmount = subtotal - discount  (WITHOUT shipping)
+        // shippingCost is stored separately
+        // grandTotal = totalAmount + shippingCost (computed by Order.getGrandTotal())
+        BigDecimal finalTotal = priceCalculatorService
+                .calculateFinalTotal(subtotal, discountAmount);
+
+        BigDecimal shippingCost = shippingMethod.getCost();
+
+        PaymentMethod paymentMethod = mapProviderToMethod(paymentProvider);
 
         // Build Order
         Order order = new Order();
         order.setUser(user);
         order.setDeliveryAddress(user.getAddress());
         order.setStatus(OrderStatus.NEW);
-        order.setTotalAmount(finalTotal);
+        order.setPaymentMethod(paymentMethod);
+        order.setPaymentProvider(paymentProvider);
+        order.setShippingMethod(shippingMethod);
+        order.setShippingCost(shippingCost);
+        order.setTotalAmount(finalTotal);        // ← WITHOUT shipping
         order.setDiscountAmount(discountAmount);
         order.setPromoCode(appliedPromoCode);
+
+        // For Rechnung: payment status is PENDING until customer pays the invoice
+        if (paymentProvider == PaymentProvider.RECHNUNG) {
+            order.setPaymentStatus(PaymentStatus.PENDING);
+        }
 
         for (CartItem cartItem : cart.getItems()) {
             Product lockedProduct = lockedProducts.get(cartItem.getProduct().getId());
@@ -131,7 +164,6 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // Increment promo code usage counter
         if (appliedPromoCode != null) {
             promoCodeService.incrementUsage(appliedPromoCode.getId());
 
@@ -141,15 +173,23 @@ public class OrderServiceImpl implements OrderService {
             usage.setOrder(savedOrder);
             usage.setDiscountAmount(discountAmount);
             promoCodeUsageRepository.save(usage);
-
-            log.info("Promo code usage recorded for order {}", savedOrder.getId());
         }
 
-        log.info("Order {} created successfully. Subtotal: {}, Discount: {}, Final: {}",
-                savedOrder.getId(), subtotal, discountAmount, finalTotal);
+        log.info("Order {} created. Subtotal: {}, Shipping: {}, Discount: {}, Total: {}, GrandTotal: {}",
+                savedOrder.getId(), subtotal, shippingCost, discountAmount,
+                savedOrder.getTotalAmount(), savedOrder.getGrandTotal());
 
         cartService.clearCart(user.getId());
+
         return savedOrder;
+    }
+
+    private PaymentMethod mapProviderToMethod(PaymentProvider provider) {
+        return switch (provider) {
+            case STRIPE -> PaymentMethod.KREDITKARTE;
+            case VORKASSE -> PaymentMethod.VORKASSE;
+            case RECHNUNG -> PaymentMethod.RECHNUNG;
+        };
     }
 
     @Override
@@ -193,6 +233,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
         log.info("Admin updating order status: ID {} to {}", orderId, newStatus);
+
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
@@ -202,7 +243,6 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException("Invalid status transition: " + previousStatus + " -> " + newStatus);
         }
 
-        // If cancelling an order with a promo code — decrement usage
         if (newStatus == OrderStatus.CANCELLED
                 && previousStatus != OrderStatus.CANCELLED
                 && order.getPromoCode() != null) {

@@ -172,6 +172,14 @@
             <artifactId>commons-csv</artifactId>
             <version>1.11.0</version>
         </dependency>
+
+        <!-- Stripe -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>24.24.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

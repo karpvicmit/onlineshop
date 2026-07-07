@@ -43,7 +43,6 @@ class OrderServiceTest {
     @Mock private PromoCodeUsageRepository promoCodeUsageRepository;
 
     private OrderServiceImpl orderService;
-
     private User user;
     private Product product;
     private Cart cart;
@@ -80,13 +79,17 @@ class OrderServiceTest {
         cart.addItem(cartItem);
     }
 
+    // ========================================================================
+    // checkout() — baseline scenarios
+    // ========================================================================
     @Nested
     @DisplayName("checkout()")
     class Checkout {
 
         @Test
-        @DisplayName("Should create order successfully without promo code")
+        @DisplayName("Should create order with VORKASSE and STANDARD shipping by default")
         void shouldCheckoutSuccessfully() {
+            // given
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
             when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
             when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
@@ -99,16 +102,24 @@ class OrderServiceTest {
                 return o;
             });
 
-            Order result = orderService.checkout(user);
+            // when
+            Order result = orderService.checkout(
+                    user, null, PaymentProvider.VORKASSE, ShippingMethod.STANDARD);
 
+            // then
             assertThat(result).isNotNull();
             assertThat(result.getId()).isEqualTo(100L);
             assertThat(result.getUser()).isEqualTo(user);
             assertThat(result.getStatus()).isEqualTo(OrderStatus.NEW);
+            assertThat(result.getPaymentProvider()).isEqualTo(PaymentProvider.VORKASSE);
+            assertThat(result.getPaymentMethod()).isEqualTo(PaymentMethod.VORKASSE);
+            assertThat(result.getShippingMethod()).isEqualTo(ShippingMethod.STANDARD);
+            assertThat(result.getShippingCost()).isEqualByComparingTo("4.99");
             assertThat(result.getTotalAmount()).isEqualByComparingTo("1998.00");
             assertThat(result.getDiscountAmount()).isEqualByComparingTo(BigDecimal.ZERO);
             assertThat(result.getPromoCode()).isNull();
             assertThat(product.getStock()).isEqualTo(3); // 5 - 2
+
             verify(cartService).clearCart(1L);
             verify(promoCodeService, never()).incrementUsage(any());
             verify(promoCodeUsageRepository, never()).save(any());
@@ -121,7 +132,8 @@ class OrderServiceTest {
             emptyCart.setUser(user);
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(emptyCart));
 
-            assertThatThrownBy(() -> orderService.checkout(user))
+            assertThatThrownBy(() ->
+                    orderService.checkout(user, null, PaymentProvider.VORKASSE, ShippingMethod.STANDARD))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Cart is empty");
         }
@@ -131,7 +143,8 @@ class OrderServiceTest {
         void shouldThrowWhenCartNotFound() {
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> orderService.checkout(user))
+            assertThatThrownBy(() ->
+                    orderService.checkout(user, null, PaymentProvider.VORKASSE, ShippingMethod.STANDARD))
                     .isInstanceOf(IllegalStateException.class);
         }
 
@@ -140,7 +153,8 @@ class OrderServiceTest {
         void shouldThrowWhenAddressMissing() {
             user.setAddress(null);
 
-            assertThatThrownBy(() -> orderService.checkout(user))
+            assertThatThrownBy(() ->
+                    orderService.checkout(user, null, PaymentProvider.VORKASSE, ShippingMethod.STANDARD))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Delivery address is missing");
         }
@@ -152,7 +166,8 @@ class OrderServiceTest {
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
             when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
 
-            assertThatThrownBy(() -> orderService.checkout(user))
+            assertThatThrownBy(() ->
+                    orderService.checkout(user, null, PaymentProvider.VORKASSE, ShippingMethod.STANDARD))
                     .isInstanceOf(ProductOutOfStockException.class)
                     .hasMessageContaining("Insufficient stock");
         }
@@ -163,11 +178,165 @@ class OrderServiceTest {
             when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
             when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> orderService.checkout(user))
+            assertThatThrownBy(() ->
+                    orderService.checkout(user, null, PaymentProvider.VORKASSE, ShippingMethod.STANDARD))
                     .isInstanceOf(ResourceNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Should throw when payment provider is null")
+        void shouldThrowWhenPaymentProviderNull() {
+            assertThatThrownBy(() ->
+                    orderService.checkout(user, null, null, ShippingMethod.STANDARD))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Payment provider is required");
+        }
+
+        @Test
+        @DisplayName("Should throw when shipping method is null")
+        void shouldThrowWhenShippingMethodNull() {
+            assertThatThrownBy(() ->
+                    orderService.checkout(user, null, PaymentProvider.VORKASSE, null))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Shipping method is required");
         }
     }
 
+    // ========================================================================
+    // checkout() — delivery options and cost calculation
+    // ========================================================================
+    @Nested
+    @DisplayName("checkout() — shipping methods")
+    class CheckoutShipping {
+
+        @Test
+        @DisplayName("Should apply EXPRESS shipping cost (9.99 €)")
+        void shouldApplyExpressShippingCost() {
+            when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
+            when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("1998.00"));
+            when(priceCalculatorService.calculateFinalTotal(any(BigDecimal.class), any(BigDecimal.class)))
+                    .thenReturn(new BigDecimal("1998.00"));
+            when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            Order result = orderService.checkout(
+                    user, null, PaymentProvider.VORKASSE, ShippingMethod.EXPRESS);
+
+            assertThat(result.getShippingMethod()).isEqualTo(ShippingMethod.EXPRESS);
+            assertThat(result.getShippingCost()).isEqualByComparingTo("9.99");
+        }
+
+        @Test
+        @DisplayName("Should apply ABHOLUNG shipping cost (0.00 €)")
+        void shouldApplyAbholungShippingCost() {
+            when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
+            when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("1998.00"));
+            when(priceCalculatorService.calculateFinalTotal(any(BigDecimal.class), any(BigDecimal.class)))
+                    .thenReturn(new BigDecimal("1998.00"));
+            when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            Order result = orderService.checkout(
+                    user, null, PaymentProvider.VORKASSE, ShippingMethod.ABHOLUNG);
+
+            assertThat(result.getShippingMethod()).isEqualTo(ShippingMethod.ABHOLUNG);
+            assertThat(result.getShippingCost()).isEqualByComparingTo("0.00");
+        }
+
+        @Test
+        @DisplayName("getGrandTotal() should include shipping cost")
+        void shouldIncludeShippingInGrandTotal() {
+            when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
+            when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("1998.00"));
+            when(priceCalculatorService.calculateFinalTotal(any(BigDecimal.class), any(BigDecimal.class)))
+                    .thenReturn(new BigDecimal("1998.00"));
+            when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            Order result = orderService.checkout(
+                    user, null, PaymentProvider.VORKASSE, ShippingMethod.EXPRESS);
+
+            // grandTotal = totalAmount (1998.00) + shippingCost (9.99) = 2007.99
+            assertThat(result.getGrandTotal()).isEqualByComparingTo("2007.99");
+        }
+    }
+
+    // ========================================================================
+    // checkout() — Rechnung
+    // ========================================================================
+    @Nested
+    @DisplayName("checkout() — Rechnung payment")
+    class CheckoutRechnung {
+
+        @Test
+        @DisplayName("Should set paymentStatus=PENDING for Rechnung orders")
+        void shouldSetPendingStatusForRechnung() {
+            when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
+            when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("1998.00"));
+            when(priceCalculatorService.calculateFinalTotal(any(BigDecimal.class), any(BigDecimal.class)))
+                    .thenReturn(new BigDecimal("1998.00"));
+            when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            Order result = orderService.checkout(
+                    user, null, PaymentProvider.RECHNUNG, ShippingMethod.STANDARD);
+
+            assertThat(result.getPaymentProvider()).isEqualTo(PaymentProvider.RECHNUNG);
+            assertThat(result.getPaymentMethod()).isEqualTo(PaymentMethod.RECHNUNG);
+            assertThat(result.getPaymentStatus()).isEqualTo(PaymentStatus.PENDING);
+        }
+
+        @Test
+        @DisplayName("Should map RECHNUNG provider to RECHNUNG method")
+        void shouldMapRechnungProviderToMethod() {
+            when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
+            when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("100.00"));
+            when(priceCalculatorService.calculateFinalTotal(any(), any()))
+                    .thenReturn(new BigDecimal("100.00"));
+            when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            Order result = orderService.checkout(
+                    user, null, PaymentProvider.RECHNUNG, ShippingMethod.STANDARD);
+
+            assertThat(result.getPaymentMethod()).isEqualTo(PaymentMethod.RECHNUNG);
+        }
+    }
+
+    // ========================================================================
+    // checkout() — Stripe
+    // ========================================================================
+    @Nested
+    @DisplayName("checkout() — Stripe payment")
+    class CheckoutStripe {
+
+        @Test
+        @DisplayName("Should map STRIPE provider to KREDITKARTE method")
+        void shouldMapStripeToKreditkarte() {
+            when(cartRepository.findWithItemsByUserId(1L)).thenReturn(Optional.of(cart));
+            when(productRepository.findByIdWithLock(10L)).thenReturn(Optional.of(product));
+            when(priceCalculatorService.calculateTotalWithLockedPrices(anyList(), anyMap()))
+                    .thenReturn(new BigDecimal("100.00"));
+            when(priceCalculatorService.calculateFinalTotal(any(), any()))
+                    .thenReturn(new BigDecimal("100.00"));
+            when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            Order result = orderService.checkout(
+                    user, null, PaymentProvider.STRIPE, ShippingMethod.STANDARD);
+
+            assertThat(result.getPaymentProvider()).isEqualTo(PaymentProvider.STRIPE);
+            assertThat(result.getPaymentMethod()).isEqualTo(PaymentMethod.KREDITKARTE);
+        }
+    }
+
+    // ========================================================================
+    // checkout() — promo code
+    // ========================================================================
     @Nested
     @DisplayName("checkout() with promo code")
     class CheckoutWithPromoCode {
@@ -201,7 +370,8 @@ class OrderServiceTest {
             when(promoCodeService.validatePromoCode(eq("SAVE10"), any(BigDecimal.class)))
                     .thenReturn(promoResult);
 
-            Order result = orderService.checkout(user, "SAVE10");
+            Order result = orderService.checkout(
+                    user, "SAVE10", PaymentProvider.VORKASSE, ShippingMethod.STANDARD);
 
             assertThat(result).isNotNull();
             assertThat(result.getDiscountAmount()).isEqualByComparingTo("199.80");
@@ -224,7 +394,8 @@ class OrderServiceTest {
             when(promoCodeService.validatePromoCode(eq("INVALID"), any(BigDecimal.class)))
                     .thenReturn(promoResult);
 
-            assertThatThrownBy(() -> orderService.checkout(user, "INVALID"))
+            assertThatThrownBy(() ->
+                    orderService.checkout(user, "INVALID", PaymentProvider.VORKASSE, ShippingMethod.STANDARD))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Invalid promo code");
 
@@ -250,6 +421,9 @@ class OrderServiceTest {
         }
     }
 
+    // ========================================================================
+    // getOrderHistory()
+    // ========================================================================
     @Nested
     @DisplayName("getOrderHistory()")
     class GetOrderHistory {
@@ -271,6 +445,9 @@ class OrderServiceTest {
         }
     }
 
+    // ========================================================================
+    // getOrderDetails()
+    // ========================================================================
     @Nested
     @DisplayName("getOrderDetails()")
     class GetOrderDetails {
@@ -300,6 +477,9 @@ class OrderServiceTest {
         }
     }
 
+    // ========================================================================
+    // updateOrderStatus()
+    // ========================================================================
     @Nested
     @DisplayName("updateOrderStatus()")
     class UpdateOrderStatus {
@@ -342,6 +522,9 @@ class OrderServiceTest {
         }
     }
 
+    // ========================================================================
+    // Admin methods
+    // ========================================================================
     @Nested
     @DisplayName("Admin methods")
     class AdminMethods {
