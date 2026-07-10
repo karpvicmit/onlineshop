@@ -1,42 +1,45 @@
 package com.karpenko.onlineshop.controller;
 
+import com.karpenko.onlineshop.dto.product.ProductDto;
+import com.karpenko.onlineshop.entity.Category;
+import com.karpenko.onlineshop.service.CategoryService;
+import com.karpenko.onlineshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.List;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
-@Slf4j
 public class HomeController {
 
-    /**
-     * Startseite: Weiterleitung basierend auf Authentifizierungsstatus.
-     * - Eingeloggter USER → /shop/products
-     * - Eingeloggter ADMIN → /admin/dashboard
-     * - Nicht eingeloggter Benutzer → /login
-     */
+    private final ProductService productService;
+    private final CategoryService categoryService;
+
     @GetMapping("/")
-    public String home(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            String role = authentication.getAuthorities().stream()
-                    .findFirst()
-                    .map(Object::toString)
-                    .orElse("");
+    public String home(Model model) {
+        log.debug("Serving home page");
 
-            log.debug("Benutzer ist eingeloggt mit Rolle: {}", role);
+        // Featured products: latest 8 products
+        List<ProductDto> featuredProducts = productService
+                .findProducts(null, null, PageRequest.of(0, 8, Sort.by(Sort.Direction.DESC, "createdAt")))
+                .getContent();
 
-            if (role.equals("ROLE_ADMIN")) {
-                return "redirect:/admin/dashboard";
-            } else {
-                return "redirect:/shop/products";
-            }
+        // Categories: first 6
+        List<Category> categories = categoryService.getAllCategories();
+        if (categories.size() > 6) {
+            categories = categories.subList(0, 6);
         }
 
-        log.debug("Benutzer ist nicht eingeloggt, Weiterleitung zu /login");
-        return "redirect:/shop/products";
-    }
+        model.addAttribute("featuredProducts", featuredProducts);
+        model.addAttribute("categories", categories);
 
+        return "home";
+    }
 }

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Startseite')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- ============================================
+     HERO SECTION
+     ============================================ -->
+<section class="hero-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <p class="hero-eyebrow">Neue Kollektion 2026</p>
+            <h1 class="hero-title">Zeitloses Design.<br>Hochwertige Produkte.</h1>
+            <p class="hero-subtitle">
+                Entdecken Sie unsere sorgfältig kuratierte Auswahl an
+                Qualitätsprodukten für Ihren Alltag.
+            </p>
+            <div class="hero-actions">
+                <a th:href="@{/shop/products}" class="btn btn-primary btn-lg">
+                    Kollektion entdecken
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <a th:href="@{/shop/products}" class="btn btn-outline btn-lg">
+                    Alle Kategorien
+                </a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-image-wrapper">
+                <div class="hero-image-placeholder">
+                    <i class="bi bi-shop"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     CATEGORIES SECTION
+     ============================================ -->
+<section class="section categories-section" th:if="${!categories.isEmpty()}">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Kategorien</h2>
+            <p class="section-subtitle">Finden Sie genau das, was Sie suchen</p>
+        </div>
+
+        <div class="categories-grid">
+            <a th:each="cat : ${categories}"
+               th:href="@{/shop/products(category=${cat.slug})}"
+               class="category-card">
+                <div class="category-icon">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                </div>
+                <h3 class="category-name" th:text="${cat.name}">Kategorie</h3>
+                <p class="category-description" th:text="${cat.description}">Beschreibung</p>
+                <span class="category-link">
+                    Entdecken <i class="bi bi-arrow-right"></i>
+                </span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     FEATURED PRODUCTS SECTION
+     ============================================ -->
+<section class="section products-section" th:if="${!featuredProducts.isEmpty()}">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Neu im Shop</h2>
+            <p class="section-subtitle">Unsere neuesten Produkte für Sie</p>
+        </div>
+
+        <div class="products-grid">
+            <div th:each="product : ${featuredProducts}" class="product-card">
+                <a th:href="@{/shop/products/{id}(id=${product.id})}" class="product-card-link">
+                    <div class="product-image-wrapper">
+                        <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                             th:src="@{${product.imageUrl}}"
+                             th:alt="${product.name}"
+                             class="product-image">
+                        <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                             class="product-image-placeholder">
+                            <i class="bi bi-image"></i>
+                        </div>
+
+                        <div th:if="${product.stock == 0}" class="product-badge badge-sold-out">
+                            Ausverkauft
+                        </div>
+                        <div th:if="${product.stock > 0 and product.stock <= 5}" class="product-badge badge-low-stock">
+                            Nur noch <span th:text="${product.stock}">3</span>
+                        </div>
+                    </div>
+
+                    <div class="product-info">
+                        <p class="product-category" th:text="${product.categoryName}">Kategorie</p>
+                        <h3 class="product-name" th:text="${product.name}">Produktname</h3>
+                        <p class="product-price" th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' €'">0.00 €</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="section-cta">
+            <a th:href="@{/shop/products}" class="btn btn-outline">
+                Alle Produkte ansehen
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     FEATURES SECTION
+     ============================================ -->
+<section class="section features-section">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="bi bi-truck"></i>
+                </div>
+                <h3 class="feature-title">Kostenloser Versand</h3>
+                <p class="feature-text">Ab 50€ Bestellwert liefern wir versandkostenfrei.</p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </div>
+                <h3 class="feature-title">30 Tage Rückgabe</h3>
+                <p class="feature-text">Kostenloses Rückgaberecht innerhalb von 30 Tagen.</p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h3 class="feature-title">Sichere Zahlung</h3>
+                <p class="feature-text">SSL-verschlüsselte Zahlung per Kreditkarte oder Rechnung.</p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="bi bi-award"></i>
+                </div>
+                <h3 class="feature-title">Premium Qualität</h3>
+                <p class="feature-text">Sorgfältig ausgewählte Produkte höchster Qualität.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

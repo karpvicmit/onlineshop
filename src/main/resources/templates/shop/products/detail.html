@@ -1,168 +1,313 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/head :: head('Produktdetail')}"></head>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head(${product.name})}"></head>
 <body>
-
-<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 <div th:replace="~{fragments/alerts :: alerts}"></div>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-6">
-            <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/placeholder.jpg'}"
-                 class="img-fluid rounded shadow" alt="Produktdetail">
-        </div>
+<!-- ============================================
+     BREADCRUMBS
+     ============================================ -->
+<section class="product-breadcrumbs">
+    <div class="container">
+        <nav class="catalog-breadcrumb" aria-label="breadcrumb">
+            <a th:href="@{/}">Startseite</a>
+            <span class="breadcrumb-sep">/</span>
+            <a th:href="@{/shop/products}">Produkte</a>
+            <span class="breadcrumb-sep">/</span>
+            <a th:if="${product.categorySlug != null}"
+               th:href="@{/shop/products(category=${product.categorySlug})}"
+               th:text="${product.categoryName}">Kategorie</a>
+            <span class="breadcrumb-sep" th:if="${product.categorySlug != null}">/</span>
+            <span class="breadcrumb-current" th:text="${product.name}">Produkt</span>
+        </nav>
+    </div>
+</section>
 
-        <div class="col-md-6">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a th:href="@{/shop/products}">Produkte</a></li>
-                    <li class="breadcrumb-item active" th:text="${product.name}">Detail</li>
-                </ol>
-            </nav>
+<!-- ============================================
+     PRODUCT MAIN SECTION
+     ============================================ -->
+<section class="product-main">
+    <div class="container">
+        <div class="product-layout">
 
-            <h1 class="display-5" th:text="${product.name}">Produkt Name</h1>
+            <!-- === LEFT: IMAGE === -->
+            <div class="product-gallery">
+                <div class="product-image-wrapper">
+                    <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                         th:src="@{${product.imageUrl}}"
+                         th:alt="${product.name}"
+                         class="product-image-main">
+                    <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                         class="product-image-placeholder-large">
+                        <i class="bi bi-image"></i>
+                    </div>
 
-            <div class="mb-3">
-                <span class="h2 text-primary" th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')} + ' €'">0.00 €</span>
-                <span class="ms-3 badge bg-secondary" th:text="'Kategorie: ' + ${product.categoryName}">Kategorie</span>
+                    <!-- Stock badges -->
+                    <div th:if="${product.stock == 0}" class="product-badge badge-sold-out">
+                        Ausverkauft
+                    </div>
+                    <div th:if="${product.stock > 0 and product.stock <= 5}" class="product-badge badge-low-stock">
+                        Nur noch <span th:text="${product.stock}">3</span> verfügbar
+                    </div>
+                </div>
             </div>
 
-            <p class="lead" th:text="${product.description}">Ausführliche Beschreibung des Produkts...</p>
+            <!-- === RIGHT: INFO === -->
+            <div class="product-info-column">
+                <div class="product-info-sticky">
 
-            <div class="card bg-light mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <strong>Lagerbestand:</strong>
-                        <div>
-                            <span th:if="${product.stock == 0}" class="badge bg-danger fs-6">
-                                <i class="bi bi-x-circle-fill"></i> Ausverkauft
-                            </span>
-                            <span th:if="${product.stock > 0 && product.stock <= 5}" class="badge bg-warning text-dark fs-6">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                Nur noch <span th:text="${product.stock}">3</span> auf Lager!
-                            </span>
-                            <span th:if="${product.stock > 5}" class="badge bg-success fs-6">
-                                <i class="bi bi-check-circle-fill"></i> Auf Lager (<span th:text="${product.stock}">50</span> verfügbar)
-                            </span>
+                    <!-- Category -->
+                    <p class="product-category-label" th:text="${product.categoryName}">Kategorie</p>
+
+                    <!-- Title -->
+                    <h1 class="product-title" th:text="${product.name}">Produktname</h1>
+
+                    <!-- Rating summary -->
+                    <div class="product-rating-summary" th:if="${reviewStats.totalCount > 0}">
+                        <div class="stars-display">
+                            <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                  th:class="${i <= reviewStats.averageRating} ? 'star filled' : 'star'">★</span>
+                        </div>
+                        <span class="rating-text">
+                            <span th:text="${#numbers.formatDecimal(reviewStats.averageRating, 1, 1)}">4.5</span>
+                            · <span th:text="${reviewStats.totalCount}">0</span>
+                            <span th:text="${reviewStats.totalCount == 1} ? 'Bewertung' : 'Bewertungen'">Bewertungen</span>
+                        </span>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="product-price-large">
+                        <span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
+                        <span class="price-currency">€</span>
+                    </div>
+
+                    <!-- Short description -->
+                    <p class="product-short-description" th:text="${product.description}">
+                        Beschreibung des Produkts...
+                    </p>
+
+                    <!-- Stock status -->
+                    <div class="product-stock-status">
+                        <div th:if="${product.stock == 0}" class="stock-indicator stock-out">
+                            <i class="bi bi-x-circle"></i>
+                            <span>Ausverkauft</span>
+                        </div>
+                        <div th:if="${product.stock > 0 and product.stock <= 5}" class="stock-indicator stock-low">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <span>Nur noch <strong th:text="${product.stock}">3</strong> auf Lager</span>
+                        </div>
+                        <div th:if="${product.stock > 5}" class="stock-indicator stock-ok">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Auf Lager — Versandfertig in 1–2 Werktagen</span>
                         </div>
                     </div>
 
-                    <div th:if="${product.stock > 0 && product.stock <= 5}" class="mb-3">
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated"
-                                 th:style="'width: ' + ${product.stock * 20} + '%'">
-                            </div>
-                        </div>
-                    </div>
-
-                    <form th:action="@{/shop/cart/add}" method="post" sec:authorize="isAuthenticated()">
+                    <!-- Add to cart form -->
+                    <form th:if="${product.stock > 0}"
+                          th:action="@{/shop/cart/add}" method="post"
+                          sec:authorize="isAuthenticated()"
+                          class="product-add-form">
                         <input type="hidden" name="productId" th:value="${product.id}">
-                        <div class="input-group mb-3" th:if="${product.stock > 0}">
-                            <span class="input-group-text">Menge</span>
-                            <input type="number" class="form-control" name="quantity" value="1"
-                                   min="1" th:max="${product.stock}">
-                            <button class="btn btn-success" type="submit">
-                                <i class="fas fa-cart-plus me-2"></i>In den Warenkorb
-                            </button>
+
+                        <div class="quantity-selector">
+                            <label for="quantity" class="quantity-label">Menge</label>
+                            <div class="quantity-control">
+                                <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+                                <input type="number" id="quantity" name="quantity"
+                                       value="1" min="1" th:max="${product.stock}"
+                                       class="qty-input">
+                                <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+                            </div>
                         </div>
-                        <div th:if="${product.stock == 0}" class="alert alert-danger mb-0">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            Dieses Produkt ist derzeit nicht auf Lager.
-                        </div>
+
+                        <button type="submit" class="btn-add-to-cart">
+                            <i class="bi bi-bag-plus"></i>
+                            In den Warenkorb
+                        </button>
                     </form>
 
-                    <div class="mt-3" sec:authorize="isAuthenticated()">
-
-                        <form th:action="@{/shop/favorites/toggle/{id}(id=${product.id})}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-danger w-100">
-                                <i class="far fa-heart"></i> Zu Favoriten hinzufügen / entfernen
-                            </button>
-                        </form>
+                    <!-- Not authenticated -->
+                    <div sec:authorize="!isAuthenticated()" class="product-auth-notice">
+                        <a th:href="@{/login}" class="btn-add-to-cart">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Anmelden zum Kaufen
+                        </a>
                     </div>
 
-                    <div sec:authorize="!isAuthenticated()" class="alert alert-info">
-                        Bitte <a th:href="@{/login}">melden Sie sich an</a>, um dieses Produkt in den Warenkorb zu legen.
+                    <!-- Favorite button -->
+                    <form th:action="@{/shop/favorites/toggle/{id}(id=${product.id})}"
+                          method="post" sec:authorize="isAuthenticated()"
+                          class="product-favorite-form">
+                        <button type="submit" class="btn-favorite"
+                                th:classappend="${isFavorite} ? 'active'">
+                            <i th:class="${isFavorite} ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
+                            <span th:text="${isFavorite} ? 'Auf der Merkliste' : 'Zur Merkliste hinzufügen'">
+                                Zur Merkliste
+                            </span>
+                        </button>
+                    </form>
+
+                    <!-- Meta info -->
+                    <div class="product-meta">
+                        <div class="meta-row">
+                            <span class="meta-label">Artikelnummer</span>
+                            <span class="meta-value" th:text="${product.sku}">SKU-0001</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Kategorie</span>
+                            <a class="meta-value"
+                               th:href="@{/shop/products(category=${product.categorySlug})}"
+                               th:text="${product.categoryName}">Kategorie</a>
+                        </div>
                     </div>
 
-                    <div class="mt-3" sec:authorize="isAuthenticated()">
-                        <form th:action="@{/shop/favorites/toggle/{id}(id=${product.id})}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-danger">
-                                <i class="far fa-heart"></i> Zu Favoriten hinzufügen
-                            </button>
-                        </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     PRODUCT DETAILS SECTION
+     ============================================ -->
+<section class="product-details-section" th:if="${product.description != null and !product.description.isEmpty()}">
+    <div class="container container-narrow">
+        <h2 class="details-title">Produktbeschreibung</h2>
+        <div class="details-content">
+            <p th:text="${product.description}">Beschreibung...</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     REVIEWS SECTION
+     ============================================ -->
+<section class="reviews-section">
+    <div class="container container-narrow">
+        <div class="reviews-header">
+            <div>
+                <h2 class="details-title">Kundenbewertungen</h2>
+                <div class="reviews-summary" th:if="${reviewStats.totalCount > 0}">
+                    <div class="stars-display large">
+                        <span th:each="i : ${#numbers.sequence(1, 5)}"
+                              th:class="${i <= reviewStats.averageRating} ? 'star filled' : 'star'">★</span>
                     </div>
+                    <span class="rating-text">
+                        <span th:text="${#numbers.formatDecimal(reviewStats.averageRating, 1, 1)}">4.5</span>
+                        von 5 · <span th:text="${reviewStats.totalCount}">0</span> Bewertungen
+                    </span>
                 </div>
             </div>
         </div>
-        <!-- ========================================== -->
-        <!-- REVIEWS SECTION -->
-        <!-- ========================================== -->
-        <div class="card mt-5 shadow-sm">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h4 class="mb-0"><i class="bi bi-star-fill text-warning me-2"></i>Kundenbewertungen</h4>
-                <div>
-            <span class="badge bg-warning text-dark fs-6 me-2">
-                <i class="bi bi-star-fill"></i>
-                <span th:text="${#numbers.formatDecimal(reviewStats.averageRating, 1, 1)}">0.0</span>
-            </span>
-                    <span class="text-muted" th:text="${reviewStats.totalCount} + ' Bewertungen'">0 Bewertungen</span>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- Write Review Form -->
-                <div th:if="${canWriteReview}" class="mb-4 p-3 bg-light rounded">
-                    <h5>Ihre Bewertung abgeben</h5>
-                    <form th:action="@{/shop/products/{id}/reviews(id=${product.id})}" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Bewertung</label>
-                            <select name="rating" class="form-select w-auto" required>
-                                <option value="5">★★★★★ (5 - Ausgezeichnet)</option>
-                                <option value="4">★★★★☆ (4 - Gut)</option>
-                                <option value="3">★★★☆☆ (3 - Okay)</option>
-                                <option value="2">★★☆☆☆ (2 - Schlecht)</option>
-                                <option value="1">★☆☆☆☆ (1 - Sehr schlecht)</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Titel</label>
-                            <input type="text" name="title" class="form-control" placeholder="Zusammenfassung Ihrer Bewertung" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kommentar</label>
-                            <textarea name="comment" class="form-control" rows="3" placeholder="Was gefällt Ihnen? Was nicht?" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Bewertung absenden</button>
-                        <small class="text-muted d-block mt-2">Ihre Bewertung wird nach einer Überprüfung durch unseren Moderator veröffentlicht.</small>
-                    </form>
-                </div>
-                <div th:if="${!canWriteReview}" class="alert alert-info mb-4">
-                    <i class="bi bi-info-circle me-2"></i>
-                    Sie können eine Bewertung nur abgeben, wenn Sie dieses Produkt gekauft haben und noch nicht bewertet haben.
-                </div>
 
-                <!-- Reviews List -->
-                <div th:if="${!reviews.isEmpty()}">
-                    <div th:each="review : ${reviews}" class="border-bottom pb-3 mb-3">
-                        <div class="d-flex justify-content-between">
-                            <strong th:text="${review.user.firstName + ' ' + review.user.lastName?.substring(0,1) + '.'}">Max M.</strong>
-                            <div>
-                                <span class="text-warning" th:text="${'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}">★★★★★</span>
-                                <small class="text-muted ms-2" th:text="${#temporals.format(review.createdAt, 'dd.MM.yyyy')}">01.01.2026</small>
-                            </div>
-                        </div>
-                        <h6 class="mt-1" th:text="${review.title}">Titel der Bewertung</h6>
-                        <p class="text-muted mb-0" th:text="${review.comment}">Kommentar...</p>
+        <!-- Write review form -->
+        <div th:if="${canWriteReview}" class="review-form-card">
+            <h3>Ihre Bewertung abgeben</h3>
+            <form th:action="@{/shop/products/{id}/reviews(id=${product.id})}" method="post" class="review-form">
+                <div class="form-group">
+                    <label class="form-label">Bewertung</label>
+                    <div class="rating-input">
+                        <input type="radio" name="rating" value="5" id="star5" required>
+                        <label for="star5" title="5 Sterne">★</label>
+                        <input type="radio" name="rating" value="4" id="star4">
+                        <label for="star4" title="4 Sterne">★</label>
+                        <input type="radio" name="rating" value="3" id="star3">
+                        <label for="star3" title="3 Sterne">★</label>
+                        <input type="radio" name="rating" value="2" id="star2">
+                        <label for="star2" title="2 Sterne">★</label>
+                        <input type="radio" name="rating" value="1" id="star1">
+                        <label for="star1" title="1 Stern">★</label>
                     </div>
                 </div>
-                <div th:if="${reviews.isEmpty()}" class="text-center text-muted py-3">
-                    Noch keine Bewertungen vorhanden. Seien Sie der Erste!
+                <div class="form-group">
+                    <label for="reviewTitle" class="form-label">Titel</label>
+                    <input type="text" id="reviewTitle" name="title" class="form-control"
+                           placeholder="Zusammenfassung Ihrer Bewertung" required>
                 </div>
+                <div class="form-group">
+                    <label for="reviewComment" class="form-label">Kommentar</label>
+                    <textarea id="reviewComment" name="comment" class="form-control" rows="4"
+                              placeholder="Was gefällt Ihnen? Was nicht?" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Bewertung absenden</button>
+                <p class="form-hint">Ihre Bewertung wird nach einer Überprüfung veröffentlicht.</p>
+            </form>
+        </div>
+
+        <div th:if="${!canWriteReview}" sec:authorize="isAuthenticated()" class="review-notice">
+            <i class="bi bi-info-circle"></i>
+            Sie können eine Bewertung nur abgeben, wenn Sie dieses Produkt gekauft haben.
+        </div>
+
+        <!-- Reviews list -->
+        <div th:if="${!reviews.isEmpty()}" class="reviews-list">
+            <div th:each="review : ${reviews}" class="review-card">
+                <div class="review-header">
+                    <div class="review-author">
+                        <div class="author-avatar"
+                             th:text="${review.user.firstName != null ? review.user.firstName.substring(0,1) : 'U'}">U</div>
+                        <div>
+                            <div class="author-name"
+                                 th:text="${review.user.firstName + ' ' + (review.user.lastName != null ? review.user.lastName.substring(0,1) + '.' : '')}">
+                                Max M.
+                            </div>
+                            <div class="review-date"
+                                 th:text="${#temporals.format(review.createdAt, 'dd.MM.yyyy')}">01.01.2026</div>
+                        </div>
+                    </div>
+                    <div class="review-rating">
+                        <span th:each="i : ${#numbers.sequence(1, 5)}"
+                              th:class="${i <= review.rating} ? 'star filled' : 'star'">★</span>
+                    </div>
+                </div>
+                <h4 class="review-title" th:text="${review.title}">Titel</h4>
+                <p class="review-comment" th:text="${review.comment}">Kommentar...</p>
+            </div>
+        </div>
+
+        <div th:if="${reviews.isEmpty()}" class="reviews-empty">
+            <i class="bi bi-chat-square-text"></i>
+            <p>Noch keine Bewertungen. Seien Sie der Erste!</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     RELATED PRODUCTS SECTION
+     ============================================ -->
+<section class="related-section" th:if="${!relatedProducts.isEmpty()}">
+    <div class="container">
+        <h2 class="details-title text-center">Ähnliche Produkte</h2>
+        <div class="products-grid related-grid">
+            <div th:each="product : ${relatedProducts}" class="product-card">
+                <a th:href="@{/shop/products/{id}(id=${product.id})}" class="product-card-link">
+                    <div class="product-image-wrapper">
+                        <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                             th:src="@{${product.imageUrl}}"
+                             th:alt="${product.name}"
+                             class="product-image" loading="lazy">
+                        <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                             class="product-image-placeholder">
+                            <i class="bi bi-image"></i>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <p class="product-category" th:text="${product.categoryName}">Kategorie</p>
+                        <h3 class="product-name" th:text="${product.name}">Produktname</h3>
+                        <p class="product-price"
+                           th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' €'">0.00 €</p>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/shop/product-detail.js}"></script>
 </body>
 </html>

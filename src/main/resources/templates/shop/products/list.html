@@ -3,134 +3,159 @@
 <head th:replace="~{fragments/head :: head('Produktkatalog')}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
-<div class="container mt-4">
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="card-title mb-3"><i class="bi bi-funnel"></i> Filter & Suche</h5>
-            <form th:action="@{/shop/products}" method="get" id="filterForm">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label for="searchQuery" class="form-label">Suche</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="searchQuery" name="q"
-                                   th:value="${searchQuery}" placeholder="Produktname oder Beschreibung...">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="categorySelect" class="form-label">Kategorie</label>
-                        <select class="form-select" id="categorySelect" name="category"
-                                onchange="submitFormWithCategory(this.value)">
-                            <option value="">Alle Kategorien</option>
-                            <option th:each="cat : ${categories}"
-                                    th:value="${cat.slug}"
-                                    th:text="${cat.name}"
-                                    th:selected="${cat.slug == selectedCategory}">
-                                Kategorie Name
-                            </option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="sortSelect" class="form-label">Sortierung</label>
-                        <select class="form-select" id="sortSelect" name="sort"
-                                onchange="submitFormWithSort(this.value)">
-                            <option value="date_desc" th:selected="${selectedSort == 'date_desc'}">
-                                Neueste zuerst
-                            </option>
-                            <option value="date_asc" th:selected="${selectedSort == 'date_asc'}">
-                                Älteste zuerst
-                            </option>
-                            <option value="price_asc" th:selected="${selectedSort == 'price_asc'}">
-                                Preis aufsteigend
-                            </option>
-                            <option value="price_desc" th:selected="${selectedSort == 'price_desc'}">
-                                Preis absteigend
-                            </option>
-                            <option value="name_asc" th:selected="${selectedSort == 'name_asc'}">
-                                Name A-Z
-                            </option>
-                            <option value="name_desc" th:selected="${selectedSort == 'name_desc'}">
-                                Name Z-A
-                            </option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <a th:href="@{/shop/products}" class="btn btn-outline-secondary w-100" title="Filter zurücksetzen">
-                            <i class="bi bi-x-lg"></i> Zurücksetzen
-                        </a>
-                    </div>
-                </div>
-            </form>
+
+<!-- ============================================
+     PAGE HEADER + BREADCRUMBS
+     ============================================ -->
+<section class="page-header">
+    <div class="container">
+        <nav class="catalog-breadcrumb" aria-label="breadcrumb">
+            <a th:href="@{/}">Startseite</a>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current">Produktkatalog</span>
+        </nav>
+        <div class="page-header-content">
+            <div>
+                <h1 class="page-title">Produktkatalog</h1>
+                <p class="page-subtitle">
+                    <span th:text="${totalItems}">0</span>
+                    <span th:text="${totalItems == 1} ? 'Produkt' : 'Produkte'">Produkte</span>
+                    <span th:if="${searchQuery != null and !searchQuery.isEmpty()}">
+                        für „<span th:text="${searchQuery}">"</span>"
+                    </span>
+                </p>
+            </div>
         </div>
     </div>
+</section>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Produktkatalog</h3>
-        <span class="text-muted" th:text="${totalItems} + ' Produkte gefunden'">0 Produkte gefunden</span>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-md-4 col-lg-3" th:each="product : ${products}">
-            <a th:href="@{/shop/products/{id}(id=${product.id})}" class="text-decoration-none text-reset">
-                <div class="card h-100 shadow-sm">
-                    <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
-                         th:src="@{${product.imageUrl}}"
-                         class="card-img-top" alt="Produktbild" style="height: 200px; object-fit: cover;">
-                    <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
-                         class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                        <i class="bi bi-image text-muted fs-1"></i>
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title" th:text="${product.name}">Produkt Name</h5>
-                        <p class="card-text text-muted small flex-grow-1" th:text="${product.description}">Beschreibung...</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="fs-5 fw-bold text-primary" th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' €'">0.00 €</span>
-
-                            <div class="text-end">
-                                <span th:if="${product.stock == 0}" class="badge bg-danger">
-                                    <i class="bi bi-x-circle-fill"></i> Ausverkauft
-                                </span>
-
-                                <span th:if="${product.stock > 0 && product.stock <= 5}" class="badge bg-warning text-dark">
-                                    <i class="bi bi-exclamation-triangle-fill"></i>
-                                    Nur noch <span th:text="${product.stock}">3</span> verfügbar!
-                                </span>
-
-                                <span th:if="${product.stock > 5}" class="badge bg-success">
-                                    <i class="bi bi-check-circle-fill"></i> Auf Lager
-                                </span>
-                            </div>
-                        </div>
-
-                        <div th:if="${product.stock > 0 && product.stock <= 5}" class="mb-3">
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated"
-                                     th:style="'width: ' + ${product.stock * 20} + '%'">
-                                </div>
-                            </div>
-
-                            <small class="text-warning">
-                                <i class="bi bi-fire"></i> Schnell vergriffen!
-                            </small>
-                        </div>
+<!-- ============================================
+     FILTER TOOLBAR
+     ============================================ -->
+<section class="filter-toolbar">
+    <div class="container">
+        <form th:action="@{/shop/products}" method="get" id="filterForm" class="filter-form">
+            <div class="filter-row">
+                <!-- Search -->
+                <div class="filter-search">
+                    <div class="search-input-wrapper">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text"
+                               class="search-input"
+                               name="q"
+                               th:value="${searchQuery}"
+                               placeholder="Produkt suchen...">
+                        <button type="button"
+                                class="search-clear"
+                                th:if="${searchQuery != null and !searchQuery.isEmpty()}"
+                                onclick="document.getElementById('searchQuery').value=''; document.getElementById('filterForm').submit();">
+                            <i class="bi bi-x"></i>
+                        </button>
                     </div>
                 </div>
+
+                <!-- Sort -->
+                <div class="filter-sort">
+                    <select class="filter-select" name="sort" id="sortSelect"
+                            onchange="submitFilterForm()">
+                        <option value="date_desc" th:selected="${selectedSort == 'date_desc'}">Neueste zuerst</option>
+                        <option value="date_asc"  th:selected="${selectedSort == 'date_asc'}">Älteste zuerst</option>
+                        <option value="price_asc" th:selected="${selectedSort == 'price_asc'}">Preis ↑</option>
+                        <option value="price_desc" th:selected="${selectedSort == 'price_desc'}">Preis ↓</option>
+                        <option value="name_asc"  th:selected="${selectedSort == 'name_asc'}">Name A-Z</option>
+                        <option value="name_desc" th:selected="${selectedSort == 'name_desc'}">Name Z-A</option>
+                    </select>
+                </div>
+
+                <!-- Reset -->
+                <a th:href="@{/shop/products}" class="filter-reset" title="Filter zurücksetzen">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    <span>Zurücksetzen</span>
+                </a>
+            </div>
+
+            <!-- Category Chips -->
+            <div class="filter-chips" th:if="${!categories.isEmpty()}">
+                <a th:href="@{/shop/products(q=${searchQuery}, sort=${selectedSort})}"
+                   class="filter-chip"
+                   th:classappend="${selectedCategory == null or selectedCategory.isEmpty()} ? 'active'">
+                    Alle
+                </a>
+                <a th:each="cat : ${categories}"
+                   th:href="@{/shop/products(category=${cat.slug}, q=${searchQuery}, sort=${selectedSort})}"
+                   class="filter-chip"
+                   th:classappend="${cat.slug == selectedCategory} ? 'active'"
+                   th:text="${cat.name}">
+                    Kategorie
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- ============================================
+     PRODUCTS GRID
+     ============================================ -->
+<section class="section products-section">
+    <div class="container">
+
+        <!-- Products Grid -->
+        <div class="products-grid" th:if="${!products.isEmpty()}">
+            <div th:each="product : ${products}" class="product-card">
+                <a th:href="@{/shop/products/{id}(id=${product.id})}" class="product-card-link">
+                    <div class="product-image-wrapper">
+                        <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                             th:src="@{${product.imageUrl}}"
+                             th:alt="${product.name}"
+                             class="product-image"
+                             loading="lazy">
+                        <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                             class="product-image-placeholder">
+                            <i class="bi bi-image"></i>
+                        </div>
+
+                        <!-- Badges -->
+                        <div th:if="${product.stock == 0}" class="product-badge badge-sold-out">
+                            Ausverkauft
+                        </div>
+                        <div th:if="${product.stock > 0 and product.stock <= 5}" class="product-badge badge-low-stock">
+                            Nur <span th:text="${product.stock}">3</span> übrig
+                        </div>
+                    </div>
+
+                    <div class="product-info">
+                        <p class="product-category" th:text="${product.categoryName}">Kategorie</p>
+                        <h3 class="product-name" th:text="${product.name}">Produktname</h3>
+                        <p class="product-price"
+                           th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' €'">0.00 €</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${products.isEmpty()}">
+            <div class="empty-state-icon">
+                <i class="bi bi-search"></i>
+            </div>
+            <h3 class="empty-state-title">Keine Produkte gefunden</h3>
+            <p class="empty-state-text">
+                Wir konnten keine Produkte zu Ihrer Suche finden.
+                Versuchen Sie es mit anderen Filtern.
+            </p>
+            <a th:href="@{/shop/products}" class="btn btn-primary">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Alle Filter zurücksetzen
             </a>
         </div>
 
-        <div class="col-12 text-center py-5" th:if="${#lists.isEmpty(products)}">
-            <i class="bi bi-search display-1 text-muted"></i>
-            <h4 class="mt-3 text-muted">Keine Produkte gefunden.</h4>
-            <a th:href="@{/shop/products}" class="btn btn-primary mt-2">Alle Filter zurücksetzen</a>
-        </div>
+        <!-- Pagination -->
+        <div th:replace="~{fragments/pagination :: pagination(page=${productPage}, baseUrl=${baseUrl})}"></div>
     </div>
+</section>
 
-    <div th:replace="~{fragments/pagination :: pagination(page=${productPage}, baseUrl=${baseUrl})}"></div>
-</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 <script th:src="@{/js/shop/products.js}"></script>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

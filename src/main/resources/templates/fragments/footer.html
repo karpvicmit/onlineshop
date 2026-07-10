@@ -1,26 +1,48 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<footer class="footer mt-auto py-4 bg-light" th:fragment="footer">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                <span class="text-muted">© 2026 OnlineShop. Alle Rechte vorbehalten.</span>
+
+    <footer class="site-footer" th:fragment="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <h3 class="footer-logo">OnlineShop</h3>
+                    <p class="footer-tagline">Hochwertige Produkte, zeitloses Design.</p>
+                </div>
+
+                <div class="footer-links-group">
+                    <div class="footer-col">
+                        <h4 class="footer-heading">Shop</h4>
+                        <a th:href="@{/shop/products}" class="footer-link">Alle Produkte</a>
+                        <a th:href="@{/shop/favorites}" class="footer-link">Favoriten</a>
+                        <a th:href="@{/shop/orders}" class="footer-link">Bestellungen</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4 class="footer-heading">Rechtliches</h4>
+                        <a th:href="@{/impressum}" target="_blank" class="footer-link">Impressum</a>
+                        <a th:href="@{/agb}" target="_blank" class="footer-link">AGB</a>
+                        <a th:href="@{/datenschutz}" target="_blank" class="footer-link">Datenschutz</a>
+                        <a th:href="@{/widerruf}" target="_blank" class="footer-link">Widerruf</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4 class="footer-heading">Kontakt</h4>
+                        <p class="footer-contact">info@onlineshop.de</p>
+                        <p class="footer-contact">+49 30 12345678</p>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6 text-center text-md-end">
-                <a href="#" id="cookieSettingsLink" class="text-muted text-decoration-none me-3">
-                    <i class="bi bi-cookie me-1"></i>Cookie-Einstellungen
+
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2026 OnlineShop. Alle Rechte vorbehalten.</p>
+                <a href="#" id="cookieSettingsLink" class="footer-link-small">
+                    <i class="bi bi-shield-check"></i> Cookie-Einstellungen
                 </a>
-                <a th:href="@{/impressum}" target="_blank" class="text-muted text-decoration-none me-3">Impressum</a>
-                <a th:href="@{/agb}" target="_blank" class="text-muted text-decoration-none me-3">AGB</a>
-                <a th:href="@{/datenschutz}" target="_blank" class="text-muted text-decoration-none me-3">Datenschutz</a>
-                <a th:href="@{/widerruf}" target="_blank" class="text-muted text-decoration-none">Widerruf</a>
             </div>
         </div>
-    </div>
 
-    <div th:replace="~{fragments/cookie-banner :: cookie-banner}"></div>
+        <div th:replace="~{fragments/cookie-banner :: cookie-banner}"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/js/fragments/cookie-settings.js}"></script>
-</footer>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script th:src="@{/js/fragments/cookie-settings.js}"></script>
+    </footer>
+
 </html>

@@ -1,0 +1,107 @@
+.site-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: rgba(250, 247, 242, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+    height: var(--navbar-height);
+    transition: all var(--transition-base);
+}
+
+.navbar-container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+}
+
+.navbar-brand {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--color-text);
+    letter-spacing: -0.03em;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+.navbar-brand:hover { color: var(--color-accent); }
+
+.brand-text {
+    display: inline-block;
+}
+
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+}
+
+.nav-link {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    position: relative;
+}
+.nav-link:hover, .nav-link.active {
+    color: var(--color-text);
+}
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--color-text);
+}
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.nav-icon-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.nav-icon-btn:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface-hover);
+}
+.nav-icon-btn i {
+    font-size: var(--text-lg);
+}
+
+.nav-account {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+@media (max-width: 768px) {
+    .nav-link-text, .nav-icon-text { display: none; }
+    .navbar-links { gap: var(--space-3); }
+}

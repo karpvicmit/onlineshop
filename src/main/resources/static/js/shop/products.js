@@ -47,3 +47,10 @@ function submitFormWithSort(selectedSort) {
 
     window.location.href = url;
 }
+
+function submitFilterForm() {
+    const form = document.getElementById('filterForm');
+    if (form) {
+        form.submit();
+    }
+}
