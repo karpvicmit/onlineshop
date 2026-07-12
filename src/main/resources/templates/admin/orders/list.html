@@ -1,121 +1,136 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Bestellverwaltung')}"></head>
-<body class="bg-light">
-<div class="d-flex">
+<body>
+<div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
-    <main class="flex-grow-1 p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-            <h2 class="mb-0"><i class="bi bi-receipt text-info me-2"></i>Bestellverwaltung</h2>
-        </div>
-        <div th:replace="~{fragments/alerts :: alerts}"></div>
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Bestell-Nr.</th>
-                            <th>Kunde</th>
-                            <th>Datum</th>
-                            <th>Zahlungsart</th>
-                            <th>Gesamtsumme</th>
-                            <th>Status</th>
-                            <th>Zahlung</th>
-                            <th class="text-center">Aktionen</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="order : ${orders}">
-                            <td class="fw-bold" th:text="'#' + ${order.id}">#1</td>
-                            <td th:text="${order.user != null ? order.user.email : 'Gast'}">kunde@email.de</td>
-                            <td th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
-                            <td>
-                                <span class="badge bg-secondary"
-                                      th:text="${order.paymentMethod != null ? order.paymentMethod.displayName : 'Vorkasse'}">
-                                    Vorkasse
-                                </span>
-                            </td>
-                            <td class="fw-bold" th:text="${#numbers.formatDecimal(order.grandTotal, 1, 2)} + ' €'">0.00 €</td>
-                            <td>
-                                <span th:switch="${order.status}" class="badge">
-                                    <span th:case="'NEW'" class="badge bg-primary">NEU</span>
-                                    <span th:case="'CONFIRMED'" class="badge bg-success">BESTÄTIGT</span>
-                                    <span th:case="'SHIPPED'" class="badge bg-info text-dark">VERSENDET</span>
-                                    <span th:case="'CANCELLED'" class="badge bg-danger">STORNIERT</span>
-                                    <span th:case="*" class="badge bg-secondary" th:text="${order.status}">UNBEKANNT</span>
-                                </span>
-                            </td>
-                            <td>
-                                <span th:if="${order.paymentStatus == null}" class="badge bg-light text-dark">—</span>
-                                <span th:if="${order.paymentStatus != null}"
-                                      th:switch="${order.paymentStatus}" class="badge">
-                                    <span th:case="'PENDING'" class="badge bg-warning text-dark">OFFEN</span>
-                                    <span th:case="'SUCCEEDED'" class="badge bg-success">BEZAHLT</span>
-                                    <span th:case="'FAILED'" class="badge bg-danger">FEHLGESCHLAGEN</span>
-                                    <span th:case="*" class="badge bg-secondary" th:text="${order.paymentStatus}">STATUS</span>
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <a th:href="@{/admin/orders/detail/{id}(id=${order.id})}"
-                                       class="btn btn-outline-secondary" title="Details">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
-                                        <select name="status" class="form-select form-select-sm d-inline-block w-auto"
-                                                onchange="this.form.submit()"
-                                                th:disabled="${order.status == 'CANCELLED' or order.status == 'SHIPPED'}">
-                                            <option value="" disabled selected>Status...</option>
-                                            <option value="CONFIRMED" th:selected="${order.status == 'CONFIRMED'}">Bestätigen</option>
-                                            <option value="SHIPPED" th:selected="${order.status == 'SHIPPED'}">Versenden</option>
-                                            <option value="CANCELLED" th:selected="${order.status == 'CANCELLED'}">Stornieren</option>
-                                        </select>
-                                    </form>
-                                    <!-- Mark as paid button — only for Rechnung orders with PENDING payment -->
-                                    <form th:if="${order.paymentProvider?.name() == 'RECHNUNG' and order.paymentStatus?.name() == 'PENDING'}"
-                                          th:action="@{/admin/orders/{id}/mark-as-paid(id=${order.id})}"
-                                          method="post" class="d-inline"
-                                          th:attr="onclick=|return confirm('Zahlungseingang für Bestellung #${order.id} bestätigen?');|">
-                                        <button type="submit" class="btn btn-sm btn-success"
-                                                title="Als bezahlt markieren">
-                                            <i class="bi bi-cash-coin"></i> Bezahlt
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(orders)}">
-                            <td colspan="8" class="text-center text-muted py-4">Keine Bestellungen gefunden.</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div th:if="${orderPage.totalPages > 1}" class="d-flex justify-content-center mt-4">
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination">
-                            <li class="page-item" th:classappend="${orderPage.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number - 1}, size=${orderPage.size})}">
-                                    &laquo; Zurück
-                                </a>
-                            </li>
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, orderPage.totalPages - 1)}"
-                                th:classappend="${i == orderPage.number} ? 'active'">
-                                <a class="page-link" th:href="@{/admin/orders(page=${i}, size=${orderPage.size})}"
-                                   th:text="${i + 1}">1</a>
-                            </li>
-                            <li class="page-item" th:classappend="${orderPage.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number + 1}, size=${orderPage.size})}">
-                                    Weiter &raquo;
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1 class="admin-page-title">
+                    <i class="bi bi-receipt"></i>
+                    Bestellverwaltung
+                </h1>
+                <p class="admin-page-subtitle">
+                    <span th:text="${orderPage.totalElements}">0</span> Bestellungen insgesamt
+                </p>
             </div>
+        </div>
+
+        <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>Bestell-Nr.</th>
+                    <th>Kunde</th>
+                    <th>Datum</th>
+                    <th>Zahlungsart</th>
+                    <th class="text-end">Gesamtsumme</th>
+                    <th>Status</th>
+                    <th>Zahlung</th>
+                    <th class="text-center">Aktionen</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td style="font-weight: 700;" th:text="'#' + ${order.id}">#1</td>
+                    <td th:text="${order.user != null ? order.user.email : 'Gast'}">kunde@email.de</td>
+                    <td class="text-muted" th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
+                    <td>
+                            <span class="status-badge" style="background-color: var(--color-bg-alt); color: var(--color-text);"
+                                  th:text="${order.paymentMethod != null ? order.paymentMethod.displayName : 'Vorkasse'}">
+                                Vorkasse
+                            </span>
+                    </td>
+                    <td class="text-end" style="font-weight: 700;"
+                        th:text="${#numbers.formatDecimal(order.grandTotal, 1, 2)} + ' €'">0.00 €</td>
+                    <td>
+                            <span th:switch="${order.status}" class="status-badge">
+                                <span th:case="'NEW'" class="status-badge status-badge-new">NEU</span>
+                                <span th:case="'CONFIRMED'" class="status-badge status-badge-confirmed">BESTÄTIGT</span>
+                                <span th:case="'SHIPPED'" class="status-badge status-badge-shipped">VERSENDET</span>
+                                <span th:case="'CANCELLED'" class="status-badge status-badge-cancelled">STORNIERT</span>
+                                <span th:case="*" class="status-badge" th:text="${order.status}">UNBEKANNT</span>
+                            </span>
+                    </td>
+                    <td>
+                        <span th:if="${order.paymentStatus == null}" class="status-badge" style="background-color: var(--color-bg-alt);">—</span>
+                        <span th:if="${order.paymentStatus != null}"
+                              th:switch="${order.paymentStatus}" class="status-badge">
+                                <span th:case="'PENDING'" class="status-badge status-badge-pending">OFFEN</span>
+                                <span th:case="'SUCCEEDED'" class="status-badge status-badge-succeeded">BEZAHLT</span>
+                                <span th:case="'FAILED'" class="status-badge status-badge-cancelled">FEHLGESCHLAGEN</span>
+                                <span th:case="*" class="status-badge" th:text="${order.paymentStatus}">STATUS</span>
+                            </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="action-buttons" style="flex-wrap: wrap;">
+                            <a th:href="@{/admin/orders/detail/{id}(id=${order.id})}"
+                               class="action-btn" title="Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                <select name="status" class="admin-form-select"
+                                        style="width: 130px; padding: 0.375rem 0.5rem; font-size: var(--text-xs);"
+                                        onchange="this.form.submit()"
+                                        th:disabled="${order.status == 'CANCELLED' or order.status == 'SHIPPED'}">
+                                    <option value="" disabled selected>Status...</option>
+                                    <option value="CONFIRMED">Bestätigen</option>
+                                    <option value="SHIPPED">Versenden</option>
+                                    <option value="CANCELLED">Stornieren</option>
+                                </select>
+                            </form>
+                            <form th:if="${order.paymentProvider?.name() == 'RECHNUNG' and order.paymentStatus?.name() == 'PENDING'}"
+                                  th:action="@{/admin/orders/{id}/mark-as-paid(id=${order.id})}"
+                                  method="post" class="d-inline"
+                                  th:attr="onclick=|return confirm('Zahlungseingang für Bestellung #${order.id} bestätigen?');|">
+                                <button type="submit" class="action-btn action-btn-success"
+                                        title="Als bezahlt markieren">
+                                    <i class="bi bi-cash-coin"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(orders)}">
+                    <td colspan="8">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-icon">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+                            <h3 class="admin-empty-title">Keine Bestellungen gefunden</h3>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${orderPage.totalPages > 1}" class="d-flex justify-content-center mt-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${orderPage.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number - 1}, size=${orderPage.size})}">
+                            &laquo; Zurück
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, orderPage.totalPages - 1)}"
+                        th:classappend="${i == orderPage.number} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/orders(page=${i}, size=${orderPage.size})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${orderPage.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number + 1}, size=${orderPage.size})}">
+                            Weiter &raquo;
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </main>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

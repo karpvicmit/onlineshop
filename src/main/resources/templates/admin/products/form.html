@@ -1,13 +1,27 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Produkt bearbeiten')}"></head>
-<body class="bg-light">
-
-<div class="d-flex">
+<body>
+<div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
 
-    <main class="flex-grow-1 p-4">
-        <h2 class="mb-4" th:text="${product.id == null} ? 'Neues Produkt anlegen' : 'Produkt bearbeiten'">Produkt</h2>
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1 class="admin-page-title">
+                    <i class="bi bi-box-seam"></i>
+                    <span th:text="${product.id == null} ? 'Neues Produkt anlegen' : 'Produkt bearbeiten'">Produkt</span>
+                </h1>
+                <p class="admin-page-subtitle" th:if="${product.id != null}">
+                    ID: <span th:text="${product.id}">1</span>
+                </p>
+            </div>
+            <div class="admin-page-actions">
+                <a th:href="@{/admin/products}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Zurück
+                </a>
+            </div>
+        </div>
 
         <div th:replace="~{fragments/alerts :: alerts}"></div>
 
@@ -15,65 +29,88 @@
             <input type="hidden" th:field="*{id}"/>
             <input type="hidden" th:field="*{version}"/>
 
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Produktname *</label>
-                        <input type="text" class="form-control" id="name" th:field="*{name}" required>
-                        <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+            <div style="display: grid; grid-template-columns: 1fr 380px; gap: var(--space-6); align-items: start;">
+                <!-- Left: Main Info -->
+                <div class="admin-form-card">
+                    <div class="admin-form-header">
+                        <i class="bi bi-info-circle"></i>
+                        Produktdaten
                     </div>
-
-                    <div class="mb-3">
-                        <label for="sku" class="form-label">Artikelnummer (SKU) *</label>
-                        <input type="text" class="form-control" id="sku" th:field="*{sku}" required
-                               placeholder="z.B. SKU-0001">
-                        <div class="text-danger small" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></div>
-                        <div class="form-text">Eindeutige Artikelnummer für Import/Export.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="category" class="form-label">Kategorie *</label>
-                        <select class="form-select" id="category" th:field="*{category.id}" required>
-                            <option value="">Bitte wählen...</option>
-                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Kategorie</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Beschreibung</label>
-                        <textarea class="form-control" id="description" th:field="*{description}" rows="4"></textarea>
+                    <div class="admin-form-body">
+                        <div class="admin-form-group">
+                            <label for="name" class="admin-form-label">Produktname *</label>
+                            <input type="text" class="admin-form-input" id="name" th:field="*{name}" required>
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                        </div>
+                        <div class="admin-form-group">
+                            <label for="sku" class="admin-form-label">Artikelnummer (SKU) *</label>
+                            <input type="text" class="admin-form-input" id="sku" th:field="*{sku}" required
+                                   placeholder="z.B. SKU-0001">
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></div>
+                            <p class="admin-form-hint">Eindeutige Artikelnummer für Import/Export.</p>
+                        </div>
+                        <div class="admin-form-group">
+                            <label for="category" class="admin-form-label">Kategorie *</label>
+                            <select class="admin-form-select" id="category" th:field="*{category.id}" required>
+                                <option value="">Bitte wählen...</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Kategorie</option>
+                            </select>
+                        </div>
+                        <div class="admin-form-group">
+                            <label for="description" class="admin-form-label">Beschreibung</label>
+                            <textarea class="admin-form-textarea" id="description" th:field="*{description}" rows="6"></textarea>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="price" class="form-label">Preis (€) *</label>
-                        <input type="number" step="0.01" min="0.01" class="form-control" id="price" th:field="*{price}" required>
-                        <div class="text-danger small" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+                <!-- Right: Price & Image -->
+                <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+                    <div class="admin-form-card">
+                        <div class="admin-form-header">
+                            <i class="bi bi-currency-euro"></i>
+                            Preis & Lager
+                        </div>
+                        <div class="admin-form-body">
+                            <div class="admin-form-group">
+                                <label for="price" class="admin-form-label">Preis (€) *</label>
+                                <input type="number" step="0.01" min="0.01" class="admin-form-input" id="price" th:field="*{price}" required>
+                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+                            </div>
+                            <div class="admin-form-group">
+                                <label for="stock" class="admin-form-label">Lagerbestand *</label>
+                                <input type="number" min="0" class="admin-form-input" id="stock" th:field="*{stock}" required>
+                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="stock" class="form-label">Lagerbestand *</label>
-                        <input type="number" min="0" class="form-control" id="stock" th:field="*{stock}" required>
-                        <div class="text-danger small" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="imageFile" class="form-label">Produktbild</label>
-                        <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/png, image/jpeg">
-                        <div class="form-text">Max. 50MB. Formate: JPG, PNG.</div>
-                    </div>
-
-                    <div class="mb-3" th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}">
-                        <label class="form-label">Aktuelles Bild</label><br>
-                        <img th:src="@{${product.imageUrl}}" alt="Produktbild" style="max-height: 150px;" class="img-thumbnail border">
+                    <div class="admin-form-card">
+                        <div class="admin-form-header">
+                            <i class="bi bi-image"></i>
+                            Produktbild
+                        </div>
+                        <div class="admin-form-body">
+                            <div class="admin-form-group">
+                                <label for="imageFile" class="admin-form-label">Bild hochladen</label>
+                                <input type="file" class="admin-form-input" id="imageFile" name="imageFile" accept="image/png, image/jpeg">
+                                <p class="admin-form-hint">Max. 50MB. Formate: JPG, PNG.</p>
+                            </div>
+                            <div th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                                 style="margin-top: var(--space-4); text-align: center;">
+                                <p class="admin-form-label">Aktuelles Bild:</p>
+                                <img th:src="@{${product.imageUrl}}" alt="Produktbild"
+                                     style="max-height: 200px; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="d-flex gap-2 mt-3">
-                <button type="submit" class="btn btn-primary">Speichern</button>
-                <a th:href="@{/admin/products}" class="btn btn-secondary">Abbrechen</a>
+            <div class="admin-form-actions" style="margin-top: var(--space-6);">
+                <a th:href="@{/admin/products}" class="btn btn-outline-secondary">Abbrechen</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Speichern
+                </button>
             </div>
         </form>
     </main>

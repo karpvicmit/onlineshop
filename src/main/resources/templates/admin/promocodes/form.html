@@ -1,124 +1,139 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Promo-Code bearbeiten')}"></head>
-<body class="bg-light">
-<div class="d-flex">
+<body>
+<div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
-    <main class="flex-grow-1 p-4">
-        <h2 class="mb-4" th:text="${promoCode.id == null} ? 'Neuer Promo-Code' : 'Promo-Code bearbeiten'">Promo-Code</h2>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1 class="admin-page-title">
+                    <i class="bi bi-tag-fill"></i>
+                    <span th:text="${promoCode.id == null} ? 'Neuer Promo-Code' : 'Promo-Code bearbeiten'">Promo-Code</span>
+                </h1>
+            </div>
+            <div class="admin-page-actions">
+                <a th:href="@{/admin/promocodes}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Zurück
+                </a>
+            </div>
+        </div>
 
         <div th:replace="~{fragments/alerts :: alerts}"></div>
 
         <form th:action="@{/admin/promocodes/save}" th:object="${promoCode}" method="post">
             <input type="hidden" th:field="*{id}"/>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-primary text-white fw-bold">
-                            <i class="bi bi-tag-fill me-2"></i>Grunddaten
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); align-items: start;">
+                <!-- Left: Basic Data -->
+                <div class="admin-form-card">
+                    <div class="admin-form-header">
+                        <i class="bi bi-tag-fill"></i>
+                        Grunddaten
+                    </div>
+                    <div class="admin-form-body">
+                        <div class="admin-form-group">
+                            <label for="code" class="admin-form-label">Promo-Code *</label>
+                            <input type="text" class="admin-form-input" id="code" th:field="*{code}"
+                                   required placeholder="z.B. SAVE10" style="text-transform: uppercase;">
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></div>
+                            <p class="admin-form-hint">Wird automatisch in Großbuchstaben umgewandelt.</p>
                         </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="code" class="form-label">Promo-Code *</label>
-                                <input type="text" class="form-control" id="code" th:field="*{code}"
-                                       required placeholder="z.B. SAVE10"
-                                       style="text-transform: uppercase;">
-                                <div class="text-danger small" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></div>
-                                <div class="form-text">Wird automatisch in Großbuchstaben umgewandelt.</div>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="discountType" class="form-label">Rabatt-Typ *</label>
-                                    <select class="form-select" id="discountType" th:field="*{discountType}" required>
-                                        <option th:each="type : ${discountTypes}"
-                                                th:value="${type}"
-                                                th:text="${type == T(com.karpenko.onlineshop.entity.DiscountType).PERCENTAGE} ? 'Prozent (%)' : 'Fester Betrag (€)'">
-                                            Typ
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="discountValue" class="form-label">Rabatt-Wert *</label>
-                                    <input type="number" step="0.01" min="0" class="form-control"
-                                           id="discountValue" th:field="*{discountValue}" required>
-                                    <div class="text-danger small" th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}"></div>
-                                </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                            <div class="admin-form-group">
+                                <label for="discountType" class="admin-form-label">Rabatt-Typ *</label>
+                                <select class="admin-form-select" id="discountType" th:field="*{discountType}" required>
+                                    <option th:each="type : ${discountTypes}"
+                                            th:value="${type}"
+                                            th:text="${type == T(com.karpenko.onlineshop.entity.DiscountType).PERCENTAGE} ? 'Prozent (%)' : 'Fester Betrag (€)'">
+                                        Typ
+                                    </option>
+                                </select>
                             </div>
+                            <div class="admin-form-group">
+                                <label for="discountValue" class="admin-form-label">Rabatt-Wert *</label>
+                                <input type="number" step="0.01" min="0" class="admin-form-input"
+                                       id="discountValue" th:field="*{discountValue}" required>
+                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}"></div>
+                            </div>
+                        </div>
 
-                            <div class="mb-3">
-                                <label for="minOrderAmount" class="form-label">Mindestbestellwert (€)</label>
-                                <input type="number" step="0.01" min="0" class="form-control"
-                                       id="minOrderAmount" th:field="*{minOrderAmount}"
-                                       placeholder="Optional, z.B. 50.00">
-                                <div class="form-text">Promo-Code ist nur gültig ab diesem Bestellwert.</div>
-                            </div>
+                        <div class="admin-form-group">
+                            <label for="minOrderAmount" class="admin-form-label">Mindestbestellwert (€)</label>
+                            <input type="number" step="0.01" min="0" class="admin-form-input"
+                                   id="minOrderAmount" th:field="*{minOrderAmount}"
+                                   placeholder="Optional, z.B. 50.00">
+                            <p class="admin-form-hint">Promo-Code ist nur gültig ab diesem Bestellwert.</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-success text-white fw-bold">
-                            <i class="bi bi-calendar-event me-2"></i>Gültigkeit & Limits
+                <!-- Right: Validity & Limits -->
+                <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+                    <div class="admin-form-card">
+                        <div class="admin-form-header">
+                            <i class="bi bi-calendar-event"></i>
+                            Gültigkeit & Limits
                         </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="validFrom" class="form-label">Gültig von *</label>
-                                <input type="datetime-local" class="form-control" id="validFrom"
+                        <div class="admin-form-body">
+                            <div class="admin-form-group">
+                                <label for="validFrom" class="admin-form-label">Gültig von *</label>
+                                <input type="datetime-local" class="admin-form-input" id="validFrom"
                                        th:field="*{validFrom}" required>
-                                <div class="text-danger small" th:if="${#fields.hasErrors('validFrom')}" th:errors="*{validFrom}"></div>
+                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('validFrom')}" th:errors="*{validFrom}"></div>
                             </div>
-
-                            <div class="mb-3">
-                                <label for="validUntil" class="form-label">Gültig bis</label>
-                                <input type="datetime-local" class="form-control" id="validUntil"
+                            <div class="admin-form-group">
+                                <label for="validUntil" class="admin-form-label">Gültig bis</label>
+                                <input type="datetime-local" class="admin-form-input" id="validUntil"
                                        th:field="*{validUntil}">
-                                <div class="form-text">Leer lassen für unbegrenzte Gültigkeit.</div>
+                                <p class="admin-form-hint">Leer lassen für unbegrenzte Gültigkeit.</p>
                             </div>
-
-                            <div class="mb-3">
-                                <label for="maxUses" class="form-label">Maximale Verwendungen</label>
-                                <input type="number" min="1" class="form-control" id="maxUses"
+                            <div class="admin-form-group">
+                                <label for="maxUses" class="admin-form-label">Maximale Verwendungen</label>
+                                <input type="number" min="1" class="admin-form-input" id="maxUses"
                                        th:field="*{maxUses}" placeholder="Optional, z.B. 100">
-                                <div class="form-text">Leer lassen für unbegrenzte Nutzung.</div>
+                                <p class="admin-form-hint">Leer lassen für unbegrenzte Nutzung.</p>
                             </div>
-
-                            <div class="mb-3">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="active" th:field="*{active}">
-                                    <label class="form-check-label" for="active">
-                                        <strong>Promo-Code ist aktiv</strong>
+                            <div class="admin-form-group" style="margin-bottom: 0;">
+                                <div style="display: flex; align-items: center; gap: var(--space-3);">
+                                    <input class="form-check-input" type="checkbox" id="active" th:field="*{active}"
+                                           style="width: 18px; height: 18px; accent-color: var(--color-accent);">
+                                    <label for="active" style="font-weight: 600; cursor: pointer;">
+                                        Promo-Code ist aktiv
                                     </label>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div th:if="${promoCode.id != null}" class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-info text-white fw-bold">
-                            <i class="bi bi-bar-chart-fill me-2"></i>Statistiken
+                    <!-- Stats (only for existing codes) -->
+                    <div th:if="${promoCode.id != null}" class="admin-form-card">
+                        <div class="admin-form-header">
+                            <i class="bi bi-bar-chart-fill"></i>
+                            Statistiken
                         </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Bereits verwendet:</span>
-                                <strong th:text="${promoCode.usedCount}">0</strong>
+                        <div class="admin-form-body">
+                            <div class="profile-info-row">
+                                <span class="profile-info-label">Bereits verwendet</span>
+                                <span class="profile-info-value" style="font-weight: 700;" th:text="${promoCode.usedCount}">0</span>
                             </div>
-                            <div th:if="${promoCode.maxUses != null}" class="d-flex justify-content-between">
-                                <span>Verbleibend:</span>
-                                <strong th:text="${promoCode.maxUses - promoCode.usedCount}">0</strong>
+                            <div class="profile-info-row" th:if="${promoCode.maxUses != null}" style="border-bottom: none;">
+                                <span class="profile-info-label">Verbleibend</span>
+                                <span class="profile-info-value" style="font-weight: 700; color: var(--color-success);"
+                                      th:text="${promoCode.maxUses - promoCode.usedCount}">0</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="d-flex gap-2 mt-3">
+            <div class="admin-form-actions" style="margin-top: var(--space-6);">
+                <a th:href="@{/admin/promocodes}" class="btn btn-outline-secondary">Abbrechen</a>
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-lg me-1"></i> Speichern
+                    <i class="bi bi-check-lg"></i> Speichern
                 </button>
-                <a th:href="@{/admin/promocodes}" class="btn btn-secondary">Abbrechen</a>
             </div>
         </form>
     </main>
