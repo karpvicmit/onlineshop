@@ -4,102 +4,107 @@
 <body>
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 <div th:replace="~{fragments/alerts :: alerts}"></div>
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="fas fa-credit-card me-2"></i>Kasse / Checkout</h4>
+
+<div class="page-container">
+    <div class="page-title-section">
+        <h1><i class="bi bi-bag-check me-2"></i>Kasse</h1>
+        <p>Überprüfen Sie Ihre Bestellung und schließen Sie den Kauf ab</p>
+    </div>
+
+    <form th:action="@{/shop/checkout/confirm}" method="post">
+        <div class="checkout-layout">
+            <div class="checkout-steps">
+                <div class="checkout-step">
+                    <div class="checkout-step-header">
+                        <span class="checkout-step-number">1</span>
+                        <h2 class="checkout-step-title">Versandart</h2>
+                    </div>
+                    <div class="checkout-step-body">
+                        <label class="checkout-option">
+                            <input type="radio" name="shippingMethod" value="STANDARD" checked required>
+                            <div class="checkout-option-info">
+                                <div class="checkout-option-name">Standardversand</div>
+                                <div class="checkout-option-desc">Lieferung in 3–5 Werktagen</div>
+                            </div>
+                            <span class="checkout-option-price">4,99 €</span>
+                        </label>
+                        <label class="checkout-option">
+                            <input type="radio" name="shippingMethod" value="EXPRESS" required>
+                            <div class="checkout-option-info">
+                                <div class="checkout-option-name">Expressversand</div>
+                                <div class="checkout-option-desc">Lieferung am nächsten Werktag</div>
+                            </div>
+                            <span class="checkout-option-price">9,99 €</span>
+                        </label>
+                        <label class="checkout-option">
+                            <input type="radio" name="shippingMethod" value="ABHOLUNG" required>
+                            <div class="checkout-option-info">
+                                <div class="checkout-option-name">Selbstabholung</div>
+                                <div class="checkout-option-desc">Kostenlose Abholung im Lager</div>
+                            </div>
+                            <span class="checkout-option-price free">Kostenlos</span>
+                        </label>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form th:action="@{/shop/checkout/confirm}" method="post">
 
-                        <!-- ============ SHIPPING METHOD ============ -->
-                        <div class="mb-4">
-                            <h5 class="mb-3"><i class="bi bi-truck me-2"></i>Versandart wählen</h5>
-                            <div class="list-group">
-                                <label class="list-group-item list-group-item-action d-flex gap-3 py-3" style="cursor: pointer;">
-                                    <input class="form-check-input flex-shrink-0" type="radio"
-                                           name="shippingMethod" value="STANDARD" checked required>
-                                    <div class="d-flex gap-2 w-100 justify-content-between">
-                                        <div>
-                                            <h6 class="mb-0">Standardversand</h6>
-                                            <small class="text-muted">Lieferung in 3–5 Werktagen</small>
-                                        </div>
-                                        <strong class="text-primary">4,99 €</strong>
-                                    </div>
-                                </label>
-                                <label class="list-group-item list-group-item-action d-flex gap-3 py-3" style="cursor: pointer;">
-                                    <input class="form-check-input flex-shrink-0" type="radio"
-                                           name="shippingMethod" value="EXPRESS" required>
-                                    <div class="d-flex gap-2 w-100 justify-content-between">
-                                        <div>
-                                            <h6 class="mb-0">Expressversand</h6>
-                                            <small class="text-muted">Lieferung am nächsten Werktag</small>
-                                        </div>
-                                        <strong class="text-primary">9,99 €</strong>
-                                    </div>
-                                </label>
-                                <label class="list-group-item list-group-item-action d-flex gap-3 py-3" style="cursor: pointer;">
-                                    <input class="form-check-input flex-shrink-0" type="radio"
-                                           name="shippingMethod" value="ABHOLUNG" required>
-                                    <div class="d-flex gap-2 w-100 justify-content-between">
-                                        <div>
-                                            <h6 class="mb-0">Selbstabholung</h6>
-                                            <small class="text-muted">Kostenlose Abholung im Lager</small>
-                                        </div>
-                                        <strong class="text-success">Kostenlos</strong>
-                                    </div>
-                                </label>
+                <div class="checkout-step">
+                    <div class="checkout-step-header">
+                        <span class="checkout-step-number">2</span>
+                        <h2 class="checkout-step-title">Zahlungsart</h2>
+                    </div>
+                    <div class="checkout-step-body">
+                        <label class="checkout-option">
+                            <input type="radio" name="paymentProvider" value="VORKASSE" checked required>
+                            <div class="checkout-option-info">
+                                <div class="checkout-option-name">Vorkasse</div>
+                                <div class="checkout-option-desc">Bezahlung vor Versand per Überweisung</div>
                             </div>
-                        </div>
+                        </label>
+                        <label class="checkout-option">
+                            <input type="radio" name="paymentProvider" value="RECHNUNG" required>
+                            <div class="checkout-option-info">
+                                <div class="checkout-option-name">Rechnung</div>
+                                <div class="checkout-option-desc">Bezahlung innerhalb von 14 Tagen nach Erhalt</div>
+                            </div>
+                        </label>
+                        <label class="checkout-option">
+                            <input type="radio" name="paymentProvider" value="STRIPE" required>
+                            <div class="checkout-option-info">
+                                <div class="checkout-option-name">Kreditkarte / PayPal</div>
+                                <div class="checkout-option-desc">Sichere Zahlung per Kreditkarte oder PayPal</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
 
-                        <!-- ============ PAYMENT METHOD ============ -->
-                        <div class="mb-4">
-                            <h5 class="mb-3"><i class="bi bi-credit-card me-2"></i>Zahlungsart wählen</h5>
-                            <div class="list-group">
-                                <label class="list-group-item list-group-item-action d-flex gap-3 py-3" style="cursor: pointer;">
-                                    <input class="form-check-input flex-shrink-0" type="radio"
-                                           name="paymentProvider" value="VORKASSE" checked required>
-                                    <div class="d-flex gap-2 w-100 justify-content-between">
-                                        <div>
-                                            <h6 class="mb-0">Vorkasse</h6>
-                                            <small class="text-muted">Bezahlung vor Versand per Überweisung</small>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="list-group-item list-group-item-action d-flex gap-3 py-3" style="cursor: pointer;">
-                                    <input class="form-check-input flex-shrink-0" type="radio"
-                                           name="paymentProvider" value="STRIPE" required>
-                                    <div class="d-flex gap-2 w-100 justify-content-between">
-                                        <div>
-                                            <h6 class="mb-0">Kreditkarte / PayPal (Stripe)</h6>
-                                            <small class="text-muted">Sichere Zahlung per Kreditkarte oder PayPal</small>
-                                        </div>
-                                    </div>
-                                </label>
+                <div class="checkout-step">
+                    <div class="checkout-step-header">
+                        <span class="checkout-step-number">3</span>
+                        <h2 class="checkout-step-title">Lieferadresse</h2>
+                    </div>
+                    <div class="checkout-step-body">
+                        <div class="checkout-address-card">
+                            <div class="checkout-address-icon">
+                                <i class="bi bi-geo-alt"></i>
                             </div>
-                        </div>
-
-                        <!-- ============ DELIVERY ADDRESS ============ -->
-                        <div class="mb-4">
-                            <h5 class="mb-3"><i class="bi bi-geo-alt me-2"></i>Lieferadresse</h5>
-                            <div class="alert alert-light border">
-                                <strong th:text="${user.firstName + ' ' + user.lastName}">Max Mustermann</strong><br>
-                                <span th:text="${user.address}">Adresse</span><br>
-                                <small class="text-muted" th:text="${user.email}">email</small>
+                            <div class="checkout-address-info">
+                                <div class="checkout-address-name"
+                                     th:text="${user.firstName + ' ' + user.lastName}">Max Mustermann</div>
+                                <div class="checkout-address-text" th:text="${user.address}">Adresse</div>
+                                <div class="checkout-address-email" th:text="${user.email}">email</div>
                             </div>
-                            <a th:href="@{/profile}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-pencil"></i> Adresse ändern
+                            <a th:href="@{/profile}" class="checkout-address-edit">
+                                <i class="bi bi-pencil"></i> Ändern
                             </a>
                         </div>
+                    </div>
+                </div>
 
-                        <hr>
-
-                        <!-- ============ TERMS ============ -->
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="acceptTerms" required>
-                            <label class="form-check-label" for="acceptTerms">
+                <div class="checkout-step">
+                    <div class="checkout-step-body">
+                        <div class="checkout-terms">
+                            <input type="checkbox" id="acceptTerms" required>
+                            <label for="acceptTerms">
                                 Ich akzeptiere die
                                 <a th:href="@{/agb}" target="_blank">AGB</a> und habe die
                                 <a th:href="@{/datenschutz}" target="_blank">Datenschutzerklärung</a>
@@ -107,20 +112,50 @@
                             </label>
                         </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a th:href="@{/shop/cart}" class="btn btn-outline-secondary me-md-2">
-                                Zurück zum Warenkorb
+                        <div class="checkout-actions">
+                            <a th:href="@{/shop/cart}" class="checkout-back-btn">
+                                <i class="bi bi-arrow-left"></i> Zurück zum Warenkorb
                             </a>
-                            <button type="submit" class="btn btn-success px-4">
-                                <i class="bi bi-check-circle me-1"></i> Kostenpflichtig bestellen
+                            <button type="submit" class="checkout-submit-btn">
+                                <i class="bi bi-lock"></i> Kostenpflichtig bestellen
                             </button>
                         </div>
-                    </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cart-summary-sidebar">
+                <div class="checkout-summary-card">
+                    <div class="checkout-summary-header">Bestellübersicht</div>
+                    <div class="checkout-summary-body" style="padding: var(--space-5);">
+                        <div class="cart-summary-row">
+                            <span>Zwischensumme</span>
+                            <span class="value" th:text="${#numbers.formatDecimal(cart != null ? cart.total : 0, 1, 'COMMA', 2, 'POINT')} + ' €'">0,00 €</span>
+                        </div>
+                        <div class="cart-summary-row total">
+                            <span>Gesamt</span>
+                            <span th:text="${#numbers.formatDecimal(cart != null ? cart.finalTotal : 0, 1, 'COMMA', 2, 'POINT')} + ' €'">0,00 €</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
+
 <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<script>
+    document.querySelectorAll('.checkout-option input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const group = this.closest('.checkout-step-body');
+            group.querySelectorAll('.checkout-option').forEach(opt => opt.classList.remove('selected'));
+            this.closest('.checkout-option').classList.add('selected');
+        });
+        if (radio.checked) {
+            radio.closest('.checkout-option').classList.add('selected');
+        }
+    });
+</script>
 </body>
 </html>

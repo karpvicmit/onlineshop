@@ -1,59 +1,106 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Bestellhistorie')}"></head>
+<head th:replace="~{fragments/head :: head('Meine Bestellungen')}"></head>
 <body>
-
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 <div th:replace="~{fragments/alerts :: alerts}"></div>
 
-<div class="container mt-4">
-    <h2 class="mb-4"><i class="fas fa-history me-2"></i>Meine Bestellhistorie</h2>
+<div class="page-container">
+    <div class="page-title-section">
+        <h1><i class="bi bi-receipt me-2"></i>Meine Bestellungen</h1>
+        <p>Übersicht über alle Ihre Bestellungen</p>
+    </div>
 
-    <div th:if="${orders != null and !orders.isEmpty()}">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                <tr>
-                    <th scope="col">Bestellnummer</th>
-                    <th scope="col">Datum</th>
-                    <th scope="col">Status</th>
-                    <th scope="col" class="text-end">Gesamtbetrag</th>
-                    <th scope="col"></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="order : ${orders}">
-                    <td th:text="'#' + ${order.id}">#123</td>
-                    <td th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
-                    <td>
-                        <span th:switch="${order.status}" class="badge">
-                                    <span th:case="NEW" class="badge bg-info text-dark">NEU</span>
-                                    <span th:case="CONFIRMED" class="badge bg-primary">BESTÄTIGT</span>
-                                    <span th:case="SHIPPED" class="badge bg-success">VERSENDET</span>
-                                    <span th:case="CANCELLED" class="badge bg-danger">STORNIERT</span>
-                                    <span th:case="*" class="badge bg-secondary" th:text="${order.status}">STATUS</span>
-                                </span>
-                    </td>
-                    <td class="text-end fw-bold"
-                        th:text="${#numbers.formatDecimal(order.grandTotal, 1, 'COMMA', 2, 'POINT')} + ' €'">
-                        0.00 €
-                    </td>
-                    <td class="text-end">
-                        <a th:href="@{/shop/orders/{id}(id=${order.id})}" class="btn btn-outline-primary btn-sm">
-                            Details ansehen
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+    <div th:if="${orders != null and !orders.isEmpty()}" class="orders-list">
+        <div th:each="order : ${orders}" class="order-card">
+            <div class="order-card-header">
+                <div>
+                    <span class="order-card-id" th:text="'Bestellung #' + ${order.id}">#123</span>
+                    <span class="order-card-date ms-3"
+                          th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}">01.01.2026</span>
+                </div>
+                <span class="order-card-status"
+                      th:classappend="${order.status.name() == 'NEW'} ? 'order-status-new' :
+                                      (${order.status.name() == 'CONFIRMED'} ? 'order-status-confirmed' :
+                                      (${order.status.name() == 'SHIPPED'} ? 'order-status-shipped' :
+                                      (${order.status.name() == 'CANCELLED'} ? 'order-status-cancelled' : '')))">
+                    <span th:switch="${order.status}">
+                        <span th:case="NEW">Neu</span>
+                        <span th:case="CONFIRMED">Bestätigt</span>
+                        <span th:case="SHIPPED">Versendet</span>
+                        <span th:case="CANCELLED">Storniert</span>
+                        <span th:case="*" th:text="${order.status}">Status</span>
+                    </span>
+                </span>
+            </div>
+
+            <div class="order-card-body">
+                <div class="order-card-items">
+                    <div th:each="item, iterStat : ${order.orderItems}"
+                         th:if="${iterStat.index < 3}"
+                         class="order-card-item">
+                        <img th:if="${item.product.imageUrl != null and !item.product.imageUrl.isEmpty()}"
+                             th:src="${item.product.imageUrl}"
+                             th:alt="${item.product.name}"
+                             class="order-card-item-image">
+                        <div th:unless="${item.product.imageUrl != null and !item.product.imageUrl.isEmpty()}"
+                             class="order-card-item-image-placeholder">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <div class="order-card-item-info">
+                            <div class="order-card-item-name" th:text="${item.product.name}">Produktname</div>
+                            <div class="order-card-item-qty"
+                                 th:text="'Menge: ' + ${item.quantity} + ' × ' + ${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')} + ' €'">
+                                Menge: 1 × 0,00 €
+                            </div>
+                        </div>
+                        <div class="order-card-item-price"
+                             th:text="${#numbers.formatDecimal(item.unitPrice * item.quantity, 1, 'COMMA', 2, 'POINT')} + ' €'">
+                            0,00 €
+                        </div>
+                    </div>
+                    <div th:if="${order.orderItems.size() > 3}"
+                         class="text-muted small ps-5"
+                         th:text="'+' + ${order.orderItems.size() - 3} + ' weitere Artikel'">
+                        +2 weitere Artikel
+                    </div>
+                </div>
+
+                <div class="order-card-footer">
+                    <div>
+                        <span class="text-muted small me-3">
+                            <i class="bi bi-credit-card me-1"></i>
+                            <span th:text="${order.paymentMethod.displayName}">Vorkasse</span>
+                        </span>
+                        <span class="text-muted small">
+                            <i class="bi bi-truck me-1"></i>
+                            <span th:text="${order.shippingMethod.displayName}">Standard</span>
+                        </span>
+                    </div>
+                    <div class="order-card-total">
+                        <span class="order-card-total-label">Gesamtbetrag</span>
+                        <span class="order-card-total-value"
+                              th:text="${#numbers.formatDecimal(order.grandTotal, 1, 'COMMA', 2, 'POINT')} + ' €'">
+                            0,00 €
+                        </span>
+                    </div>
+                    <a th:href="@{/shop/orders/{id}(id=${order.id})}" class="order-card-detail-btn">
+                        Details <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div th:if="${orders == null or orders.isEmpty()}" class="text-center py-5">
-        <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+    <div th:if="${orders == null or orders.isEmpty()}" class="orders-empty-state">
+        <div class="orders-empty-icon">
+            <i class="bi bi-receipt"></i>
+        </div>
         <h3>Noch keine Bestellungen</h3>
-        <p class="text-muted">Ihre Bestellhistorie ist leer. Stöbern Sie durch unseren Shop!</p>
-        <a th:href="@{/shop/products}" class="btn btn-primary mt-2">Jetzt einkaufen</a>
+        <p>Ihre Bestellhistorie ist leer. Stöbern Sie durch unseren Shop!</p>
+        <a th:href="@{/shop/products}" class="btn btn-primary btn-lg">
+            <i class="bi bi-arrow-right me-2"></i>Jetzt einkaufen
+        </a>
     </div>
 </div>
 

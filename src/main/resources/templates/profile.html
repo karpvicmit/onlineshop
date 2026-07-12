@@ -1,96 +1,147 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Profil')}"></head>
+<head th:replace="~{fragments/head :: head('Mein Profil')}"></head>
 <body>
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 <div th:replace="~{fragments/alerts :: alerts}"></div>
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Mein Profil</h4>
-                </div>
-                <div class="card-body">
-                    <div class="mb-4 p-3 bg-light rounded">
-                        <h5>Kontoinformationen</h5>
-                        <p class="mb-1"><strong>E-Mail:</strong> <span th:text="${userEmail}">user@email.com</span></p>
-                    </div>
 
-                    <hr>
-                    <h5 class="mb-3">Persönliche Daten & Lieferadresse</h5>
+<div class="page-container">
+    <div class="page-title-section">
+        <h1>Mein Profil</h1>
+        <p>Verwalten Sie Ihre persönlichen Daten und Kontoeinstellungen</p>
+    </div>
+
+    <div class="profile-layout">
+        <!-- Sidebar -->
+        <div class="profile-sidebar-card">
+            <div class="profile-avatar-section">
+                <div class="profile-avatar"
+                     th:text="${#strings.substring(userEmail, 0, 1).toUpperCase()}">U</div>
+                <div class="profile-avatar-name"
+                     th:text="${userEmail}">user@email.com</div>
+                <div class="profile-avatar-email">
+                    <span th:if="${isOAuth2User}" class="badge bg-info">Google-Konto</span>
+                    <span th:unless="${isOAuth2User}" class="badge bg-secondary">Lokales Konto</span>
+                </div>
+            </div>
+            <div class="profile-nav">
+                <a href="#personal-data" class="profile-nav-item active">
+                    <i class="bi bi-person"></i> Persönliche Daten
+                </a>
+                <a href="#password" class="profile-nav-item">
+                    <i class="bi bi-key"></i> Passwort ändern
+                </a>
+                <a th:href="@{/shop/orders}" class="profile-nav-item">
+                    <i class="bi bi-receipt"></i> Meine Bestellungen
+                </a>
+                <a th:href="@{/shop/favorites}" class="profile-nav-item">
+                    <i class="bi bi-heart"></i> Favoriten
+                </a>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="profile-content">
+            <!-- Personal Data Section -->
+            <div class="profile-section-card" id="personal-data">
+                <div class="profile-section-header">
+                    <i class="bi bi-person"></i>
+                    <h3>Persönliche Daten & Lieferadresse</h3>
+                </div>
+                <div class="profile-section-body">
                     <form th:action="@{/profile/update}" th:object="${profileDto}" method="post">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="firstName" class="form-label">Vorname</label>
-                                <input type="text" class="form-control"
-                                       th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'"
-                                       id="firstName" th:field="*{firstName}">
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                            <div class="col-md-6">
+                                <div class="profile-form-group">
+                                    <label for="firstName" class="profile-form-label">Vorname</label>
+                                    <input type="text" class="profile-form-input"
+                                           th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'"
+                                           id="firstName" th:field="*{firstName}">
+                                    <div class="text-danger small mt-1"
+                                         th:if="${#fields.hasErrors('firstName')}"
+                                         th:errors="*{firstName}"></div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="lastName" class="form-label">Nachname</label>
-                                <input type="text" class="form-control"
-                                       th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'"
-                                       id="lastName" th:field="*{lastName}">
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                            <div class="col-md-6">
+                                <div class="profile-form-group">
+                                    <label for="lastName" class="profile-form-label">Nachname</label>
+                                    <input type="text" class="profile-form-input"
+                                           th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'"
+                                           id="lastName" th:field="*{lastName}">
+                                    <div class="text-danger small mt-1"
+                                         th:if="${#fields.hasErrors('lastName')}"
+                                         th:errors="*{lastName}"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Lieferadresse (für Bestellungen)</label>
-                            <textarea class="form-control"
+                        <div class="profile-form-group">
+                            <label for="address" class="profile-form-label">Lieferadresse</label>
+                            <textarea class="profile-form-input"
                                       th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'"
                                       id="address" th:field="*{address}" rows="3"></textarea>
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
-                            <div class="form-text">Diese Adresse wird beim Checkout automatisch vorausgefüllt.</div>
+                            <div class="text-danger small mt-1"
+                                 th:if="${#fields.hasErrors('address')}"
+                                 th:errors="*{address}"></div>
+                            <p class="profile-form-hint">Diese Adresse wird beim Checkout automatisch vorausgefüllt.</p>
                         </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save me-1"></i> Änderungen speichern
+                        <div class="profile-form-actions">
+                            <button type="submit" class="profile-save-btn">
+                                <i class="bi bi-check-lg"></i> Änderungen speichern
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-secondary text-white">
-                    <h4 class="mb-0"><i class="fas fa-key me-2"></i>Passwort ändern</h4>
+            <!-- Password Section -->
+            <div class="profile-section-card" id="password">
+                <div class="profile-section-header">
+                    <i class="bi bi-key"></i>
+                    <h3>Passwort ändern</h3>
                 </div>
-                <div class="card-body">
-                    <div th:if="${isOAuth2User}" class="alert alert-info mb-0">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        Sie sind über einen externen Anbieter (z. B. Google) angemeldet.
-                        Das Passwort wird dort verwaltet und kann hier nicht geändert werden.
+                <div class="profile-section-body">
+                    <div th:if="${isOAuth2User}" class="profile-oauth-notice">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <div>
+                            <strong>Sie sind über einen externen Anbieter angemeldet.</strong><br>
+                            Das Passwort wird dort verwaltet und kann hier nicht geändert werden.
+                        </div>
                     </div>
+
                     <form th:unless="${isOAuth2User}"
                           th:action="@{/profile/change-password}"
                           th:object="${passwordDto}"
                           method="post">
-                        <div class="mb-3">
-                            <label for="currentPassword" class="form-label">Aktuelles Passwort</label>
-                            <input type="password" class="form-control"
+                        <div class="profile-form-group">
+                            <label for="currentPassword" class="profile-form-label">Aktuelles Passwort</label>
+                            <input type="password" class="profile-form-input"
                                    th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'"
                                    id="currentPassword" th:field="*{currentPassword}" required>
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
+                            <div class="text-danger small mt-1"
+                                 th:if="${#fields.hasErrors('currentPassword')}"
+                                 th:errors="*{currentPassword}"></div>
                         </div>
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label">Neues Passwort (min. 8 Zeichen)</label>
-                            <input type="password" class="form-control"
+                        <div class="profile-form-group">
+                            <label for="newPassword" class="profile-form-label">Neues Passwort (min. 8 Zeichen)</label>
+                            <input type="password" class="profile-form-input"
                                    th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'"
                                    id="newPassword" th:field="*{newPassword}" required minlength="8">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+                            <div class="text-danger small mt-1"
+                                 th:if="${#fields.hasErrors('newPassword')}"
+                                 th:errors="*{newPassword}"></div>
                         </div>
-                        <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">Neues Passwort bestätigen</label>
-                            <input type="password" class="form-control"
+                        <div class="profile-form-group">
+                            <label for="confirmPassword" class="profile-form-label">Neues Passwort bestätigen</label>
+                            <input type="password" class="profile-form-input"
                                    th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
                                    id="confirmPassword" th:field="*{confirmPassword}" required>
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                            <div class="text-danger small mt-1"
+                                 th:if="${#fields.hasErrors('confirmPassword')}"
+                                 th:errors="*{confirmPassword}"></div>
                         </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn btn-warning">
-                                <i class="fas fa-lock me-1"></i> Passwort ändern
+                        <div class="profile-form-actions">
+                            <button type="submit" class="profile-save-btn">
+                                <i class="bi bi-lock"></i> Passwort ändern
                             </button>
                         </div>
                     </form>
@@ -99,6 +150,7 @@
         </div>
     </div>
 </div>
+
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
