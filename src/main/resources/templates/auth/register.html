@@ -1,73 +1,121 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Registrierung')}"></head>
-<body class="bg-light">
-<nav class="navbar navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand" th:href="@{/}">
-            <i class="bi bi-shop"></i> OnlineShop
-        </a>
-    </div>
-</nav>
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h3 class="text-center mb-4">Registrierung</h3>
-                    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-                    <form th:action="@{/register}" th:object="${registrationDto}" method="post">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="firstName" class="form-label">Vorname</label>
-                                <input type="text" class="form-control" id="firstName" th:field="*{firstName}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="lastName" class="form-label">Nachname</label>
-                                <input type="text" class="form-control" id="lastName" th:field="*{lastName}">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">E-Mail-Adresse</label>
-                            <input type="email" class="form-control"
-                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
-                                   id="email" th:field="*{email}" required>
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Lieferadresse</label>
-                            <textarea class="form-control"
-                                      th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'"
-                                      id="address" th:field="*{address}" rows="2" required></textarea>
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Passwort (min. 8 Zeichen)</label>
-                            <input type="password" class="form-control"
-                                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
-                                   id="password" th:field="*{password}" required minlength="8">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="acceptAgb" required>
-                            <label class="form-check-label" for="acceptAgb">
-                                Ich akzeptiere die
-                                <a th:href="@{/agb}" target="_blank">AGB</a> und habe die
-                                <a th:href="@{/datenschutz}" target="_blank">Datenschutzerklärung</a> zur Kenntnis genommen.
-                            </label>
-                        </div>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success">Konto erstellen</button>
-                        </div>
-                    </form>
-                    <div class="text-center mt-3">
-                        <p>Bereits registriert? <a th:href="@{/login}">Zum Login</a></p>
-                    </div>
+<body class="auth-page">
+<!-- Navbar -->
+<div class="auth-navbar">
+    <a th:href="@{/}" class="auth-navbar-brand">
+        <i class="bi bi-shop"></i>
+        <span>OnlineShop</span>
+    </a>
+</div>
+
+<!-- Main Content -->
+<div class="auth-container">
+    <!-- Left: Branding -->
+    <div class="auth-branding">
+        <div class="auth-branding-content">
+            <div class="auth-branding-icon">
+                <i class="bi bi-person-plus"></i>
+            </div>
+            <h2>Konto erstellen</h2>
+            <p>Registrieren Sie sich und profitieren Sie von allen Vorteilen unseres Online-Shops.</p>
+            <div class="auth-branding-features">
+                <div class="auth-branding-feature">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Sichere Registrierung mit E-Mail-Bestätigung</span>
+                </div>
+                <div class="auth-branding-feature">
+                    <i class="bi bi-truck"></i>
+                    <span>Lieferadresse speichern für schnellen Checkout</span>
+                </div>
+                <div class="auth-branding-feature">
+                    <i class="bi bi-gift"></i>
+                    <span>Exklusive Angebote und Promo-Codes erhalten</span>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Right: Form -->
+    <div class="auth-form-panel">
+        <div class="auth-form-wrapper">
+            <div class="auth-form-header">
+                <h1>Registrierung</h1>
+                <p>Füllen Sie das Formular aus, um ein Konto zu erstellen.</p>
+            </div>
+
+            <!-- Alerts -->
+            <div th:if="${errorMessage}" class="auth-alert auth-alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span th:text="${errorMessage}">Fehler</span>
+            </div>
+
+            <!-- Registration Form -->
+            <form th:action="@{/register}" th:object="${registrationDto}" method="post" class="auth-form">
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label for="firstName" class="auth-form-label">Vorname</label>
+                        <input type="text" class="auth-form-input" id="firstName"
+                               th:field="*{firstName}" placeholder="Max">
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="lastName" class="auth-form-label">Nachname</label>
+                        <input type="text" class="auth-form-input" id="lastName"
+                               th:field="*{lastName}" placeholder="Mustermann">
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label for="email" class="auth-form-label">E-Mail-Adresse *</label>
+                    <input type="email" class="auth-form-input"
+                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                           id="email" th:field="*{email}"
+                           placeholder="ihre@email.de" required>
+                    <div class="auth-form-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label for="address" class="auth-form-label">Lieferadresse *</label>
+                    <textarea class="auth-form-input"
+                              th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'"
+                              id="address" th:field="*{address}" rows="2"
+                              placeholder="Straße, Hausnr., PLZ, Stadt" required></textarea>
+                    <div class="auth-form-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                    <p class="auth-form-hint">Diese Adresse wird beim Checkout vorausgefüllt.</p>
+                </div>
+
+                <div class="auth-form-group">
+                    <label for="password" class="auth-form-label">Passwort *</label>
+                    <input type="password" class="auth-form-input"
+                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                           id="password" th:field="*{password}"
+                           placeholder="Mindestens 8 Zeichen" required minlength="8">
+                    <div class="auth-form-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+
+                <div class="auth-checkbox">
+                    <input type="checkbox" id="acceptAgb" required>
+                    <label for="acceptAgb">
+                        Ich akzeptiere die
+                        <a th:href="@{/agb}" target="_blank">AGB</a> und habe die
+                        <a th:href="@{/datenschutz}" target="_blank">Datenschutzerklärung</a>
+                        zur Kenntnis genommen.
+                    </label>
+                </div>
+
+                <button type="submit" class="auth-submit-btn">
+                    <i class="bi bi-person-plus"></i>
+                    Konto erstellen
+                </button>
+            </form>
+
+            <!-- Login Link -->
+            <p class="auth-footer-link">
+                Bereits registriert? <a th:href="@{/login}">Zum Login</a>
+            </p>
+        </div>
+    </div>
 </div>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
