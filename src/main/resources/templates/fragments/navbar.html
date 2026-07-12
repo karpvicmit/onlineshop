@@ -1,47 +1,55 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
 <nav th:fragment="navbar" class="site-navbar">
     <div class="navbar-container">
         <!-- Logo -->
         <a th:href="@{/}" class="navbar-brand">
-            <span class="brand-text">OnlineShop</span>
+            <span class="brand-text" th:text="#{navbar.brand}">OnlineShop</span>
         </a>
 
         <!-- Navigation Links -->
         <div class="navbar-links">
             <a th:href="@{/shop/products}" class="nav-link"
                th:classappend="${currentUri != null and currentUri.startsWith('/shop/products')} ? 'active'">
-                Katalog
+                <span th:text="#{navbar.catalog}">Katalog</span>
             </a>
             <a th:href="@{/shop/favorites}" class="nav-link" sec:authorize="isAuthenticated()"
                th:classappend="${currentUri != null and currentUri.startsWith('/shop/favorites')} ? 'active'">
                 <i class="bi bi-heart"></i>
-                <span class="nav-link-text">Favoriten</span>
+                <span class="nav-link-text" th:text="#{navbar.favorites}">Favoriten</span>
             </a>
             <a th:href="@{/shop/orders}" class="nav-link" sec:authorize="isAuthenticated()"
                th:classappend="${currentUri != null and currentUri.startsWith('/shop/orders')} ? 'active'">
-                Bestellungen
+                <span th:text="#{navbar.orders}">Bestellungen</span>
             </a>
         </div>
 
         <!-- Right Side: Cart + Account -->
         <div class="navbar-actions">
+            <!-- Language Switcher -->
+            <div class="nav-language-switcher">
+                <a th:href="@{''(lang='de')}" class="nav-lang-link" th:classappend="${#locale.language == 'de'} ? 'active'">DE</a>
+                <span class="nav-lang-sep">|</span>
+                <a th:href="@{''(lang='en')}" class="nav-lang-link" th:classappend="${#locale.language == 'en'} ? 'active'">EN</a>
+                <span class="nav-lang-sep">|</span>
+                <a th:href="@{''(lang='ru')}" class="nav-lang-link" th:classappend="${#locale.language == 'ru'} ? 'active'">RU</a>
+            </div>
+
             <!-- Cart -->
             <a th:href="@{/shop/cart}" class="nav-icon-btn" sec:authorize="isAuthenticated()"
-               title="Warenkorb">
+               th:title="#{navbar.cart}">
                 <i class="bi bi-bag"></i>
-                <span class="nav-icon-text">Warenkorb</span>
+                <span class="nav-icon-text" th:text="#{navbar.cart}">Warenkorb</span>
             </a>
 
             <!-- Account -->
             <div sec:authorize="isAuthenticated()" class="nav-account">
-                <a th:href="@{/profile}" class="nav-icon-btn" title="Profil">
+                <a th:href="@{/profile}" class="nav-icon-btn" th:title="#{navbar.profile}">
                     <i class="bi bi-person"></i>
                 </a>
                 <form th:action="@{/logout}" method="post" class="d-inline">
-                    <button type="submit" class="nav-icon-btn" title="Abmelden">
+                    <button type="submit" class="nav-icon-btn" th:title="#{navbar.logout}">
                         <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </form>
@@ -49,10 +57,9 @@
 
             <!-- Auth Links (not logged in) -->
             <div sec:authorize="!isAuthenticated()" class="navbar-auth">
-                <a th:href="@{/login}" class="nav-link">Anmelden</a>
+                <a th:href="@{/login}" class="nav-link" th:text="#{navbar.login}">Anmelden</a>
             </div>
         </div>
     </div>
 </nav>
-
 </html>
