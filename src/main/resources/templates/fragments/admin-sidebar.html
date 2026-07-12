@@ -1,91 +1,94 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<div th:fragment="admin-sidebar" class="admin-sidebar">
+    <!-- Header -->
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <div>
+            <h3 class="sidebar-title">Admin-Panel</h3>
+            <p class="sidebar-subtitle">OnlineShop Verwaltung</p>
+        </div>
+    </div>
 
-<div th:fragment="admin-sidebar" class="d-flex flex-column flex-shrink-0 p-3 bg-dark text-white" style="width: 280px; min-height: 100vh;">
-
-    <a th:href="@{/admin/dashboard}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none border-bottom pb-3">
-        <i class="bi bi-shield-lock-fill fs-4 me-2 text-warning"></i>
-        <span class="fs-4 fw-bold">Admin-Panel</span>
-    </a>
-
-    <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-            <a th:href="@{/admin/dashboard}" class="nav-link text-white d-flex align-items-center"
-               th:classappend="${activeMenu == 'dashboard'} ? 'active bg-primary' : 'text-white-50'">
-                <i class="bi bi-speedometer2 me-2"></i> Dashboard
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/products}" class="nav-link text-white d-flex align-items-center"
-               th:classappend="${activeMenu == 'products'} ? 'active bg-primary' : 'text-white-50'">
-                <i class="bi bi-box-seam me-2"></i> Produktverwaltung
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/categories}" class="nav-link text-white d-flex align-items-center"
-               th:classappend="${activeMenu == 'categories'} ? 'active bg-primary' : 'text-white-50'">
-                <i class="bi bi-tags me-2"></i> Kategorien
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/orders}" class="nav-link text-white d-flex align-items-center"
-               th:classappend="${activeMenu == 'orders'} ? 'active bg-primary' : 'text-white-50'">
-                <i class="bi bi-receipt me-2"></i> Bestellverwaltung
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/users}" class="nav-link text-white d-flex align-items-center"
-               th:classappend="${activeMenu == 'users'} ? 'active bg-primary' : 'text-white-50'">
-                <i class="bi bi-people me-2"></i> Benutzerverwaltung
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/analytics}" class="nav-link text-white d-flex align-items-center"
-               th:classappend="${activeMenu == 'analytics'} ? 'active bg-primary' : 'text-white-50'">
-                <i class="bi bi-graph-up me-2"></i> Analyse & Statistik
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/reviews}" class="nav-link text-white d-flex align-items-center"
-               th:classappend="${activeMenu == 'reviews'} ? 'active bg-primary' : 'text-white-50'">
-                <i class="bi bi-chat-left-text me-2"></i> Bewertungen
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/promocodes}" class="nav-link text-white d-flex align-items-center"
-               th:classappend="${activeMenu == 'promocodes'} ? 'active bg-primary' : 'text-white-50'">
-                <i class="bi bi-tag-fill me-2"></i> Promo-Codes
-            </a>
-        </li>
-    </ul>
-
-    <hr class="text-white-50">
-
-    <div class="dropdown">
-        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-person-circle fs-4 me-2"></i>
-            <strong sec:authentication="name">Admin</strong>
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+        <a th:href="@{/admin/dashboard}"
+           class="sidebar-nav-item"
+           th:classappend="${activeMenu == 'dashboard'} ? 'active'">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
         </a>
-        <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-            <li>
-                <span class="dropdown-item-text text-white-50 small" sec:authentication="principal.authorities">Rolle</span>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <a class="dropdown-item" th:href="@{/shop/products}">
-                    <i class="bi bi-shop me-2"></i> Zum öffentlichen Shop
-                </a>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <form th:action="@{/logout}" method="post" class="d-inline w-100">
-                    <button type="submit" class="dropdown-item text-danger w-100 text-start">
-                        <i class="bi bi-box-arrow-right me-2"></i> Abmelden
-                    </button>
-                </form>
-            </li>
-        </ul>
+        <a th:href="@{/admin/products}"
+           class="sidebar-nav-item"
+           th:classappend="${activeMenu == 'products'} ? 'active'">
+            <i class="bi bi-box-seam"></i>
+            <span>Produkte</span>
+        </a>
+        <a th:href="@{/admin/categories}"
+           class="sidebar-nav-item"
+           th:classappend="${activeMenu == 'categories'} ? 'active'">
+            <i class="bi bi-tags"></i>
+            <span>Kategorien</span>
+        </a>
+        <a th:href="@{/admin/orders}"
+           class="sidebar-nav-item"
+           th:classappend="${activeMenu == 'orders'} ? 'active'">
+            <i class="bi bi-receipt"></i>
+            <span>Bestellungen</span>
+        </a>
+        <a th:href="@{/admin/users}"
+           class="sidebar-nav-item"
+           th:classappend="${activeMenu == 'users'} ? 'active'">
+            <i class="bi bi-people"></i>
+            <span>Benutzer</span>
+        </a>
+        <a th:href="@{/admin/analytics}"
+           class="sidebar-nav-item"
+           th:classappend="${activeMenu == 'analytics'} ? 'active'">
+            <i class="bi bi-graph-up"></i>
+            <span>Analyse</span>
+        </a>
+        <a th:href="@{/admin/reviews}"
+           class="sidebar-nav-item"
+           th:classappend="${activeMenu == 'reviews'} ? 'active'">
+            <i class="bi bi-chat-left-text"></i>
+            <span>Bewertungen</span>
+        </a>
+        <a th:href="@{/admin/promocodes}"
+           class="sidebar-nav-item"
+           th:classappend="${activeMenu == 'promocodes'} ? 'active'">
+            <i class="bi bi-tag-fill"></i>
+            <span>Promo-Codes</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- User Section -->
+    <div class="sidebar-user">
+        <div class="sidebar-user-info">
+            <div class="sidebar-user-avatar"
+                 th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">A</div>
+            <div>
+                <p class="sidebar-user-name" sec:authentication="name">Admin</p>
+                <p class="sidebar-user-role">Administrator</p>
+            </div>
+        </div>
+        <div class="sidebar-user-actions">
+            <a th:href="@{/shop/products}" class="sidebar-user-btn">
+                <i class="bi bi-shop"></i>
+                <span>Shop</span>
+            </a>
+            <form th:action="@{/logout}" method="post" class="d-inline w-100">
+                <button type="submit" class="sidebar-user-btn w-100">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Abmelden</span>
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 </html>
