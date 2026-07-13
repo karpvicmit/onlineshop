@@ -1,39 +1,37 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Kategorieverwaltung')}"></head>
+<head th:replace="~{fragments/head :: head(#{admin.categories.title})}"></head>
 <body>
 <div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
-
     <main class="admin-main">
         <div class="admin-page-header">
             <div>
                 <h1 class="admin-page-title">
                     <i class="bi bi-tags"></i>
-                    Kategorieverwaltung
+                    <span th:text="#{admin.categories.title}">Kategorieverwaltung</span>
                 </h1>
                 <p class="admin-page-subtitle">
-                    <span th:text="${categories.size()}">0</span> Kategorien
+                    <span th:text="#{admin.categories.subtitle(${categories.size()})}">0 Kategorien</span>
                 </p>
             </div>
             <div class="admin-page-actions">
                 <a th:href="@{/admin/categories/new}" class="btn btn-primary">
-                    <i class="bi bi-plus-lg"></i> Neue Kategorie
+                    <i class="bi bi-plus-lg"></i> <span th:text="#{admin.categories.btn.new}">Neue Kategorie</span>
                 </a>
             </div>
         </div>
-
         <div th:replace="~{fragments/alerts :: alerts}"></div>
 
         <div class="admin-table-wrapper">
             <table class="admin-table">
                 <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Beschreibung</th>
-                    <th>Slug (URL)</th>
-                    <th class="text-center">Aktionen</th>
+                    <th th:text="#{admin.categories.table.id}">ID</th>
+                    <th th:text="#{admin.categories.table.name}">Name</th>
+                    <th th:text="#{admin.categories.table.description}">Beschreibung</th>
+                    <th th:text="#{admin.categories.table.slug}">Slug (URL)</th>
+                    <th class="text-center" th:text="#{admin.categories.table.actions}">Aktionen</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -44,14 +42,12 @@
                     <td><code th:text="${category.slug}">slug</code></td>
                     <td class="text-center">
                         <div class="action-buttons">
-                            <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}"
-                               class="action-btn" title="Bearbeiten">
+                            <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="action-btn" th:title="#{common.edit}">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form th:action="@{/admin/categories/delete/{id}(id=${category.id})}" method="post"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Möchten Sie diese Kategorie wirklich löschen?');">
-                                <button type="submit" class="action-btn action-btn-danger" title="Löschen">
+                            <form th:action="@{/admin/categories/delete/{id}(id=${category.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('[[#{admin.categories.delete.confirm}]]');">
+                                <button type="submit" class="action-btn action-btn-danger" th:title="#{common.delete}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -61,13 +57,11 @@
                 <tr th:if="${#lists.isEmpty(categories)}">
                     <td colspan="5">
                         <div class="admin-empty-state">
-                            <div class="admin-empty-icon">
-                                <i class="bi bi-tags"></i>
-                            </div>
-                            <h3 class="admin-empty-title">Keine Kategorien gefunden</h3>
-                            <p class="admin-empty-text">Legen Sie Ihre erste Kategorie an.</p>
+                            <div class="admin-empty-icon"><i class="bi bi-tags"></i></div>
+                            <h3 class="admin-empty-title" th:text="#{admin.categories.empty.title}">Keine Kategorien gefunden</h3>
+                            <p class="admin-empty-text" th:text="#{admin.categories.empty.text}">Legen Sie Ihre erste Kategorie an.</p>
                             <a th:href="@{/admin/categories/new}" class="btn btn-primary">
-                                <i class="bi bi-plus-lg"></i> Kategorie anlegen
+                                <i class="bi bi-plus-lg"></i> <span th:text="#{admin.categories.empty.btn}">Kategorie anlegen</span>
                             </a>
                         </div>
                     </td>

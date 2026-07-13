@@ -1,34 +1,26 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Benutzerverwaltung')}"></head>
+<head th:replace="~{fragments/head :: head(#{admin.users.title})}"></head>
 <body>
 <div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
-
     <main class="admin-main">
         <div class="admin-page-header">
             <div>
-                <h1 class="admin-page-title">
-                    <i class="bi bi-people"></i>
-                    Benutzerverwaltung
-                </h1>
-                <p class="admin-page-subtitle">
-                    <span th:text="${userPage.totalElements}">0</span> Benutzer registriert
-                </p>
+                <h1 class="admin-page-title"><i class="bi bi-people"></i><span th:text="#{admin.users.title}">Benutzerverwaltung</span></h1>
+                <p class="admin-page-subtitle"><span th:text="#{admin.users.subtitle(${userPage.totalElements})}">0 Benutzer registriert</span></p>
             </div>
         </div>
-
         <div th:replace="~{fragments/alerts :: alerts}"></div>
-
         <div class="admin-table-wrapper">
             <table class="admin-table">
                 <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>E-Mail</th>
-                    <th class="text-center">Rolle</th>
-                    <th class="text-center">Status</th>
+                    <th th:text="#{admin.users.table.id}">ID</th>
+                    <th th:text="#{admin.users.table.name}">Name</th>
+                    <th th:text="#{admin.users.table.email}">E-Mail</th>
+                    <th class="text-center" th:text="#{admin.users.table.role}">Rolle</th>
+                    <th class="text-center" th:text="#{admin.users.table.status}">Status</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -38,10 +30,7 @@
                     <td th:text="${user.email}">max@email.de</td>
                     <td class="text-center">
                         <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post" class="d-inline">
-                            <select name="newRole" class="admin-form-select"
-                                    style="width: 120px; padding: 0.375rem 0.5rem; font-size: var(--text-xs);"
-                                    onchange="this.form.submit()"
-                                    th:disabled="${user.id == currentUserId}">
+                            <select name="newRole" class="admin-form-select" style="width: 120px; padding: 0.375rem 0.5rem; font-size: var(--text-xs);" onchange="this.form.submit()" th:disabled="${user.id == currentUserId}">
                                 <option value="USER" th:selected="${user.role.name() == 'USER'}">USER</option>
                                 <option value="ADMIN" th:selected="${user.role.name() == 'ADMIN'}">ADMIN</option>
                             </select>
@@ -49,34 +38,19 @@
                     </td>
                     <td class="text-center">
                         <form th:action="@{/admin/users/{id}/status(id=${user.id})}" method="post" class="d-inline">
-                            <select name="newStatus" class="admin-form-select"
-                                    style="width: 130px; padding: 0.375rem 0.5rem; font-size: var(--text-xs);"
-                                    onchange="this.form.submit()"
-                                    th:disabled="${user.id == currentUserId}">
-                                <option value="ACTIVE" th:selected="${user.status.name() == 'ACTIVE'}">
-                                    ✅ AKTIV
-                                </option>
-                                <option value="BLOCKED" th:selected="${user.status.name() == 'BLOCKED'}">
-                                    🚫 GESPERRT
-                                </option>
+                            <select name="newStatus" class="admin-form-select" style="width: 130px; padding: 0.375rem 0.5rem; font-size: var(--text-xs);" onchange="this.form.submit()" th:disabled="${user.id == currentUserId}">
+                                <option value="ACTIVE" th:selected="${user.status.name() == 'ACTIVE'}" th:text="#{admin.users.status.ACTIVE}">✅ AKTIV</option>
+                                <option value="BLOCKED" th:selected="${user.status.name() == 'BLOCKED'}" th:text="#{admin.users.status.BLOCKED}">🚫 GESPERRT</option>
                             </select>
                         </form>
                     </td>
                 </tr>
                 <tr th:if="${userPage.isEmpty()}">
-                    <td colspan="5">
-                        <div class="admin-empty-state">
-                            <div class="admin-empty-icon">
-                                <i class="bi bi-people"></i>
-                            </div>
-                            <h3 class="admin-empty-title">Keine Benutzer gefunden</h3>
-                        </div>
-                    </td>
+                    <td colspan="5"><div class="admin-empty-state"><div class="admin-empty-icon"><i class="bi bi-people"></i></div><h3 class="admin-empty-title" th:text="#{admin.users.empty.title}">Keine Benutzer gefunden</h3></div></td>
                 </tr>
                 </tbody>
             </table>
         </div>
-
         <div th:replace="~{fragments/pagination :: pagination(page=${userPage}, baseUrl=${baseUrl})}"></div>
     </main>
 </div>

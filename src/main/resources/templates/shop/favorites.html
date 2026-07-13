@@ -1,72 +1,49 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Meine Favoriten')}"></head>
+<head th:replace="~{fragments/head :: head(#{favorites.title})}"></head>
 <body>
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 <div th:replace="~{fragments/alerts :: alerts}"></div>
-
 <div class="page-container">
     <div class="page-title-section">
-        <h1><i class="bi bi-heart-fill me-2" style="color: var(--color-danger);"></i>Meine Favoriten</h1>
-        <p th:if="${favorites != null and !favorites.isEmpty()}"
-           th:text="${favorites.size()} + ' ' + (${favorites.size() == 1} ? 'Produkt' : 'Produkte') + ' auf Ihrer Merkliste'">
-            0 Produkte auf Ihrer Merkliste
-        </p>
+        <h1><i class="bi bi-heart-fill me-2" style="color: var(--color-danger);"></i><span th:text="#{favorites.title}">Meine Favoriten</span></h1>
+        <p th:if="${favorites != null and !favorites.isEmpty()}" th:text="#{favorites.items(${favorites.size()})}">0 Produkte auf Ihrer Merkliste</p>
     </div>
-
     <div th:if="${favorites != null and !favorites.isEmpty()}" class="favorites-grid">
         <div th:each="fav : ${favorites}" class="favorite-card">
             <div class="favorite-card-image-wrapper">
-                <img th:if="${fav.product.imageUrl != null and !fav.product.imageUrl.isEmpty()}"
-                     th:src="${fav.product.imageUrl}"
-                     th:alt="${fav.product.name}"
-                     class="favorite-card-image">
-                <div th:unless="${fav.product.imageUrl != null and !fav.product.imageUrl.isEmpty()}"
-                     class="favorite-card-image-placeholder">
-                    <i class="bi bi-image"></i>
-                </div>
+                <img th:if="${fav.product.imageUrl != null and !fav.product.imageUrl.isEmpty()}" th:src="${fav.product.imageUrl}" th:alt="${fav.product.name}" class="favorite-card-image">
+                <div th:unless="${fav.product.imageUrl != null and !fav.product.imageUrl.isEmpty()}" class="favorite-card-image-placeholder"><i class="bi bi-image"></i></div>
                 <form th:action="@{/shop/favorites/toggle/{id}(id=${fav.product.id})}" method="post">
-                    <button type="submit" class="favorite-card-remove" title="Entfernen">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
+                    <button type="submit" class="favorite-card-remove" th:title="#{favorites.remove}"><i class="bi bi-x-lg"></i></button>
                 </form>
             </div>
             <div class="favorite-card-body">
-                <h3 class="favorite-card-name">
-                    <a th:href="@{/shop/products/{id}(id=${fav.product.id})}" th:text="${fav.product.name}">Produktname</a>
-                </h3>
-                <p class="favorite-card-desc"
-                   th:text="${#strings.abbreviate(fav.product.description, 80)}">Beschreibung...</p>
-                <div class="favorite-card-price"
-                     th:text="${#numbers.formatDecimal(fav.product.price, 1, 'COMMA', 2, 'POINT')} + ' €'">0,00 €</div>
+                <h3 class="favorite-card-name"><a th:href="@{/shop/products/{id}(id=${fav.product.id})}" th:text="${fav.product.name}">Produktname</a></h3>
+                <p class="favorite-card-desc" th:text="${#strings.abbreviate(fav.product.description, 80)}">Beschreibung...</p>
+                <div class="favorite-card-price" th:text="${#numbers.formatDecimal(fav.product.price, 1, 'COMMA', 2, 'POINT')} + ' €'">0,00 €</div>
                 <div class="favorite-card-actions">
-                    <a th:href="@{/shop/products/{id}(id=${fav.product.id})}" class="btn btn-outline">
-                        Details
-                    </a>
+                    <a th:href="@{/shop/products/{id}(id=${fav.product.id})}" class="btn btn-outline" th:text="#{favorites.details}">Details</a>
                     <form th:action="@{/shop/cart/add}" method="post" class="d-flex flex-grow-1">
                         <input type="hidden" name="productId" th:value="${fav.product.id}">
                         <input type="hidden" name="quantity" value="1">
                         <button type="submit" class="btn btn-primary flex-grow-1">
-                            <i class="bi bi-bag-plus"></i> In den Warenkorb
+                            <i class="bi bi-bag-plus"></i> <span th:text="#{favorites.addToCart}">In den Warenkorb</span>
                         </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
     <div th:if="${favorites == null or favorites.isEmpty()}" class="favorites-empty-state">
-        <div class="favorites-empty-icon">
-            <i class="bi bi-heart"></i>
-        </div>
-        <h3>Ihre Favoritenliste ist leer</h3>
-        <p>Markieren Sie Produkte mit dem Herz-Icon, um sie hier zu speichern.</p>
+        <div class="favorites-empty-icon"><i class="bi bi-heart"></i></div>
+        <h3 th:text="#{favorites.empty.title}">Ihre Favoritenliste ist leer</h3>
+        <p th:text="#{favorites.empty.text}">Markieren Sie Produkte mit dem Herz-Icon...</p>
         <a th:href="@{/shop/products}" class="btn btn-primary btn-lg">
-            <i class="bi bi-arrow-right me-2"></i>Jetzt stöbern
+            <i class="bi bi-arrow-right me-2"></i><span th:text="#{favorites.empty.btn}">Jetzt stöbern</span>
         </a>
     </div>
 </div>
-
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

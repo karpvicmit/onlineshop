@@ -5,82 +5,75 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-8 mb-3 mb-lg-0">
-                    <h5 class="mb-2"><i class="bi bi-shield-lock me-2"></i>Cookie-Einstellungen</h5>
+                    <h5 class="mb-2"><i class="bi bi-shield-lock me-2"></i><span th:text="#{cookie.title}">Cookie-Einstellungen</span></h5>
                     <p class="mb-0 small">
-                        Wir verwenden Cookies, um Ihnen die bestmögliche Erfahrung zu bieten.
-                        Sie können auswählen, welche Kategorien Sie zulassen möchten.
-                        Weitere Informationen finden Sie in unserer
-                        <a th:href="@{/datenschutz}" class="text-decoration-underline">Datenschutzerklärung</a>.
+                        <span th:text="#{cookie.text}">Wir verwenden Cookies, um Ihnen die bestmögliche Erfahrung zu bieten. Sie können auswählen, welche Kategorien Sie zulassen möchten. Weitere Informationen finden Sie in unserer</span>
+                        <a th:href="@{/datenschutz}" class="text-decoration-underline" th:text="#{footer.datenschutz}">Datenschutzerklärung</a>.
                     </p>
                 </div>
                 <div class="col-lg-4 text-lg-end">
                     <button id="cookieSettingsBtn" class="btn btn-outline-primary btn-sm me-2 mb-2 mb-lg-0">
-                        <i class="bi bi-gear me-1"></i> Einstellungen
+                        <i class="bi bi-gear me-1"></i> <span th:text="#{cookie.btn.settings}">Einstellungen</span>
                     </button>
                     <button id="acceptAllCookies" class="btn btn-success btn-sm mb-2 mb-lg-0">
-                        <i class="bi bi-check-lg me-1"></i> Alle akzeptieren
+                        <i class="bi bi-check-lg me-1"></i> <span th:text="#{cookie.btn.acceptAll}">Alle akzeptieren</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="cookieSettingsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="bi bi-shield-lock me-2"></i>Cookie-Einstellungen
+                        <i class="bi bi-shield-lock me-2"></i><span th:text="#{cookie.modal.title}">Cookie-Einstellungen</span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted small mb-4">
+                    <p class="text-muted small mb-4" th:text="#{cookie.modal.text}">
                         Hier können Sie auswählen, welche Kategorien von Cookies Sie zulassen möchten.
                         Notwendige Cookies sind für die Grundfunktionen der Website erforderlich.
                     </p>
-
                     <div class="cookie-category mb-3 p-3 border rounded">
                         <div class="form-check form-switch d-flex justify-content-between align-items-start">
                             <div class="me-3">
-                                <h6 class="mb-1"><i class="bi bi-lock-fill text-primary me-2"></i>Notwendige Cookies</h6>
-                                <p class="small text-muted mb-0">
+                                <h6 class="mb-1"><i class="bi bi-lock-fill text-primary me-2"></i><span th:text="#{cookie.necessary}">Notwendige Cookies</span></h6>
+                                <p class="small text-muted mb-0" th:text="#{cookie.necessary.desc}">
                                     Für die Grundfunktionen der Website erforderlich (Session, Sicherheit).
                                 </p>
                             </div>
                             <input class="form-check-input" type="checkbox" checked disabled data-category="necessary">
                         </div>
                     </div>
-
                     <div class="cookie-category mb-3 p-3 border rounded">
                         <div class="form-check form-switch d-flex justify-content-between align-items-start">
                             <div class="me-3">
-                                <h6 class="mb-1"><i class="bi bi-gear-fill text-info me-2"></i>Funktionale Cookies</h6>
-                                <p class="small text-muted mb-0">
+                                <h6 class="mb-1"><i class="bi bi-gear-fill text-info me-2"></i><span th:text="#{cookie.functional}">Funktionale Cookies</span></h6>
+                                <p class="small text-muted mb-0" th:text="#{cookie.functional.desc}">
                                     Erweiterte Funktionen wie Spracheinstellungen und personalisierte Inhalte.
                                 </p>
                             </div>
                             <input class="form-check-input" type="checkbox" id="cookieFunctional" data-category="functional">
                         </div>
                     </div>
-
                     <div class="cookie-category mb-3 p-3 border rounded">
                         <div class="form-check form-switch d-flex justify-content-between align-items-start">
                             <div class="me-3">
-                                <h6 class="mb-1"><i class="bi bi-graph-up text-success me-2"></i>Analytics Cookies</h6>
-                                <p class="small text-muted mb-0">
+                                <h6 class="mb-1"><i class="bi bi-graph-up text-success me-2"></i><span th:text="#{cookie.analytics}">Analytics Cookies</span></h6>
+                                <p class="small text-muted mb-0" th:text="#{cookie.analytics.desc}">
                                     Helfen uns zu verstehen, wie Besucher die Website nutzen.
                                 </p>
                             </div>
                             <input class="form-check-input" type="checkbox" id="cookieAnalytics" data-category="analytics">
                         </div>
                     </div>
-
                     <div class="cookie-category mb-3 p-3 border rounded">
                         <div class="form-check form-switch d-flex justify-content-between align-items-start">
                             <div class="me-3">
-                                <h6 class="mb-1"><i class="bi bi-megaphone-fill text-warning me-2"></i>Marketing Cookies</h6>
-                                <p class="small text-muted mb-0">
+                                <h6 class="mb-1"><i class="bi bi-megaphone-fill text-warning me-2"></i><span th:text="#{cookie.marketing}">Marketing Cookies</span></h6>
+                                <p class="small text-muted mb-0" th:text="#{cookie.marketing.desc}">
                                     Für personalisierte Werbung und Messung von Marketingkampagnen.
                                 </p>
                             </div>
@@ -89,14 +82,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Abbrechen</button>
-                    <button type="button" class="btn btn-outline-primary" id="rejectOptionalCookies">Nur notwendige</button>
-                    <button type="button" class="btn btn-primary" id="saveCookieSettings">Einstellungen speichern</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" th:text="#{cookie.btn.cancel}">Abbrechen</button>
+                    <button type="button" class="btn btn-outline-primary" id="rejectOptionalCookies" th:text="#{cookie.btn.reject}">Nur notwendige</button>
+                    <button type="button" class="btn btn-primary" id="saveCookieSettings" th:text="#{cookie.btn.save}">Einstellungen speichern</button>
                 </div>
             </div>
         </div>
     </div>
-
     <style>
         .cookie-banner {
             position: fixed;

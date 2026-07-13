@@ -1,68 +1,62 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Bestelldetails')}"></head>
+<head th:replace="~{fragments/head :: head(#{order.detail.title})}"></head>
 <body>
-
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 <div th:replace="~{fragments/alerts :: alerts}"></div>
-
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-file-invoice me-2"></i>Bestelldetails #<span th:text="${order.id}">123</span></h2>
-        <a th:href="@{/shop/orders}" class="btn btn-outline-secondary">Zurück zur Übersicht</a>
+        <h2><i class="fas fa-file-invoice me-2"></i><span th:text="#{order.detail.title}">Bestelldetails</span> #<span th:text="${order.id}">123</span></h2>
+        <a th:href="@{/shop/orders}" class="btn btn-outline-secondary" th:text="#{order.detail.back}">Zurück zur Übersicht</a>
     </div>
-
     <div class="row">
         <div class="col-md-4">
             <div class="card mb-4">
-                <div class="card-header bg-light fw-bold">Bestellinformationen</div>
+                <div class="card-header bg-light fw-bold" th:text="#{order.detail.info}">Bestellinformationen</div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Datum:</span>
+                        <span th:text="#{order.detail.date}">Datum:</span>
                         <span th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}">-</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Status:</span>
+                        <span th:text="#{order.detail.status}">Status:</span>
                         <span th:switch="${order.status}">
-                                <span th:case="NEW" class="badge bg-info text-dark">NEU</span>
-                                <span th:case="CONFIRMED" class="badge bg-primary">BESTÄTIGT</span>
-                                <span th:case="SHIPPED" class="badge bg-success">VERSENDET</span>
-                                <span th:case="CANCELLED" class="badge bg-danger">STORNIERT</span>
-                            </span>
+                            <span th:case="NEW" class="badge bg-info text-dark" th:text="#{orderStatus.NEW}">NEU</span>
+                            <span th:case="CONFIRMED" class="badge bg-primary" th:text="#{orderStatus.CONFIRMED}">BESTÄTIGT</span>
+                            <span th:case="SHIPPED" class="badge bg-success" th:text="#{orderStatus.SHIPPED}">VERSENDET</span>
+                            <span th:case="CANCELLED" class="badge bg-danger" th:text="#{orderStatus.CANCELLED}">STORNIERT</span>
+                        </span>
                     </li>
                     <li class="list-group-item">
-                        <strong>Lieferadresse:</strong><br>
+                        <strong th:text="#{order.detail.address}">Lieferadresse:</strong><br>
                         <span th:text="${order.deliveryAddress}">Adresse</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
-                        <span><i class="bi bi-credit-card me-1"></i>Zahlungsart:</span>
+                        <span><i class="bi bi-credit-card me-1"></i><span th:text="#{order.detail.payment}">Zahlungsart</span>:</span>
                         <strong th:text="${order.paymentMethod.displayName}">Vorkasse</strong>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
-                        <span><i class="bi bi-truck me-1"></i>Versandart:</span>
+                        <span><i class="bi bi-truck me-1"></i><span th:text="#{order.detail.shipping}">Versandart</span>:</span>
                         <strong th:text="${order.shippingMethod.displayName}">Standard</strong>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Versandkosten:</span>
-                        <strong th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' €'">
-                            0.00 €
-                        </strong>
+                        <span th:text="#{order.detail.shippingCost}">Versandkosten:</span>
+                        <strong th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' €'">0.00 €</strong>
                     </li>
                 </ul>
             </div>
         </div>
-
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header bg-light fw-bold">Bestellte Artikel</div>
+                <div class="card-header bg-light fw-bold" th:text="#{order.detail.items}">Bestellte Artikel</div>
                 <div class="card-body p-0">
                     <table class="table table-striped mb-0">
                         <thead>
                         <tr>
-                            <th>Produkt</th>
-                            <th class="text-center">Menge</th>
-                            <th class="text-end">Einzelpreis</th>
-                            <th class="text-end">Gesamt</th>
+                            <th th:text="#{order.detail.product}">Produkt</th>
+                            <th class="text-center" th:text="#{order.detail.quantity}">Menge</th>
+                            <th class="text-end" th:text="#{order.detail.unitPrice}">Einzelpreis</th>
+                            <th class="text-end" th:text="#{order.detail.total}">Gesamt</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -74,29 +68,25 @@
                         </tr>
                         </tbody>
                         <tfoot class="table-light">
-                            <tr th:if="${order.discountAmount != null and order.discountAmount > 0}">
-                                <td colspan="3" class="text-end text-success">
-                                    <i class="bi bi-tag-fill me-1"></i>
-                                    <span th:if="${order.promoCode != null}" th:text="'Rabatt (' + ${order.promoCode.code} + ')'">Rabatt</span>
-                                    <span th:unless="${order.promoCode != null}">Rabatt</span>:
-                                </td>
-                                <td class="text-end text-success fw-bold"
-                                    th:text="'- ' + ${#numbers.formatDecimal(order.discountAmount, 1, 'COMMA', 2, 'POINT')} + ' €'">-0.00 €</td>
-                            </tr>
-
-                            <tr>
-                                <td colspan="3" class="text-end">Zwischensumme:</td>
-                                <td class="text-end" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' €'">0.00 €</td>
-                            </tr>
-                            <tr>
-                                <td colspan="3" class="text-end">Versandkosten:</td>
-                                <td class="text-end" th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' €'">0.00 €</td>
-                            </tr>
-                            <tr>
-                                <td colspan="3" class="text-end fw-bold fs-5">Gesamtsumme:</td>
-                                <td class="text-end fw-bold fs-5 text-primary"
-                                    th:text="${#numbers.formatDecimal(order.grandTotal, 1, 2)} + ' €'">0.00 €</td>
-                            </tr>
+                        <tr th:if="${order.discountAmount != null and order.discountAmount > 0}">
+                            <td colspan="3" class="text-end text-success">
+                                <i class="bi bi-tag-fill me-1"></i>
+                                <span th:text="#{order.detail.discount}">Rabatt</span>:
+                            </td>
+                            <td class="text-end text-success fw-bold" th:text="'- ' + ${#numbers.formatDecimal(order.discountAmount, 1, 'COMMA', 2, 'POINT')} + ' €'">-0.00 €</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end" th:text="#{order.detail.subtotal} + ':'">Zwischensumme:</td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' €'">0.00 €</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end" th:text="#{order.detail.shippingCost} + ':'">Versandkosten:</td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' €'">0.00 €</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold fs-5" th:text="#{order.detail.grandTotal} + ':'">Gesamtsumme:</td>
+                            <td class="text-end fw-bold fs-5 text-primary" th:text="${#numbers.formatDecimal(order.grandTotal, 1, 2)} + ' €'">0.00 €</td>
+                        </tr>
                         </tfoot>
                     </table>
                 </div>
@@ -104,7 +94,6 @@
         </div>
     </div>
 </div>
-
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

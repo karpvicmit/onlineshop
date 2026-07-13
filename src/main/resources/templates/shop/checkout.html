@@ -1,139 +1,133 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Kasse')}"></head>
+<head th:replace="~{fragments/head :: head(#{checkout.title})}"></head>
 <body>
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 <div th:replace="~{fragments/alerts :: alerts}"></div>
-
 <div class="page-container">
     <div class="page-title-section">
-        <h1><i class="bi bi-bag-check me-2"></i>Kasse</h1>
-        <p>Überprüfen Sie Ihre Bestellung und schließen Sie den Kauf ab</p>
+        <h1><i class="bi bi-bag-check me-2"></i><span th:text="#{checkout.title}">Kasse</span></h1>
+        <p th:text="#{checkout.subtitle}">Überprüfen Sie Ihre Bestellung...</p>
     </div>
-
     <form th:action="@{/shop/checkout/confirm}" method="post">
         <div class="checkout-layout">
             <div class="checkout-steps">
+                <!-- 1. Shipping -->
                 <div class="checkout-step">
                     <div class="checkout-step-header">
                         <span class="checkout-step-number">1</span>
-                        <h2 class="checkout-step-title">Versandart</h2>
+                        <h2 class="checkout-step-title" th:text="#{checkout.step.shipping}">Versandart</h2>
                     </div>
                     <div class="checkout-step-body">
                         <label class="checkout-option">
                             <input type="radio" name="shippingMethod" value="STANDARD" checked required>
                             <div class="checkout-option-info">
-                                <div class="checkout-option-name">Standardversand</div>
-                                <div class="checkout-option-desc">Lieferung in 3–5 Werktagen</div>
+                                <div class="checkout-option-name" th:text="#{shipping.STANDARD.name}">Standardversand</div>
+                                <div class="checkout-option-desc" th:text="#{shipping.STANDARD.desc}">Lieferung in 3–5 Werktagen</div>
                             </div>
-                            <span class="checkout-option-price">4,99 €</span>
+                            <span class="checkout-option-price" th:text="#{shipping.STANDARD.cost}">4,99 €</span>
                         </label>
                         <label class="checkout-option">
                             <input type="radio" name="shippingMethod" value="EXPRESS" required>
                             <div class="checkout-option-info">
-                                <div class="checkout-option-name">Expressversand</div>
-                                <div class="checkout-option-desc">Lieferung am nächsten Werktag</div>
+                                <div class="checkout-option-name" th:text="#{shipping.EXPRESS.name}">Expressversand</div>
+                                <div class="checkout-option-desc" th:text="#{shipping.EXPRESS.desc}">Lieferung am nächsten Werktag</div>
                             </div>
-                            <span class="checkout-option-price">9,99 €</span>
+                            <span class="checkout-option-price" th:text="#{shipping.EXPRESS.cost}">9,99 €</span>
                         </label>
                         <label class="checkout-option">
                             <input type="radio" name="shippingMethod" value="ABHOLUNG" required>
                             <div class="checkout-option-info">
-                                <div class="checkout-option-name">Selbstabholung</div>
-                                <div class="checkout-option-desc">Kostenlose Abholung im Lager</div>
+                                <div class="checkout-option-name" th:text="#{shipping.ABHOLUNG.name}">Selbstabholung</div>
+                                <div class="checkout-option-desc" th:text="#{shipping.ABHOLUNG.desc}">Kostenlose Abholung im Lager</div>
                             </div>
-                            <span class="checkout-option-price free">Kostenlos</span>
+                            <span class="checkout-option-price free" th:text="#{shipping.ABHOLUNG.cost}">Kostenlos</span>
                         </label>
                     </div>
                 </div>
 
+                <!-- 2. Payment -->
                 <div class="checkout-step">
                     <div class="checkout-step-header">
                         <span class="checkout-step-number">2</span>
-                        <h2 class="checkout-step-title">Zahlungsart</h2>
+                        <h2 class="checkout-step-title" th:text="#{checkout.step.payment}">Zahlungsart</h2>
                     </div>
                     <div class="checkout-step-body">
                         <label class="checkout-option">
                             <input type="radio" name="paymentProvider" value="VORKASSE" checked required>
                             <div class="checkout-option-info">
-                                <div class="checkout-option-name">Vorkasse</div>
-                                <div class="checkout-option-desc">Bezahlung vor Versand per Überweisung</div>
+                                <div class="checkout-option-name" th:text="#{paymentProvider.VORKASSE.name}">Vorkasse</div>
+                                <div class="checkout-option-desc" th:text="#{paymentProvider.VORKASSE.desc}">Bezahlung vor Versand per Überweisung</div>
                             </div>
                         </label>
                         <label class="checkout-option">
                             <input type="radio" name="paymentProvider" value="RECHNUNG" required>
                             <div class="checkout-option-info">
-                                <div class="checkout-option-name">Rechnung</div>
-                                <div class="checkout-option-desc">Bezahlung innerhalb von 14 Tagen nach Erhalt</div>
+                                <div class="checkout-option-name" th:text="#{paymentProvider.RECHNUNG.name}">Rechnung</div>
+                                <div class="checkout-option-desc" th:text="#{paymentProvider.RECHNUNG.desc}">Bezahlung innerhalb von 14 Tagen nach Erhalt</div>
                             </div>
                         </label>
                         <label class="checkout-option">
                             <input type="radio" name="paymentProvider" value="STRIPE" required>
                             <div class="checkout-option-info">
-                                <div class="checkout-option-name">Kreditkarte / PayPal</div>
-                                <div class="checkout-option-desc">Sichere Zahlung per Kreditkarte oder PayPal</div>
+                                <div class="checkout-option-name" th:text="#{paymentProvider.STRIPE.name}">Kreditkarte / PayPal</div>
+                                <div class="checkout-option-desc" th:text="#{paymentProvider.STRIPE.desc}">Sichere Zahlung per Kreditkarte oder PayPal</div>
                             </div>
                         </label>
                     </div>
                 </div>
 
+                <!-- 3. Address -->
                 <div class="checkout-step">
                     <div class="checkout-step-header">
                         <span class="checkout-step-number">3</span>
-                        <h2 class="checkout-step-title">Lieferadresse</h2>
+                        <h2 class="checkout-step-title" th:text="#{checkout.step.address}">Lieferadresse</h2>
                     </div>
                     <div class="checkout-step-body">
                         <div class="checkout-address-card">
-                            <div class="checkout-address-icon">
-                                <i class="bi bi-geo-alt"></i>
-                            </div>
+                            <div class="checkout-address-icon"><i class="bi bi-geo-alt"></i></div>
                             <div class="checkout-address-info">
-                                <div class="checkout-address-name"
-                                     th:text="${user.firstName + ' ' + user.lastName}">Max Mustermann</div>
+                                <div class="checkout-address-name" th:text="${user.firstName + ' ' + user.lastName}">Max Mustermann</div>
                                 <div class="checkout-address-text" th:text="${user.address}">Adresse</div>
                                 <div class="checkout-address-email" th:text="${user.email}">email</div>
                             </div>
                             <a th:href="@{/profile}" class="checkout-address-edit">
-                                <i class="bi bi-pencil"></i> Ändern
+                                <i class="bi bi-pencil"></i> <span th:text="#{checkout.address.edit}">Ändern</span>
                             </a>
                         </div>
                     </div>
                 </div>
 
+                <!-- 4. Terms & Actions -->
                 <div class="checkout-step">
                     <div class="checkout-step-body">
                         <div class="checkout-terms">
                             <input type="checkbox" id="acceptTerms" required>
-                            <label for="acceptTerms">
-                                Ich akzeptiere die
-                                <a th:href="@{/agb}" target="_blank">AGB</a> und habe die
-                                <a th:href="@{/datenschutz}" target="_blank">Datenschutzerklärung</a>
-                                zur Kenntnis genommen.
-                            </label>
+                            <label for="acceptTerms" th:text="#{checkout.terms}">Ich akzeptiere die AGB...</label>
                         </div>
-
                         <div class="checkout-actions">
                             <a th:href="@{/shop/cart}" class="checkout-back-btn">
-                                <i class="bi bi-arrow-left"></i> Zurück zum Warenkorb
+                                <i class="bi bi-arrow-left"></i> <span th:text="#{checkout.back}">Zurück zum Warenkorb</span>
                             </a>
                             <button type="submit" class="checkout-submit-btn">
-                                <i class="bi bi-lock"></i> Kostenpflichtig bestellen
+                                <i class="bi bi-lock"></i> <span th:text="#{checkout.submit}">Kostenpflichtig bestellen</span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Summary Sidebar -->
             <div class="cart-summary-sidebar">
                 <div class="checkout-summary-card">
-                    <div class="checkout-summary-header">Bestellübersicht</div>
+                    <div class="checkout-summary-header" th:text="#{checkout.summary.title}">Bestellübersicht</div>
                     <div class="checkout-summary-body" style="padding: var(--space-5);">
                         <div class="cart-summary-row">
-                            <span>Zwischensumme</span>
+                            <span th:text="#{checkout.summary.subtotal}">Zwischensumme</span>
                             <span class="value" th:text="${#numbers.formatDecimal(cart != null ? cart.total : 0, 1, 'COMMA', 2, 'POINT')} + ' €'">0,00 €</span>
                         </div>
                         <div class="cart-summary-row total">
-                            <span>Gesamt</span>
+                            <span th:text="#{checkout.summary.total}">Gesamt</span>
                             <span th:text="${#numbers.formatDecimal(cart != null ? cart.finalTotal : 0, 1, 'COMMA', 2, 'POINT')} + ' €'">0,00 €</span>
                         </div>
                     </div>
@@ -142,9 +136,7 @@
         </div>
     </form>
 </div>
-
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-
 <script>
     document.querySelectorAll('.checkout-option input[type="radio"]').forEach(radio => {
         radio.addEventListener('change', function() {
@@ -152,9 +144,7 @@
             group.querySelectorAll('.checkout-option').forEach(opt => opt.classList.remove('selected'));
             this.closest('.checkout-option').classList.add('selected');
         });
-        if (radio.checked) {
-            radio.closest('.checkout-option').classList.add('selected');
-        }
+        if (radio.checked) radio.closest('.checkout-option').classList.add('selected');
     });
 </script>
 </body>

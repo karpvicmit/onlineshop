@@ -1,118 +1,75 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Registrierung')}"></head>
+<head th:replace="~{fragments/head :: head(#{auth.register.title})}"></head>
 <body class="auth-page">
-<!-- Navbar -->
 <div class="auth-navbar">
     <a th:href="@{/}" class="auth-navbar-brand">
         <i class="bi bi-shop"></i>
-        <span>OnlineShop</span>
+        <span th:text="#{navbar.brand}">OnlineShop</span>
     </a>
 </div>
-
-<!-- Main Content -->
 <div class="auth-container">
-    <!-- Left: Branding -->
     <div class="auth-branding">
         <div class="auth-branding-content">
-            <div class="auth-branding-icon">
-                <i class="bi bi-person-plus"></i>
-            </div>
-            <h2>Konto erstellen</h2>
-            <p>Registrieren Sie sich und profitieren Sie von allen Vorteilen unseres Online-Shops.</p>
+            <div class="auth-branding-icon"><i class="bi bi-person-plus"></i></div>
+            <h2 th:text="#{auth.register.branding.title}">Konto erstellen</h2>
+            <p th:text="#{auth.register.branding.text}">Registrieren Sie sich...</p>
             <div class="auth-branding-features">
-                <div class="auth-branding-feature">
-                    <i class="bi bi-shield-check"></i>
-                    <span>Sichere Registrierung mit E-Mail-Bestätigung</span>
-                </div>
-                <div class="auth-branding-feature">
-                    <i class="bi bi-truck"></i>
-                    <span>Lieferadresse speichern für schnellen Checkout</span>
-                </div>
-                <div class="auth-branding-feature">
-                    <i class="bi bi-gift"></i>
-                    <span>Exklusive Angebote und Promo-Codes erhalten</span>
-                </div>
+                <div class="auth-branding-feature"><i class="bi bi-shield-check"></i><span th:text="#{auth.register.branding.f1}">Sichere Registrierung...</span></div>
+                <div class="auth-branding-feature"><i class="bi bi-truck"></i><span th:text="#{auth.register.branding.f2}">Lieferadresse speichern...</span></div>
+                <div class="auth-branding-feature"><i class="bi bi-gift"></i><span th:text="#{auth.register.branding.f3}">Exklusive Angebote...</span></div>
             </div>
         </div>
     </div>
-
-    <!-- Right: Form -->
     <div class="auth-form-panel">
         <div class="auth-form-wrapper">
             <div class="auth-form-header">
-                <h1>Registrierung</h1>
-                <p>Füllen Sie das Formular aus, um ein Konto zu erstellen.</p>
+                <h1 th:text="#{auth.register.title}">Registrierung</h1>
+                <p th:text="#{auth.register.subtitle}">Füllen Sie das Formular aus...</p>
             </div>
-
-            <!-- Alerts -->
             <div th:if="${errorMessage}" class="auth-alert auth-alert-danger">
-                <i class="bi bi-exclamation-circle-fill"></i>
-                <span th:text="${errorMessage}">Fehler</span>
+                <i class="bi bi-exclamation-circle-fill"></i><span th:text="${errorMessage}">Fehler</span>
             </div>
-
-            <!-- Registration Form -->
             <form th:action="@{/register}" th:object="${registrationDto}" method="post" class="auth-form">
                 <div class="auth-form-row">
                     <div class="auth-form-group">
-                        <label for="firstName" class="auth-form-label">Vorname</label>
-                        <input type="text" class="auth-form-input" id="firstName"
-                               th:field="*{firstName}" placeholder="Max">
+                        <label for="firstName" class="auth-form-label" th:text="#{auth.register.firstName}">Vorname</label>
+                        <input type="text" class="auth-form-input" id="firstName" th:field="*{firstName}">
                     </div>
                     <div class="auth-form-group">
-                        <label for="lastName" class="auth-form-label">Nachname</label>
-                        <input type="text" class="auth-form-input" id="lastName"
-                               th:field="*{lastName}" placeholder="Mustermann">
+                        <label for="lastName" class="auth-form-label" th:text="#{auth.register.lastName}">Nachname</label>
+                        <input type="text" class="auth-form-input" id="lastName" th:field="*{lastName}">
                     </div>
                 </div>
-
                 <div class="auth-form-group">
-                    <label for="email" class="auth-form-label">E-Mail-Adresse *</label>
-                    <input type="email" class="auth-form-input"
-                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
-                           id="email" th:field="*{email}"
-                           placeholder="ihre@email.de" required>
+                    <label for="email" class="auth-form-label" th:text="#{auth.register.email}">E-Mail-Adresse *</label>
+                    <input type="email" class="auth-form-input" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" id="email" th:field="*{email}" required>
                     <div class="auth-form-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                 </div>
-
                 <div class="auth-form-group">
-                    <label for="address" class="auth-form-label">Lieferadresse *</label>
-                    <textarea class="auth-form-input"
-                              th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'"
-                              id="address" th:field="*{address}" rows="2"
-                              placeholder="Straße, Hausnr., PLZ, Stadt" required></textarea>
+                    <label for="address" class="auth-form-label" th:text="#{auth.register.address}">Lieferadresse *</label>
+                    <textarea class="auth-form-input" th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'" id="address" th:field="*{address}" rows="2" th:placeholder="#{auth.register.address.placeholder}" required></textarea>
                     <div class="auth-form-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
-                    <p class="auth-form-hint">Diese Adresse wird beim Checkout vorausgefüllt.</p>
+                    <p class="auth-form-hint" th:text="#{auth.register.address.hint}">Diese Adresse wird beim Checkout vorausgefüllt.</p>
                 </div>
-
                 <div class="auth-form-group">
-                    <label for="password" class="auth-form-label">Passwort *</label>
-                    <input type="password" class="auth-form-input"
-                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
-                           id="password" th:field="*{password}"
-                           placeholder="Mindestens 8 Zeichen" required minlength="8">
+                    <label for="password" class="auth-form-label" th:text="#{auth.register.password}">Passwort *</label>
+                    <input type="password" class="auth-form-input" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" id="password" th:field="*{password}" th:placeholder="#{auth.register.password.placeholder}" required minlength="8">
                     <div class="auth-form-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                 </div>
-
                 <div class="auth-checkbox">
                     <input type="checkbox" id="acceptAgb" required>
                     <label for="acceptAgb">
-                        Ich akzeptiere die
-                        <a th:href="@{/agb}" target="_blank">AGB</a> und habe die
-                        <a th:href="@{/datenschutz}" target="_blank">Datenschutzerklärung</a>
-                        zur Kenntnis genommen.
+                        <span th:text="#{auth.register.agb}">Ich akzeptiere die AGB...</span>
                     </label>
                 </div>
-
                 <button type="submit" class="auth-submit-btn">
                     <i class="bi bi-person-plus"></i>
-                    Konto erstellen
+                    <span th:text="#{auth.register.submit}">Konto erstellen</span>
                 </button>
             </form>
-
-            <!-- Login Link -->
             <p class="auth-footer-link">
-                Bereits registriert? <a th:href="@{/login}">Zum Login</a>
+                <span th:text="#{auth.register.have.account}">Bereits registriert?</span> <a th:href="@{/login}" th:text="#{auth.register.login.link}">Zum Login</a>
             </p>
         </div>
     </div>

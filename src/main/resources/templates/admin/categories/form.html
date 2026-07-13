@@ -1,59 +1,52 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Kategorie bearbeiten')}"></head>
+<head th:replace="~{fragments/head :: head(${category.id == null} ? #{admin.categories.form.title.new} : #{admin.categories.form.title.edit})}"></head>
 <body>
 <div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
-
     <main class="admin-main">
         <div class="admin-page-header">
             <div>
                 <h1 class="admin-page-title">
                     <i class="bi bi-tags"></i>
-                    <span th:text="${category.id == null} ? 'Neue Kategorie anlegen' : 'Kategorie bearbeiten'">Kategorie</span>
+                    <span th:text="${category.id == null} ? #{admin.categories.form.title.new} : #{admin.categories.form.title.edit}">Kategorie</span>
                 </h1>
             </div>
             <div class="admin-page-actions">
                 <a th:href="@{/admin/categories}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Zurück
+                    <i class="bi bi-arrow-left"></i> <span th:text="#{admin.categories.form.back}">Zurück</span>
                 </a>
             </div>
         </div>
-
         <div th:replace="~{fragments/alerts :: alerts}"></div>
 
         <div style="max-width: 700px;">
             <div class="admin-form-card">
                 <div class="admin-form-header">
                     <i class="bi bi-info-circle"></i>
-                    Kategoriedaten
+                    <span th:text="#{admin.categories.form.data}">Kategoriedaten</span>
                 </div>
                 <div class="admin-form-body">
                     <form th:action="@{/admin/categories/save}" th:object="${category}" method="post">
                         <input type="hidden" th:field="*{id}"/>
-
                         <div class="admin-form-group">
-                            <label for="name" class="admin-form-label">Kategoriename *</label>
+                            <label for="name" class="admin-form-label" th:text="#{admin.categories.form.name}">Kategoriename *</label>
                             <input type="text" class="admin-form-input" id="name" th:field="*{name}" required>
                             <div class="text-danger small mt-1" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
                         </div>
-
                         <div class="admin-form-group">
-                            <label for="description" class="admin-form-label">Beschreibung</label>
+                            <label for="description" class="admin-form-label" th:text="#{admin.categories.form.description}">Beschreibung</label>
                             <textarea class="admin-form-textarea" id="description" th:field="*{description}" rows="4"></textarea>
                         </div>
-
                         <div class="admin-form-group" th:if="${category.slug != null}">
-                            <label class="admin-form-label">Slug (automatisch generiert)</label>
-                            <input type="text" class="admin-form-input" th:value="${category.slug}" readonly
-                                   style="background-color: var(--color-bg-alt);">
-                            <p class="admin-form-hint">Wird beim Speichern automatisch aus dem Namen erzeugt.</p>
+                            <label class="admin-form-label" th:text="#{admin.categories.form.slug}">Slug (automatisch generiert)</label>
+                            <input type="text" class="admin-form-input" th:value="${category.slug}" readonly style="background-color: var(--color-bg-alt);">
+                            <p class="admin-form-hint" th:text="#{admin.categories.form.slug.hint}">Wird beim Speichern automatisch aus dem Namen erzeugt.</p>
                         </div>
-
                         <div class="admin-form-actions">
-                            <a th:href="@{/admin/categories}" class="btn btn-outline-secondary">Abbrechen</a>
+                            <a th:href="@{/admin/categories}" class="btn btn-outline-secondary" th:text="#{admin.categories.form.cancel}">Abbrechen</a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg"></i> Speichern
+                                <i class="bi bi-check-lg"></i> <span th:text="#{admin.categories.form.save}">Speichern</span>
                             </button>
                         </div>
                     </form>

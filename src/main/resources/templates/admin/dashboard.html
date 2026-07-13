@@ -1,28 +1,26 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Admin Dashboard')}"></head>
+<head th:replace="~{fragments/head :: head(#{admin.dashboard.title})}"></head>
 <body>
 <div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
-
     <main class="admin-main">
         <!-- Page Header -->
         <div class="admin-page-header">
             <div>
                 <h1 class="admin-page-title">
                     <i class="bi bi-speedometer2"></i>
-                    Dashboard
+                    <span th:text="#{admin.dashboard.title}">Dashboard</span>
                 </h1>
-                <p class="admin-page-subtitle">Willkommen zurück! Hier ist Ihre Übersicht.</p>
+                <p class="admin-page-subtitle" th:text="#{admin.dashboard.subtitle}">Willkommen zurück! Hier ist Ihre Übersicht.</p>
             </div>
             <div class="admin-page-actions">
                 <span class="status-badge status-badge-active">
                     <i class="bi bi-shield-check"></i>
-                    Admin-Modus aktiv
+                    <span th:text="#{admin.dashboard.badge.active}">Admin-Modus aktiv</span>
                 </span>
             </div>
         </div>
-
         <div th:replace="~{fragments/alerts :: alerts}"></div>
 
         <!-- Dashboard Cards -->
@@ -30,85 +28,61 @@
             <!-- Products Card -->
             <a th:href="@{/admin/products}" class="dashboard-card" style="--card-accent: #0d6efd;">
                 <div class="dashboard-card-header">
-                    <div class="dashboard-card-icon">
-                        <i class="bi bi-box-seam"></i>
-                    </div>
-                    <span class="dashboard-card-badge">Verwalten</span>
+                    <div class="dashboard-card-icon"><i class="bi bi-box-seam"></i></div>
+                    <span class="dashboard-card-badge" th:text="#{admin.dashboard.products.badge}">Verwalten</span>
                 </div>
-                <h3 class="dashboard-card-title">Produkte</h3>
-                <p class="dashboard-card-description">
-                    Produkte anlegen, bearbeiten, löschen und Bilder verwalten.
-                </p>
+                <h3 class="dashboard-card-title" th:text="#{admin.dashboard.products.title}">Produkte</h3>
+                <p class="dashboard-card-description" th:text="#{admin.dashboard.products.desc}">Produkte anlegen, bearbeiten...</p>
             </a>
 
             <!-- Categories Card -->
             <a th:href="@{/admin/categories}" class="dashboard-card" style="--card-accent: var(--color-success);">
                 <div class="dashboard-card-header">
-                    <div class="dashboard-card-icon">
-                        <i class="bi bi-tags"></i>
-                    </div>
-                    <span class="dashboard-card-badge">Organisieren</span>
+                    <div class="dashboard-card-icon"><i class="bi bi-tags"></i></div>
+                    <span class="dashboard-card-badge" th:text="#{admin.dashboard.categories.badge}">Organisieren</span>
                 </div>
-                <h3 class="dashboard-card-title">Kategorien</h3>
-                <p class="dashboard-card-description">
-                    Produktkategorien organisieren und Slugs verwalten.
-                </p>
+                <h3 class="dashboard-card-title" th:text="#{admin.dashboard.categories.title}">Kategorien</h3>
+                <p class="dashboard-card-description" th:text="#{admin.dashboard.categories.desc}">Produktkategorien organisieren...</p>
             </a>
 
             <!-- Orders Card -->
             <a th:href="@{/admin/orders}" class="dashboard-card" style="--card-accent: var(--color-info);">
                 <div class="dashboard-card-header">
-                    <div class="dashboard-card-icon">
-                        <i class="bi bi-receipt"></i>
-                    </div>
-                    <span class="dashboard-card-badge">Übersicht</span>
+                    <div class="dashboard-card-icon"><i class="bi bi-receipt"></i></div>
+                    <span class="dashboard-card-badge" th:text="#{admin.dashboard.orders.badge}">Übersicht</span>
                 </div>
-                <h3 class="dashboard-card-title">Bestellungen</h3>
-                <p class="dashboard-card-description">
-                    Eingehende Bestellungen einsehen und Status ändern.
-                </p>
+                <h3 class="dashboard-card-title" th:text="#{admin.dashboard.orders.title}">Bestellungen</h3>
+                <p class="dashboard-card-description" th:text="#{admin.dashboard.orders.desc}">Eingehende Bestellungen einsehen...</p>
             </a>
 
             <!-- Users Card -->
             <a th:href="@{/admin/users}" class="dashboard-card" style="--card-accent: var(--color-text-muted);">
                 <div class="dashboard-card-header">
-                    <div class="dashboard-card-icon">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <span class="dashboard-card-badge">Verwalten</span>
+                    <div class="dashboard-card-icon"><i class="bi bi-people"></i></div>
+                    <span class="dashboard-card-badge" th:text="#{admin.dashboard.users.badge}">Verwalten</span>
                 </div>
-                <h3 class="dashboard-card-title">Benutzer</h3>
-                <p class="dashboard-card-description">
-                    Kundenkonten verwalten, Rollen zuweisen oder sperren.
-                </p>
+                <h3 class="dashboard-card-title" th:text="#{admin.dashboard.users.title}">Benutzer</h3>
+                <p class="dashboard-card-description" th:text="#{admin.dashboard.users.desc}">Kundenkonten verwalten...</p>
             </a>
 
             <!-- Analytics Card -->
             <a th:href="@{/admin/analytics}" class="dashboard-card" style="--card-accent: var(--color-text);">
                 <div class="dashboard-card-header">
-                    <div class="dashboard-card-icon">
-                        <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-                    <span class="dashboard-card-badge">Analysieren</span>
+                    <div class="dashboard-card-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <span class="dashboard-card-badge" th:text="#{admin.dashboard.analytics.badge}">Analysieren</span>
                 </div>
-                <h3 class="dashboard-card-title">Analyse & Statistik</h3>
-                <p class="dashboard-card-description">
-                    Umsatzdiagramme, Top-Produkte und Bestellstatistiken.
-                </p>
+                <h3 class="dashboard-card-title" th:text="#{admin.dashboard.analytics.title}">Analyse & Statistik</h3>
+                <p class="dashboard-card-description" th:text="#{admin.dashboard.analytics.desc}">Umsatzdiagramme, Top-Produkte...</p>
             </a>
 
             <!-- Promo Codes Card -->
             <a th:href="@{/admin/promocodes}" class="dashboard-card" style="--card-accent: var(--color-warning);">
                 <div class="dashboard-card-header">
-                    <div class="dashboard-card-icon">
-                        <i class="bi bi-tag-fill"></i>
-                    </div>
-                    <span class="dashboard-card-badge">Erstellen</span>
+                    <div class="dashboard-card-icon"><i class="bi bi-tag-fill"></i></div>
+                    <span class="dashboard-card-badge" th:text="#{admin.dashboard.promocodes.badge}">Erstellen</span>
                 </div>
-                <h3 class="dashboard-card-title">Promo-Codes</h3>
-                <p class="dashboard-card-description">
-                    Rabattcodes erstellen und verwalten.
-                </p>
+                <h3 class="dashboard-card-title" th:text="#{admin.dashboard.promocodes.title}">Promo-Codes</h3>
+                <p class="dashboard-card-description" th:text="#{admin.dashboard.promocodes.desc}">Rabattcodes erstellen und verwalten.</p>
             </a>
         </div>
     </main>

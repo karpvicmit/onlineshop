@@ -1,65 +1,39 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('E-Mail gesendet')}"></head>
+<head th:replace="~{fragments/head :: head(#{auth.emailSent.title})}"></head>
 <body class="auth-page">
-<!-- Navbar -->
 <div class="auth-navbar">
     <a th:href="@{/}" class="auth-navbar-brand">
         <i class="bi bi-shop"></i>
-        <span>OnlineShop</span>
+        <span th:text="#{navbar.brand}">OnlineShop</span>
     </a>
 </div>
-
-<!-- Main Content -->
 <div class="auth-container">
-    <!-- Left: Branding -->
     <div class="auth-branding">
         <div class="auth-branding-content">
-            <div class="auth-branding-icon">
-                <i class="bi bi-envelope-check"></i>
-            </div>
-            <h2>Fast geschafft!</h2>
-            <p>Nur noch ein Schritt, um Ihr Konto zu aktivieren. Bestätigen Sie Ihre E-Mail-Adresse über den Link in der zugesendeten E-Mail.</p>
+            <div class="auth-branding-icon"><i class="bi bi-envelope-check"></i></div>
+            <h2 th:text="#{auth.emailSent.branding.title}">Fast geschafft!</h2>
+            <p th:text="#{auth.emailSent.branding.text}">Nur noch ein Schritt...</p>
             <div class="auth-branding-features">
-                <div class="auth-branding-feature">
-                    <i class="bi bi-envelope"></i>
-                    <span>Bestätigungs-E-Mail wurde an Ihre Adresse gesendet</span>
-                </div>
-                <div class="auth-branding-feature">
-                    <i class="bi bi-clock"></i>
-                    <span>Der Link ist 24 Stunden lang gültig</span>
-                </div>
-                <div class="auth-branding-feature">
-                    <i class="bi bi-shield-lock"></i>
-                    <span>Sichere Verifizierung Ihrer E-Mail-Adresse</span>
-                </div>
+                <div class="auth-branding-feature"><i class="bi bi-envelope"></i><span th:text="#{auth.emailSent.branding.f1}">Bestätigungs-E-Mail wurde gesendet</span></div>
+                <div class="auth-branding-feature"><i class="bi bi-clock"></i><span th:text="#{auth.emailSent.branding.f2}">Der Link ist 24 Stunden gültig</span></div>
+                <div class="auth-branding-feature"><i class="bi bi-shield-lock"></i><span th:text="#{auth.emailSent.branding.f3}">Sichere Verifizierung</span></div>
             </div>
         </div>
     </div>
-
-    <!-- Right: Content -->
     <div class="auth-form-panel">
         <div class="auth-form-wrapper">
             <div class="email-sent-content">
-                <div class="email-sent-icon">
-                    <i class="bi bi-envelope-check"></i>
-                </div>
-                <h2 class="email-sent-title">Bestätigungs-E-Mail gesendet</h2>
-                <p class="email-sent-text">
-                    Wir haben eine Bestätigungs-E-Mail an Ihre E-Mail-Adresse gesendet.
-                    Bitte überprüfen Sie Ihren Posteingang und klicken Sie auf den Bestätigungslink,
-                    um Ihre Registrierung abzuschließen.
-                </p>
+                <div class="email-sent-icon"><i class="bi bi-envelope-check"></i></div>
+                <h2 class="email-sent-title" th:text="#{auth.emailSent.title}">Bestätigungs-E-Mail gesendet</h2>
+                <p class="email-sent-text" th:text="#{auth.emailSent.text}">Wir haben eine Bestätigungs-E-Mail...</p>
                 <div class="email-sent-tip">
                     <i class="bi bi-info-circle-fill"></i>
-                    <div>
-                        <strong>Tipp:</strong> Überprüfen Sie auch Ihren Spam-Ordner,
-                        falls Sie die E-Mail nicht in Ihrem Posteingang finden.
-                    </div>
+                    <div><span th:text="#{auth.emailSent.tip}">Tipp: Überprüfen Sie auch Ihren Spam-Ordner...</span></div>
                 </div>
                 <a th:href="@{/login}" class="auth-submit-btn">
                     <i class="bi bi-box-arrow-in-right"></i>
-                    Zum Login
+                    <span th:text="#{auth.emailSent.btn}">Zum Login</span>
                 </a>
             </div>
         </div>

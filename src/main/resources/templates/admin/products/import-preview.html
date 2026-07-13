@@ -1,134 +1,45 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('CSV-Import Vorschau')}"></head>
+<head th:replace="~{fragments/head :: head(#{admin.csv.import.title})}"></head>
 <body class="bg-light">
 <div class="d-flex">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
     <main class="flex-grow-1 p-4">
         <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-            <h2 class="mb-0"><i class="bi bi-eye me-2"></i>CSV-Import Vorschau</h2>
-            <a th:href="@{/admin/products}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Zurück
-            </a>
+            <h2 class="mb-0"><i class="bi bi-eye me-2"></i><span th:text="#{admin.csv.import.title}">CSV-Import Vorschau</span></h2>
+            <a th:href="@{/admin/products}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> <span th:text="#{admin.csv.import.back}">Zurück</span></a>
         </div>
-
         <div th:replace="~{fragments/alerts :: alerts}"></div>
-
         <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card border-primary">
-                    <div class="card-body text-center">
-                        <h3 class="text-primary" th:text="${preview.totalRows}">0</h3>
-                        <small class="text-muted">Zeilen gesamt</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-success">
-                    <div class="card-body text-center">
-                        <h3 class="text-success" th:text="${preview.toCreate}">0</h3>
-                        <small class="text-muted">Neu erstellen</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-info">
-                    <div class="card-body text-center">
-                        <h3 class="text-info" th:text="${preview.toUpdate}">0</h3>
-                        <small class="text-muted">Aktualisieren</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-danger">
-                    <div class="card-body text-center">
-                        <h3 class="text-danger" th:text="${#lists.size(preview.errors)}">0</h3>
-                        <small class="text-muted">Fehler</small>
-                    </div>
-                </div>
-            </div>
+            <div class="col-md-3"><div class="card border-primary"><div class="card-body text-center"><h3 class="text-primary" th:text="${preview.totalRows}">0</h3><small class="text-muted" th:text="#{admin.csv.import.totalRows}">Zeilen gesamt</small></div></div></div>
+            <div class="col-md-3"><div class="card border-success"><div class="card-body text-center"><h3 class="text-success" th:text="${preview.toCreate}">0</h3><small class="text-muted" th:text="#{admin.csv.import.toCreate}">Neu erstellen</small></div></div></div>
+            <div class="col-md-3"><div class="card border-info"><div class="card-body text-center"><h3 class="text-info" th:text="${preview.toUpdate}">0</h3><small class="text-muted" th:text="#{admin.csv.import.toUpdate}">Aktualisieren</small></div></div></div>
+            <div class="col-md-3"><div class="card border-danger"><div class="card-body text-center"><h3 class="text-danger" th:text="${#lists.size(preview.errors)}">0</h3><small class="text-muted" th:text="#{admin.csv.import.errors}">Fehler</small></div></div></div>
         </div>
-
-        <!-- Errors -->
         <div th:if="${preview.hasErrors()}" class="card mb-4 border-danger">
-            <div class="card-header bg-danger text-white">
-                <i class="bi bi-exclamation-triangle me-2"></i>Validierungsfehler
-            </div>
+            <div class="card-header bg-danger text-white"><i class="bi bi-exclamation-triangle me-2"></i><span th:text="#{admin.csv.import.validationErrors}">Validierungsfehler</span></div>
             <div class="card-body p-0">
                 <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
                     <table class="table table-sm mb-0">
-                        <thead class="table-light sticky-top">
-                        <tr><th>Zeile</th><th>SKU</th><th>Fehler</th></tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="err : ${preview.errors}">
-                            <td th:text="${err.rowNumber}"></td>
-                            <td th:text="${err.sku ?: '-'}"></td>
-                            <td th:text="${err.message}"></td>
-                        </tr>
-                        </tbody>
+                        <thead class="table-light sticky-top"><tr><th th:text="#{admin.csv.import.table.row}">Zeile</th><th th:text="#{admin.csv.import.table.sku}">SKU</th><th th:text="#{admin.csv.import.table.error}">Fehler</th></tr></thead>
+                        <tbody><tr th:each="err : ${preview.errors}"><td th:text="${err.rowNumber}"></td><td th:text="${err.sku ?: '-'}"></td><td th:text="${err.message}"></td></tr></tbody>
                     </table>
                 </div>
             </div>
         </div>
-
         <div th:if="${!#lists.isEmpty(preview.sampleRows)}" class="card mb-4">
-            <div class="card-header bg-light">
-                <i class="bi bi-table me-2"></i>Vorschau der ersten Zeilen
-            </div>
+            <div class="card-header bg-light"><i class="bi bi-table me-2"></i><span th:text="#{admin.csv.import.preview}">Vorschau der ersten Zeilen</span></div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-sm table-striped mb-0">
-                        <thead class="table-light">
-                        <tr>
-                            <th>SKU</th><th>Name</th><th>Preis</th><th>Lager</th><th>Kategorie</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="row : ${preview.sampleRows}">
-                            <td><code th:text="${row.sku}"></code></td>
-                            <td th:text="${row.name}"></td>
-                            <td th:text="${row.price}"></td>
-                            <td th:text="${row.stock}"></td>
-                            <td th:text="${row.categorySlug}"></td>
-                        </tr>
-                        </tbody>
+                        <thead class="table-light"><tr><th th:text="#{admin.csv.import.preview.sku}">SKU</th><th th:text="#{admin.csv.import.preview.name}">Name</th><th th:text="#{admin.csv.import.preview.price}">Preis</th><th th:text="#{admin.csv.import.preview.stock}">Lager</th><th th:text="#{admin.csv.import.preview.category}">Kategorie</th></tr></thead>
+                        <tbody><tr th:each="row : ${preview.sampleRows}"><td><code th:text="${row.sku}"></code></td><td th:text="${row.name}"></td><td th:text="${row.price}"></td><td th:text="${row.stock}"></td><td th:text="${row.categorySlug}"></td></tr></tbody>
                     </table>
                 </div>
             </div>
         </div>
-
-        <!-- Action buttons -->
-
-        <div th:if="${preview.hasErrors()}" class="alert alert-warning mt-3">
-            <i class="bi bi-exclamation-circle me-2"></i>
-            Fehlerhafte Zeilen werden beim Import übersprungen. Gültige Zeilen werden trotzdem importiert.
-        </div>
-
-        <form id="importForm" th:action="@{/admin/products/import}" method="post" enctype="multipart/form-data"
-              style="display: none;">
-            <input type="file" name="csvFile" id="hiddenCsvFile">
-        </form>
-
-        <script>
-            document.getElementById('confirmImportBtn').addEventListener('click', function() {
-                const originalInput = window.openerFile || document.querySelector('#csvFile');
-                const form = document.getElementById('importForm');
-                const hidden = document.getElementById('hiddenCsvFile');
-
-                if (window._previewFile && typeof DataTransfer !== 'undefined') {
-                    const dt = new DataTransfer();
-                    dt.items.add(window._previewFile);
-                    hidden.files = dt.files;
-                    form.submit();
-                } else {
-                    alert('Bitte Datei erneut auswählen.');
-                    window.location.href = '/admin/products';
-                }
-            });
-        </script>
+        <div th:if="${preview.hasErrors()}" class="alert alert-warning mt-3"><i class="bi bi-exclamation-circle me-2"></i><span th:text="#{admin.csv.import.warning}">Fehlerhafte Zeilen werden beim Import übersprungen...</span></div>
     </main>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

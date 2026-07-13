@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Produkt bearbeiten')}"></head>
+<head th:replace="~{fragments/head :: head(${product.id == null} ? #{admin.products.form.title.new} : #{admin.products.form.title.edit})}"></head>
 <body>
 <div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
-
     <main class="admin-main">
         <div class="admin-page-header">
             <div>
                 <h1 class="admin-page-title">
                     <i class="bi bi-box-seam"></i>
-                    <span th:text="${product.id == null} ? 'Neues Produkt anlegen' : 'Produkt bearbeiten'">Produkt</span>
+                    <span th:text="${product.id == null} ? #{admin.products.form.title.new} : #{admin.products.form.title.edit}">Produkt</span>
                 </h1>
                 <p class="admin-page-subtitle" th:if="${product.id != null}">
                     ID: <span th:text="${product.id}">1</span>
@@ -18,46 +17,44 @@
             </div>
             <div class="admin-page-actions">
                 <a th:href="@{/admin/products}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Zurück
+                    <i class="bi bi-arrow-left"></i> <span th:text="#{admin.products.form.back}">Zurück</span>
                 </a>
             </div>
         </div>
-
         <div th:replace="~{fragments/alerts :: alerts}"></div>
 
         <form th:action="@{/admin/products/save}" th:object="${product}" method="post" enctype="multipart/form-data">
             <input type="hidden" th:field="*{id}"/>
             <input type="hidden" th:field="*{version}"/>
-
             <div style="display: grid; grid-template-columns: 1fr 380px; gap: var(--space-6); align-items: start;">
+
                 <!-- Left: Main Info -->
                 <div class="admin-form-card">
                     <div class="admin-form-header">
                         <i class="bi bi-info-circle"></i>
-                        Produktdaten
+                        <span th:text="#{admin.products.form.data}">Produktdaten</span>
                     </div>
                     <div class="admin-form-body">
                         <div class="admin-form-group">
-                            <label for="name" class="admin-form-label">Produktname *</label>
+                            <label for="name" class="admin-form-label" th:text="#{admin.products.form.name}">Produktname *</label>
                             <input type="text" class="admin-form-input" id="name" th:field="*{name}" required>
                             <div class="text-danger small mt-1" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
                         </div>
                         <div class="admin-form-group">
-                            <label for="sku" class="admin-form-label">Artikelnummer (SKU) *</label>
-                            <input type="text" class="admin-form-input" id="sku" th:field="*{sku}" required
-                                   placeholder="z.B. SKU-0001">
+                            <label for="sku" class="admin-form-label" th:text="#{admin.products.form.sku}">Artikelnummer (SKU) *</label>
+                            <input type="text" class="admin-form-input" id="sku" th:field="*{sku}" required th:placeholder="#{admin.products.form.sku.placeholder}">
                             <div class="text-danger small mt-1" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></div>
-                            <p class="admin-form-hint">Eindeutige Artikelnummer für Import/Export.</p>
+                            <p class="admin-form-hint" th:text="#{admin.products.form.sku.hint}">Eindeutige Artikelnummer für Import/Export.</p>
                         </div>
                         <div class="admin-form-group">
-                            <label for="category" class="admin-form-label">Kategorie *</label>
+                            <label for="category" class="admin-form-label" th:text="#{admin.products.form.category}">Kategorie *</label>
                             <select class="admin-form-select" id="category" th:field="*{category.id}" required>
-                                <option value="">Bitte wählen...</option>
+                                <option value="" th:text="#{admin.products.form.category.placeholder}">Bitte wählen...</option>
                                 <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Kategorie</option>
                             </select>
                         </div>
                         <div class="admin-form-group">
-                            <label for="description" class="admin-form-label">Beschreibung</label>
+                            <label for="description" class="admin-form-label" th:text="#{admin.products.form.description}">Beschreibung</label>
                             <textarea class="admin-form-textarea" id="description" th:field="*{description}" rows="6"></textarea>
                         </div>
                     </div>
@@ -68,48 +65,44 @@
                     <div class="admin-form-card">
                         <div class="admin-form-header">
                             <i class="bi bi-currency-euro"></i>
-                            Preis & Lager
+                            <span th:text="#{admin.products.form.price.title}">Preis & Lager</span>
                         </div>
                         <div class="admin-form-body">
                             <div class="admin-form-group">
-                                <label for="price" class="admin-form-label">Preis (€) *</label>
+                                <label for="price" class="admin-form-label" th:text="#{admin.products.form.price}">Preis (€) *</label>
                                 <input type="number" step="0.01" min="0.01" class="admin-form-input" id="price" th:field="*{price}" required>
                                 <div class="text-danger small mt-1" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
                             </div>
                             <div class="admin-form-group">
-                                <label for="stock" class="admin-form-label">Lagerbestand *</label>
+                                <label for="stock" class="admin-form-label" th:text="#{admin.products.form.stock}">Lagerbestand *</label>
                                 <input type="number" min="0" class="admin-form-input" id="stock" th:field="*{stock}" required>
                                 <div class="text-danger small mt-1" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></div>
                             </div>
                         </div>
                     </div>
-
                     <div class="admin-form-card">
                         <div class="admin-form-header">
                             <i class="bi bi-image"></i>
-                            Produktbild
+                            <span th:text="#{admin.products.form.image.title}">Produktbild</span>
                         </div>
                         <div class="admin-form-body">
                             <div class="admin-form-group">
-                                <label for="imageFile" class="admin-form-label">Bild hochladen</label>
+                                <label for="imageFile" class="admin-form-label" th:text="#{admin.products.form.image.label}">Bild hochladen</label>
                                 <input type="file" class="admin-form-input" id="imageFile" name="imageFile" accept="image/png, image/jpeg">
-                                <p class="admin-form-hint">Max. 50MB. Formate: JPG, PNG.</p>
+                                <p class="admin-form-hint" th:text="#{admin.products.form.image.hint}">Max. 50MB. Formate: JPG, PNG.</p>
                             </div>
-                            <div th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
-                                 style="margin-top: var(--space-4); text-align: center;">
-                                <p class="admin-form-label">Aktuelles Bild:</p>
-                                <img th:src="@{${product.imageUrl}}" alt="Produktbild"
-                                     style="max-height: 200px; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                            <div th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}" style="margin-top: var(--space-4); text-align: center;">
+                                <p class="admin-form-label" th:text="#{admin.products.form.currentImage}">Aktuelles Bild:</p>
+                                <img th:src="@{${product.imageUrl}}" alt="Produktbild" style="max-height: 200px; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="admin-form-actions" style="margin-top: var(--space-6);">
-                <a th:href="@{/admin/products}" class="btn btn-outline-secondary">Abbrechen</a>
+                <a th:href="@{/admin/products}" class="btn btn-outline-secondary" th:text="#{admin.products.form.cancel}">Abbrechen</a>
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-lg"></i> Speichern
+                    <i class="bi bi-check-lg"></i> <span th:text="#{admin.products.form.save}">Speichern</span>
                 </button>
             </div>
         </form>

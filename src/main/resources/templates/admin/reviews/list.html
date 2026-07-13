@@ -1,55 +1,41 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Bewertungen moderieren')}"></head>
+<head th:replace="~{fragments/head :: head(#{admin.reviews.title})}"></head>
 <body>
 <div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
-
     <main class="admin-main">
         <div class="admin-page-header">
             <div>
-                <h1 class="admin-page-title">
-                    <i class="bi bi-chat-left-text"></i>
-                    Offene Bewertungen
-                </h1>
-                <p class="admin-page-subtitle">
-                    <span th:text="${reviews.size()}">0</span> Bewertungen warten auf Moderation
-                </p>
+                <h1 class="admin-page-title"><i class="bi bi-chat-left-text"></i><span th:text="#{admin.reviews.title}">Offene Bewertungen</span></h1>
+                <p class="admin-page-subtitle"><span th:text="#{admin.reviews.subtitle(${reviews.size()})}">0 Bewertungen warten auf Moderation</span></p>
             </div>
         </div>
-
         <div th:replace="~{fragments/alerts :: alerts}"></div>
-
         <div th:if="${reviews.isEmpty()}" class="admin-table-wrapper">
             <div class="admin-empty-state" style="padding: var(--space-10);">
-                <div class="admin-empty-icon">
-                    <i class="bi bi-check-circle"></i>
-                </div>
-                <h3 class="admin-empty-title">Alles moderiert!</h3>
-                <p class="admin-empty-text">Keine offenen Bewertungen vorhanden.</p>
+                <div class="admin-empty-icon"><i class="bi bi-check-circle"></i></div>
+                <h3 class="admin-empty-title" th:text="#{admin.reviews.empty.title}">Alles moderiert!</h3>
+                <p class="admin-empty-text" th:text="#{admin.reviews.empty.text}">Keine offenen Bewertungen vorhanden.</p>
             </div>
         </div>
-
         <div th:if="${!reviews.isEmpty()}" class="admin-table-wrapper">
             <table class="admin-table">
                 <thead>
                 <tr>
-                    <th>Produkt</th>
-                    <th>Kunde</th>
-                    <th>Rating</th>
-                    <th>Titel / Kommentar</th>
-                    <th>Datum</th>
-                    <th class="text-center">Aktionen</th>
+                    <th th:text="#{admin.reviews.table.product}">Produkt</th>
+                    <th th:text="#{admin.reviews.table.customer}">Kunde</th>
+                    <th th:text="#{admin.reviews.table.rating}">Rating</th>
+                    <th th:text="#{admin.reviews.table.titleComment}">Titel / Kommentar</th>
+                    <th th:text="#{admin.reviews.table.date}">Datum</th>
+                    <th class="text-center" th:text="#{admin.reviews.table.actions}">Aktionen</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="review : ${reviews}">
                     <td style="font-weight: 500;" th:text="${review.product.name}">Produkt</td>
                     <td class="text-muted" th:text="${review.user.email}">user@email.de</td>
-                    <td>
-                            <span style="color: var(--color-warning); letter-spacing: 2px;"
-                                  th:text="${'★'.repeat(review.rating)}">★★★★★</span>
-                    </td>
+                    <td><span style="color: var(--color-warning); letter-spacing: 2px;" th:text="${'★'.repeat(review.rating)}">★★★★★</span></td>
                     <td>
                         <div style="font-weight: 600;" th:text="${review.title}">Titel</div>
                         <div class="text-muted small" th:text="${review.comment}">Kommentar...</div>
@@ -58,15 +44,10 @@
                     <td class="text-center">
                         <div class="action-buttons">
                             <form th:action="@{/admin/reviews/{id}/approve(id=${review.id})}" method="post" class="d-inline">
-                                <button type="submit" class="action-btn action-btn-success" title="Genehmigen">
-                                    <i class="bi bi-check-lg"></i>
-                                </button>
+                                <button type="submit" class="action-btn action-btn-success" th:title="#{admin.reviews.btn.approve.title}"><i class="bi bi-check-lg"></i></button>
                             </form>
-                            <form th:action="@{/admin/reviews/{id}/reject(id=${review.id})}" method="post" class="d-inline"
-                                  onsubmit="return confirm('Bewertung wirklich ablehnen und löschen?');">
-                                <button type="submit" class="action-btn action-btn-danger" title="Ablehnen">
-                                    <i class="bi bi-x-lg"></i>
-                                </button>
+                            <form th:action="@{/admin/reviews/{id}/reject(id=${review.id})}" method="post" class="d-inline" th:attr="onsubmit=|return confirm('#{admin.reviews.reject.confirm}');|">
+                                <button type="submit" class="action-btn action-btn-danger" th:title="#{admin.reviews.btn.reject.title}"><i class="bi bi-x-lg"></i></button>
                             </form>
                         </div>
                     </td>

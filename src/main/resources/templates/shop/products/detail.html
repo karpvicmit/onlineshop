@@ -7,14 +7,14 @@
 <div th:replace="~{fragments/alerts :: alerts}"></div>
 
 <!-- ============================================
-     BREADCRUMBS
-     ============================================ -->
+BREADCRUMBS
+============================================ -->
 <section class="product-breadcrumbs">
     <div class="container">
         <nav class="catalog-breadcrumb" aria-label="breadcrumb">
-            <a th:href="@{/}">Startseite</a>
+            <a th:href="@{/}" th:text="#{product.breadcrumb.home}">Startseite</a>
             <span class="breadcrumb-sep">/</span>
-            <a th:href="@{/shop/products}">Produkte</a>
+            <a th:href="@{/shop/products}" th:text="#{product.breadcrumb.products}">Produkte</a>
             <span class="breadcrumb-sep">/</span>
             <a th:if="${product.categorySlug != null}"
                th:href="@{/shop/products(category=${product.categorySlug})}"
@@ -26,12 +26,11 @@
 </section>
 
 <!-- ============================================
-     PRODUCT MAIN SECTION
-     ============================================ -->
+PRODUCT MAIN SECTION
+============================================ -->
 <section class="product-main">
     <div class="container">
         <div class="product-layout">
-
             <!-- === LEFT: IMAGE === -->
             <div class="product-gallery">
                 <div class="product-image-wrapper">
@@ -43,13 +42,11 @@
                          class="product-image-placeholder-large">
                         <i class="bi bi-image"></i>
                     </div>
-
                     <!-- Stock badges -->
-                    <div th:if="${product.stock == 0}" class="product-badge badge-sold-out">
-                        Ausverkauft
-                    </div>
+                    <div th:if="${product.stock == 0}" class="product-badge badge-sold-out"
+                         th:text="#{product.badge.soldOut}">Ausverkauft</div>
                     <div th:if="${product.stock > 0 and product.stock <= 5}" class="product-badge badge-low-stock">
-                        Nur noch <span th:text="${product.stock}">3</span> verfügbar
+                        <span th:text="#{product.badge.lowStock(${product.stock})}">Nur noch 3 verfügbar</span>
                     </div>
                 </div>
             </div>
@@ -57,7 +54,6 @@
             <!-- === RIGHT: INFO === -->
             <div class="product-info-column">
                 <div class="product-info-sticky">
-
                     <!-- Category -->
                     <p class="product-category-label" th:text="${product.categoryName}">Kategorie</p>
 
@@ -73,7 +69,7 @@
                         <span class="rating-text">
                             <span th:text="${#numbers.formatDecimal(reviewStats.averageRating, 1, 1)}">4.5</span>
                             · <span th:text="${reviewStats.totalCount}">0</span>
-                            <span th:text="${reviewStats.totalCount == 1} ? 'Bewertung' : 'Bewertungen'">Bewertungen</span>
+                            <span th:text="${reviewStats.totalCount == 1} ? #{product.reviews.count.singular} : #{product.reviews.count.plural}">Bewertungen</span>
                         </span>
                     </div>
 
@@ -92,15 +88,15 @@
                     <div class="product-stock-status">
                         <div th:if="${product.stock == 0}" class="stock-indicator stock-out">
                             <i class="bi bi-x-circle"></i>
-                            <span>Ausverkauft</span>
+                            <span th:text="#{product.stock.out}">Ausverkauft</span>
                         </div>
                         <div th:if="${product.stock > 0 and product.stock <= 5}" class="stock-indicator stock-low">
                             <i class="bi bi-exclamation-circle"></i>
-                            <span>Nur noch <strong th:text="${product.stock}">3</strong> auf Lager</span>
+                            <span><span th:text="#{product.stock.low(${product.stock})}">Nur noch 3 auf Lager</span></span>
                         </div>
                         <div th:if="${product.stock > 5}" class="stock-indicator stock-ok">
                             <i class="bi bi-check-circle"></i>
-                            <span>Auf Lager — Versandfertig in 1–2 Werktagen</span>
+                            <span th:text="#{product.stock.ok}">Auf Lager — Versandfertig in 1–2 Werktagen</span>
                         </div>
                     </div>
 
@@ -110,9 +106,8 @@
                           sec:authorize="isAuthenticated()"
                           class="product-add-form">
                         <input type="hidden" name="productId" th:value="${product.id}">
-
                         <div class="quantity-selector">
-                            <label for="quantity" class="quantity-label">Menge</label>
+                            <label for="quantity" class="quantity-label" th:text="#{product.quantity}">Menge</label>
                             <div class="quantity-control">
                                 <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
                                 <input type="number" id="quantity" name="quantity"
@@ -121,10 +116,9 @@
                                 <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
                             </div>
                         </div>
-
                         <button type="submit" class="btn-add-to-cart">
                             <i class="bi bi-bag-plus"></i>
-                            In den Warenkorb
+                            <span th:text="#{product.addToCart}">In den Warenkorb</span>
                         </button>
                     </form>
 
@@ -132,7 +126,7 @@
                     <div sec:authorize="!isAuthenticated()" class="product-auth-notice">
                         <a th:href="@{/login}" class="btn-add-to-cart">
                             <i class="bi bi-box-arrow-in-right"></i>
-                            Anmelden zum Kaufen
+                            <span th:text="#{product.loginToBuy}">Anmelden zum Kaufen</span>
                         </a>
                     </div>
 
@@ -143,39 +137,35 @@
                         <button type="submit" class="btn-favorite"
                                 th:classappend="${isFavorite} ? 'active'">
                             <i th:class="${isFavorite} ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
-                            <span th:text="${isFavorite} ? 'Auf der Merkliste' : 'Zur Merkliste hinzufügen'">
-                                Zur Merkliste
-                            </span>
+                            <span th:text="${isFavorite} ? #{product.favorite.remove} : #{product.favorite.add}">Zur Merkliste</span>
                         </button>
                     </form>
 
                     <!-- Meta info -->
                     <div class="product-meta">
                         <div class="meta-row">
-                            <span class="meta-label">Artikelnummer</span>
+                            <span class="meta-label" th:text="#{product.meta.sku}">Artikelnummer</span>
                             <span class="meta-value" th:text="${product.sku}">SKU-0001</span>
                         </div>
                         <div class="meta-row">
-                            <span class="meta-label">Kategorie</span>
+                            <span class="meta-label" th:text="#{product.meta.category}">Kategorie</span>
                             <a class="meta-value"
                                th:href="@{/shop/products(category=${product.categorySlug})}"
                                th:text="${product.categoryName}">Kategorie</a>
                         </div>
                     </div>
-
                 </div>
             </div>
-
         </div>
     </div>
 </section>
 
 <!-- ============================================
-     PRODUCT DETAILS SECTION
-     ============================================ -->
+PRODUCT DETAILS SECTION
+============================================ -->
 <section class="product-details-section" th:if="${product.description != null and !product.description.isEmpty()}">
     <div class="container container-narrow">
-        <h2 class="details-title">Produktbeschreibung</h2>
+        <h2 class="details-title" th:text="#{product.description.title}">Produktbeschreibung</h2>
         <div class="details-content">
             <p th:text="${product.description}">Beschreibung...</p>
         </div>
@@ -183,13 +173,13 @@
 </section>
 
 <!-- ============================================
-     REVIEWS SECTION
-     ============================================ -->
+REVIEWS SECTION
+============================================ -->
 <section class="reviews-section">
     <div class="container container-narrow">
         <div class="reviews-header">
             <div>
-                <h2 class="details-title">Kundenbewertungen</h2>
+                <h2 class="details-title" th:text="#{product.reviews.title}">Kundenbewertungen</h2>
                 <div class="reviews-summary" th:if="${reviewStats.totalCount > 0}">
                     <div class="stars-display large">
                         <span th:each="i : ${#numbers.sequence(1, 5)}"
@@ -197,7 +187,8 @@
                     </div>
                     <span class="rating-text">
                         <span th:text="${#numbers.formatDecimal(reviewStats.averageRating, 1, 1)}">4.5</span>
-                        von 5 · <span th:text="${reviewStats.totalCount}">0</span> Bewertungen
+                        <span th:text="#{product.reviews.of}">von</span> 5 · <span th:text="${reviewStats.totalCount}">0</span>
+                        <span th:text="${reviewStats.totalCount == 1} ? #{product.reviews.count.singular} : #{product.reviews.count.plural}">Bewertungen</span>
                     </span>
                 </div>
             </div>
@@ -205,10 +196,10 @@
 
         <!-- Write review form -->
         <div th:if="${canWriteReview}" class="review-form-card">
-            <h3>Ihre Bewertung abgeben</h3>
+            <h3 th:text="#{product.review.form.title}">Ihre Bewertung abgeben</h3>
             <form th:action="@{/shop/products/{id}/reviews(id=${product.id})}" method="post" class="review-form">
                 <div class="form-group">
-                    <label class="form-label">Bewertung</label>
+                    <label class="form-label" th:text="#{product.review.form.rating}">Bewertung</label>
                     <div class="rating-input">
                         <input type="radio" name="rating" value="5" id="star5" required>
                         <label for="star5" title="5 Sterne">★</label>
@@ -223,23 +214,23 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="reviewTitle" class="form-label">Titel</label>
+                    <label for="reviewTitle" class="form-label" th:text="#{product.review.form.ratingTitle}">Titel</label>
                     <input type="text" id="reviewTitle" name="title" class="form-control"
-                           placeholder="Zusammenfassung Ihrer Bewertung" required>
+                           th:placeholder="#{product.review.form.ratingTitle.placeholder}" required>
                 </div>
                 <div class="form-group">
-                    <label for="reviewComment" class="form-label">Kommentar</label>
+                    <label for="reviewComment" class="form-label" th:text="#{product.review.form.comment}">Kommentar</label>
                     <textarea id="reviewComment" name="comment" class="form-control" rows="4"
-                              placeholder="Was gefällt Ihnen? Was nicht?" required></textarea>
+                              th:placeholder="#{product.review.form.comment.placeholder}" required></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Bewertung absenden</button>
-                <p class="form-hint">Ihre Bewertung wird nach einer Überprüfung veröffentlicht.</p>
+                <button type="submit" class="btn btn-primary" th:text="#{product.review.form.submit}">Bewertung absenden</button>
+                <p class="form-hint" th:text="#{product.review.form.hint}">Ihre Bewertung wird nach einer Überprüfung veröffentlicht.</p>
             </form>
         </div>
 
         <div th:if="${!canWriteReview}" sec:authorize="isAuthenticated()" class="review-notice">
             <i class="bi bi-info-circle"></i>
-            Sie können eine Bewertung nur abgeben, wenn Sie dieses Produkt gekauft haben.
+            <span th:text="#{product.review.notice}">Sie können eine Bewertung nur abgeben, wenn Sie dieses Produkt gekauft haben.</span>
         </div>
 
         <!-- Reviews list -->
@@ -270,17 +261,17 @@
 
         <div th:if="${reviews.isEmpty()}" class="reviews-empty">
             <i class="bi bi-chat-square-text"></i>
-            <p>Noch keine Bewertungen. Seien Sie der Erste!</p>
+            <p th:text="#{product.reviews.empty}">Noch keine Bewertungen. Seien Sie der Erste!</p>
         </div>
     </div>
 </section>
 
 <!-- ============================================
-     RELATED PRODUCTS SECTION
-     ============================================ -->
+RELATED PRODUCTS SECTION
+============================================ -->
 <section class="related-section" th:if="${!relatedProducts.isEmpty()}">
     <div class="container">
-        <h2 class="details-title text-center">Ähnliche Produkte</h2>
+        <h2 class="details-title text-center" th:text="#{product.related.title}">Ähnliche Produkte</h2>
         <div class="products-grid related-grid">
             <div th:each="product : ${relatedProducts}" class="product-card">
                 <a th:href="@{/shop/products/{id}(id=${product.id})}" class="product-card-link">
@@ -307,7 +298,6 @@
 </section>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
-
 <script th:src="@{/js/shop/product-detail.js}"></script>
 </body>
 </html>

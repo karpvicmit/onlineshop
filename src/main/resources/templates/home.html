@@ -1,113 +1,92 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/head :: head('Startseite')}"></head>
+<head th:replace="~{fragments/head :: head(#{navbar.brand})}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<!-- ============================================
-HERO SECTION
-============================================ -->
+<!-- HERO SECTION -->
 <section class="hero-section">
     <div class="hero-container">
         <div class="hero-content">
-            <p class="hero-eyebrow">Neue Kollektion 2026</p>
+            <p class="hero-eyebrow" th:text="#{home.hero.eyebrow}">Neue Kollektion 2026</p>
             <h1 class="hero-title">
-                Zeitloses Design.<br>
-                <span class="hero-title-accent">Hochwertige Produkte.</span>
+                <span th:text="#{home.hero.title.1}">Zeitloses Design.</span><br>
+                <span class="hero-title-accent" th:text="#{home.hero.title.2}">Hochwertige Produkte.</span>
             </h1>
-            <p class="hero-subtitle">
-                Entdecken Sie unsere sorgfältig kuratierte Auswahl an
-                Qualitätsprodukten für Ihren Alltag. Kostenloser Versand ab 50 €.
+            <p class="hero-subtitle" th:text="#{home.hero.subtitle}">
+                Entdecken Sie unsere sorgfältig kuratierte Auswahl...
             </p>
             <div class="hero-actions">
                 <a th:href="@{/shop/products}" class="btn btn-primary btn-lg">
-                    Kollektion entdecken
+                    <span th:text="#{home.hero.btn.catalog}">Kollektion entdecken</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
                 <a th:href="@{/shop/products}" class="btn btn-outline btn-lg">
-                    Alle Kategorien
+                    <span th:text="#{home.hero.btn.categories}">Alle Kategorien</span>
                 </a>
             </div>
             <div class="hero-stats">
                 <div class="hero-stat">
-                    <span class="hero-stat-value">500+</span>
-                    <span class="hero-stat-label">Produkte</span>
+                    <span class="hero-stat-value" th:text="#{home.hero.stats.products}">500+</span>
+                    <span class="hero-stat-label" th:text="#{home.hero.stats.products.label}">Produkte</span>
                 </div>
                 <div class="hero-stat-divider"></div>
                 <div class="hero-stat">
-                    <span class="hero-stat-value">2.000+</span>
-                    <span class="hero-stat-label">Zufriedene Kunden</span>
+                    <span class="hero-stat-value" th:text="#{home.hero.stats.customers}">2.000+</span>
+                    <span class="hero-stat-label" th:text="#{home.hero.stats.customers.label}">Zufriedene Kunden</span>
                 </div>
                 <div class="hero-stat-divider"></div>
                 <div class="hero-stat">
-                    <span class="hero-stat-value">4.8★</span>
-                    <span class="hero-stat-label">Bewertung</span>
+                    <span class="hero-stat-value" th:text="#{home.hero.stats.rating}">4.8★</span>
+                    <span class="hero-stat-label" th:text="#{home.hero.stats.rating.label}">Bewertung</span>
                 </div>
             </div>
         </div>
         <div class="hero-visual">
             <div class="hero-image-wrapper">
-                <div class="hero-image-placeholder">
-                    <i class="bi bi-shop"></i>
-                </div>
+                <div class="hero-image-placeholder"><i class="bi bi-shop"></i></div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ============================================
-CATEGORIES SECTION
-============================================ -->
+<!-- CATEGORIES SECTION -->
 <section class="section categories-section" th:if="${!categories.isEmpty()}">
     <div class="container">
         <div class="section-header">
-            <h2 class="section-title">Kategorien</h2>
-            <p class="section-subtitle">Finden Sie genau das, was Sie suchen</p>
+            <h2 class="section-title" th:text="#{home.categories.title}">Kategorien</h2>
+            <p class="section-subtitle" th:text="#{home.categories.subtitle}">Finden Sie genau das, was Sie suchen</p>
         </div>
         <div class="categories-grid">
-            <a th:each="cat : ${categories}"
-               th:href="@{/shop/products(category=${cat.slug})}"
-               class="category-card">
-                <div class="category-icon">
-                    <i class="bi bi-grid-3x3-gap"></i>
-                </div>
+            <a th:each="cat : ${categories}" th:href="@{/shop/products(category=${cat.slug})}" class="category-card">
+                <div class="category-icon"><i class="bi bi-grid-3x3-gap"></i></div>
                 <h3 class="category-name" th:text="${cat.name}">Kategorie</h3>
                 <p class="category-description" th:text="${cat.description}">Beschreibung</p>
                 <span class="category-link">
-                    Entdecken <i class="bi bi-arrow-right"></i>
+                    <span th:text="#{home.categories.link}">Entdecken</span> <i class="bi bi-arrow-right"></i>
                 </span>
             </a>
         </div>
     </div>
 </section>
 
-<!-- ============================================
-FEATURED PRODUCTS SECTION
-============================================ -->
+<!-- FEATURED PRODUCTS SECTION -->
 <section class="section products-section" th:if="${!featuredProducts.isEmpty()}">
     <div class="container">
         <div class="section-header">
-            <h2 class="section-title">Neu im Shop</h2>
-            <p class="section-subtitle">Unsere neuesten Produkte für Sie</p>
+            <h2 class="section-title" th:text="#{home.featured.title}">Neu im Shop</h2>
+            <p class="section-subtitle" th:text="#{home.featured.subtitle}">Unsere neuesten Produkte für Sie</p>
         </div>
         <div class="products-grid">
             <div th:each="product : ${featuredProducts}" class="product-card">
                 <a th:href="@{/shop/products/{id}(id=${product.id})}" class="product-card-link">
                     <div class="product-image-wrapper">
-                        <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
-                             th:src="@{${product.imageUrl}}"
-                             th:alt="${product.name}"
-                             class="product-image">
-                        <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
-                             class="product-image-placeholder">
-                            <i class="bi bi-image"></i>
-                        </div>
-                        <div th:if="${product.stock == 0}" class="product-badge badge-sold-out">
-                            Ausverkauft
-                        </div>
+                        <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}" th:src="@{${product.imageUrl}}" th:alt="${product.name}" class="product-image">
+                        <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}" class="product-image-placeholder"><i class="bi bi-image"></i></div>
+                        <div th:if="${product.stock == 0}" class="product-badge badge-sold-out" th:text="#{catalog.badge.soldOut}">Ausverkauft</div>
                         <div th:if="${product.stock > 0 and product.stock <= 5}" class="product-badge badge-low-stock">
-                            Nur noch <span th:text="${product.stock}">3</span>
+                            <span th:text="#{catalog.badge.lowStock(${product.stock})}">Nur noch 3</span>
                         </div>
                     </div>
                     <div class="product-info">
@@ -120,99 +99,68 @@ FEATURED PRODUCTS SECTION
         </div>
         <div class="section-cta">
             <a th:href="@{/shop/products}" class="btn btn-outline">
-                Alle Produkte ansehen
+                <span th:text="#{home.featured.btn}">Alle Produkte ansehen</span>
                 <i class="bi bi-arrow-right"></i>
             </a>
         </div>
     </div>
 </section>
 
-<!-- ============================================
-HOW IT WORKS SECTION
-============================================ -->
+<!-- HOW IT WORKS SECTION -->
 <section class="section how-it-works-section">
     <div class="container">
         <div class="section-header">
-            <h2 class="section-title">So einfach geht's</h2>
-            <p class="section-subtitle">In drei Schritten zu Ihrer Bestellung</p>
+            <h2 class="section-title" th:text="#{home.how.title}">So einfach geht's</h2>
+            <p class="section-subtitle" th:text="#{home.how.subtitle}">In drei Schritten zu Ihrer Bestellung</p>
         </div>
         <div class="steps-grid">
             <div class="step-card">
                 <div class="step-number">01</div>
-                <div class="step-icon">
-                    <i class="bi bi-search"></i>
-                </div>
-                <h3 class="step-title">Produkt auswählen</h3>
-                <p class="step-text">
-                    Stöbern Sie durch unseren Katalog und finden Sie das perfekte Produkt.
-                    Nutzen Sie Filter und Suche für eine schnelle Auswahl.
-                </p>
+                <div class="step-icon"><i class="bi bi-search"></i></div>
+                <h3 class="step-title" th:text="#{home.step.1.title}">Produkt auswählen</h3>
+                <p class="step-text" th:text="#{home.step.1.text}">Stöbern Sie durch unseren Katalog...</p>
             </div>
-            <div class="step-connector">
-                <i class="bi bi-arrow-right"></i>
-            </div>
+            <div class="step-connector"><i class="bi bi-arrow-right"></i></div>
             <div class="step-card">
                 <div class="step-number">02</div>
-                <div class="step-icon">
-                    <i class="bi bi-bag-plus"></i>
-                </div>
-                <h3 class="step-title">In den Warenkorb</h3>
-                <p class="step-text">
-                    Fügen Sie Produkte Ihrem Warenkorb hinzu und wenden Sie
-                    optional einen Promo-Code für einen Rabatt an.
-                </p>
+                <div class="step-icon"><i class="bi bi-bag-plus"></i></div>
+                <h3 class="step-title" th:text="#{home.step.2.title}">In den Warenkorb</h3>
+                <p class="step-text" th:text="#{home.step.2.text}">Fügen Sie Produkte Ihrem Warenkorb hinzu...</p>
             </div>
-            <div class="step-connector">
-                <i class="bi bi-arrow-right"></i>
-            </div>
+            <div class="step-connector"><i class="bi bi-arrow-right"></i></div>
             <div class="step-card">
                 <div class="step-number">03</div>
-                <div class="step-icon">
-                    <i class="bi bi-truck"></i>
-                </div>
-                <h3 class="step-title">Bestellung erhalten</h3>
-                <p class="step-text">
-                    Bezahlen Sie sicher per Vorkasse oder Rechnung.
-                    Wir liefern Ihre Bestellung schnell und zuverlässig.
-                </p>
+                <div class="step-icon"><i class="bi bi-truck"></i></div>
+                <h3 class="step-title" th:text="#{home.step.3.title}">Bestellung erhalten</h3>
+                <p class="step-text" th:text="#{home.step.3.text}">Bezahlen Sie sicher per Vorkasse oder Rechnung...</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ============================================
-FEATURES SECTION
-============================================ -->
+<!-- FEATURES SECTION -->
 <section class="section features-section">
     <div class="container">
         <div class="features-grid">
             <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="bi bi-truck"></i>
-                </div>
-                <h3 class="feature-title">Kostenloser Versand</h3>
-                <p class="feature-text">Ab 50€ Bestellwert liefern wir versandkostenfrei.</p>
+                <div class="feature-icon"><i class="bi bi-truck"></i></div>
+                <h3 class="feature-title" th:text="#{home.feature.shipping.title}">Kostenloser Versand</h3>
+                <p class="feature-text" th:text="#{home.feature.shipping.text}">Ab 50€ Bestellwert...</p>
             </div>
             <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                </div>
-                <h3 class="feature-title">30 Tage Rückgabe</h3>
-                <p class="feature-text">Kostenloses Rückgaberecht innerhalb von 30 Tagen.</p>
+                <div class="feature-icon"><i class="bi bi-arrow-counterclockwise"></i></div>
+                <h3 class="feature-title" th:text="#{home.feature.returns.title}">30 Tage Rückgabe</h3>
+                <p class="feature-text" th:text="#{home.feature.returns.text}">Kostenloses Rückgaberecht...</p>
             </div>
             <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="bi bi-shield-check"></i>
-                </div>
-                <h3 class="feature-title">Sichere Zahlung</h3>
-                <p class="feature-text">SSL-verschlüsselte Zahlung per Kreditkarte oder Rechnung.</p>
+                <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+                <h3 class="feature-title" th:text="#{home.feature.secure.title}">Sichere Zahlung</h3>
+                <p class="feature-text" th:text="#{home.feature.secure.text}">SSL-verschlüsselte Zahlung...</p>
             </div>
             <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="bi bi-award"></i>
-                </div>
-                <h3 class="feature-title">Premium Qualität</h3>
-                <p class="feature-text">Sorgfältig ausgewählte Produkte höchster Qualität.</p>
+                <div class="feature-icon"><i class="bi bi-award"></i></div>
+                <h3 class="feature-title" th:text="#{home.feature.quality.title}">Premium Qualität</h3>
+                <p class="feature-text" th:text="#{home.feature.quality.text}">Sorgfältig ausgewählte Produkte...</p>
             </div>
         </div>
     </div>

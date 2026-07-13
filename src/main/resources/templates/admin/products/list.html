@@ -1,38 +1,36 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Produktverwaltung')}"></head>
+<head th:replace="~{fragments/head :: head(#{admin.products.title})}"></head>
 <body>
 <div class="admin-layout">
     <div th:replace="~{fragments/admin-sidebar :: admin-sidebar}"></div>
-
     <main class="admin-main">
         <!-- Page Header -->
         <div class="admin-page-header">
             <div>
                 <h1 class="admin-page-title">
                     <i class="bi bi-box-seam"></i>
-                    Produktverwaltung
+                    <span th:text="#{admin.products.title}">Produktverwaltung</span>
                 </h1>
                 <p class="admin-page-subtitle">
-                    <span th:text="${productPage.totalElements}">0</span> Produkte insgesamt
+                    <span th:text="#{admin.products.subtitle(${productPage.totalElements})}">0 Produkte insgesamt</span>
                 </p>
             </div>
             <div class="admin-page-actions">
                 <a th:href="@{/admin/products/categories/export}" class="btn btn-outline-secondary">
-                    <i class="bi bi-tags"></i> Kategorien CSV
+                    <i class="bi bi-tags"></i> <span th:text="#{admin.products.btn.exportCategories}">Kategorien CSV</span>
                 </a>
                 <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#importModal">
-                    <i class="bi bi-upload"></i> CSV importieren
+                    <i class="bi bi-upload"></i> <span th:text="#{admin.products.btn.importCsv}">CSV importieren</span>
                 </button>
                 <a th:href="@{/admin/products/export}" class="btn btn-outline-success">
-                    <i class="bi bi-download"></i> CSV exportieren
+                    <i class="bi bi-download"></i> <span th:text="#{admin.products.btn.exportCsv}">CSV exportieren</span>
                 </a>
                 <a th:href="@{/admin/products/new}" class="btn btn-primary">
-                    <i class="bi bi-plus-lg"></i> Neues Produkt
+                    <i class="bi bi-plus-lg"></i> <span th:text="#{admin.products.btn.new}">Neues Produkt</span>
                 </a>
             </div>
         </div>
-
         <div th:replace="~{fragments/alerts :: alerts}"></div>
 
         <!-- Products Table -->
@@ -40,14 +38,14 @@
             <table class="admin-table">
                 <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Bild</th>
-                    <th>Name</th>
-                    <th>SKU</th>
-                    <th>Kategorie</th>
-                    <th class="text-end">Preis</th>
-                    <th class="text-center">Lager</th>
-                    <th class="text-center">Aktionen</th>
+                    <th th:text="#{admin.products.table.id}">ID</th>
+                    <th th:text="#{admin.products.table.image}">Bild</th>
+                    <th th:text="#{admin.products.table.name}">Name</th>
+                    <th th:text="#{admin.products.table.sku}">SKU</th>
+                    <th th:text="#{admin.products.table.category}">Kategorie</th>
+                    <th class="text-end" th:text="#{admin.products.table.price}">Preis</th>
+                    <th class="text-center" th:text="#{admin.products.table.stock}">Lager</th>
+                    <th class="text-center" th:text="#{admin.products.table.actions}">Aktionen</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -55,10 +53,8 @@
                     <td class="text-muted" th:text="${product.id}">1</td>
                     <td>
                         <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
-                             th:src="@{${product.imageUrl}}" alt="Produktbild"
-                             class="table-image">
-                        <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
-                             class="table-image-placeholder">
+                             th:src="@{${product.imageUrl}}" alt="Produktbild" class="table-image">
+                        <div th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}" class="table-image-placeholder">
                             <i class="bi bi-image"></i>
                         </div>
                     </td>
@@ -66,8 +62,7 @@
                         <div style="font-weight: 600;" th:text="${product.name}">Produktname</div>
                     </td>
                     <td>
-                        <code style="font-size: var(--text-xs); color: var(--color-text-muted);"
-                              th:text="${product.sku}">SKU-0001</code>
+                        <code style="font-size: var(--text-xs); color: var(--color-text-muted);" th:text="${product.sku}">SKU-0001</code>
                     </td>
                     <td>
                         <span th:text="${product.categoryName != null and !product.categoryName.isEmpty()} ? ${product.categoryName} : '—'">Kategorie</span>
@@ -75,26 +70,21 @@
                     <td class="text-end" style="font-weight: 600;"
                         th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' €'">0.00 €</td>
                     <td class="text-center">
-                            <span th:if="${product.stock == 0}" class="status-badge status-badge-cancelled"
-                                  th:text="${product.stock}">0</span>
-                        <span th:if="${product.stock > 0 && product.stock <= 5}" class="status-badge status-badge-pending"
-                              th:text="${product.stock}">3</span>
-                        <span th:if="${product.stock > 5}" class="status-badge status-badge-active"
-                              th:text="${product.stock}">50</span>
+                        <span th:if="${product.stock == 0}" class="status-badge status-badge-cancelled" th:text="${product.stock}">0</span>
+                        <span th:if="${product.stock > 0 && product.stock <= 5}" class="status-badge status-badge-pending" th:text="${product.stock}">3</span>
+                        <span th:if="${product.stock > 5}" class="status-badge status-badge-active" th:text="${product.stock}">50</span>
                         <div th:if="${product.stock > 0 && product.stock <= 5}" class="small text-warning mt-1">
-                            <i class="bi bi-exclamation-triangle"></i> Niedrig
+                            <i class="bi bi-exclamation-triangle"></i> <span th:text="#{admin.products.stock.low}">Niedrig</span>
                         </div>
                     </td>
                     <td class="text-center">
                         <div class="action-buttons">
-                            <a th:href="@{/admin/products/edit/{id}(id=${product.id})}"
-                               class="action-btn" title="Bearbeiten">
+                            <a th:href="@{/admin/products/edit/{id}(id=${product.id})}" class="action-btn" th:title="#{common.edit}">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form th:action="@{/admin/products/delete/{id}(id=${product.id})}" method="post"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Möchten Sie dieses Produkt wirklich löschen?');">
-                                <button type="submit" class="action-btn action-btn-danger" title="Löschen">
+                            <form th:action="@{/admin/products/delete/{id}(id=${product.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('[[#{admin.products.delete.confirm}]]');">
+                                <button type="submit" class="action-btn action-btn-danger" th:title="#{common.delete}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -104,13 +94,11 @@
                 <tr th:if="${#lists.isEmpty(productPage)}">
                     <td colspan="8">
                         <div class="admin-empty-state">
-                            <div class="admin-empty-icon">
-                                <i class="bi bi-box-seam"></i>
-                            </div>
-                            <h3 class="admin-empty-title">Keine Produkte gefunden</h3>
-                            <p class="admin-empty-text">Legen Sie Ihr erstes Produkt an.</p>
+                            <div class="admin-empty-icon"><i class="bi bi-box-seam"></i></div>
+                            <h3 class="admin-empty-title" th:text="#{admin.products.empty.title}">Keine Produkte gefunden</h3>
+                            <p class="admin-empty-text" th:text="#{admin.products.empty.text}">Legen Sie Ihr erstes Produkt an.</p>
                             <a th:href="@{/admin/products/new}" class="btn btn-primary">
-                                <i class="bi bi-plus-lg"></i> Produkt anlegen
+                                <i class="bi bi-plus-lg"></i> <span th:text="#{admin.products.empty.btn}">Produkt anlegen</span>
                             </a>
                         </div>
                     </td>
@@ -118,7 +106,6 @@
                 </tbody>
             </table>
         </div>
-
         <div th:replace="~{fragments/pagination :: pagination(page=${productPage}, baseUrl=${baseUrl})}"></div>
 
         <!-- CSV Import Modal -->
@@ -127,31 +114,30 @@
                 <div class="modal-content">
                     <form th:action="@{/admin/products/import/preview}" method="post" enctype="multipart/form-data">
                         <div class="modal-header">
-                            <h5 class="modal-title"><i class="bi bi-upload me-2"></i>CSV-Import (Preview)</h5>
+                            <h5 class="modal-title"><i class="bi bi-upload me-2"></i><span th:text="#{admin.csv.import.modal.title}">CSV-Import (Preview)</span></h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
                             <div class="alert alert-info">
-                                <strong>Format:</strong> <code>sku;name;description;price;stock;categorySlug;imageUrl</code><br>
-                                <strong>Trennzeichen:</strong> Semikolon (<code>;</code>)<br>
-                                <strong>Kodierung:</strong> UTF-8<br>
-                                <strong>Max. Größe:</strong> 50 MB
+                                <strong th:text="#{admin.csv.import.format}">Format:</strong> <code>sku;name;description;price;stock;categorySlug;imageUrl</code><br>
+                                <strong th:text="#{admin.csv.import.separator}">Trennzeichen:</strong> <span th:text="#{admin.csv.import.separator.value}">Semikolon (;)</span><br>
+                                <strong th:text="#{admin.csv.import.encoding}">Kodierung:</strong> <span th:text="#{admin.csv.import.encoding.value}">UTF-8</span><br>
+                                <strong th:text="#{admin.csv.import.maxSize}">Max. Größe:</strong> <span th:text="#{admin.csv.import.maxSize.value}">50 MB</span>
                             </div>
                             <div class="admin-form-group">
-                                <label for="csvFile" class="admin-form-label">CSV-Datei auswählen</label>
-                                <input type="file" class="admin-form-input" id="csvFile" name="csvFile"
-                                       accept=".csv" required>
+                                <label for="csvFile" class="admin-form-label" th:text="#{admin.csv.import.selectFile}">CSV-Datei auswählen</label>
+                                <input type="file" class="admin-form-input" id="csvFile" name="csvFile" accept=".csv" required>
                             </div>
                             <div class="small text-muted">
-                                <p class="mb-1">Beispiel:</p>
+                                <p class="mb-1" th:text="#{admin.csv.import.example}">Beispiel:</p>
                                 <pre class="bg-light p-2 rounded">sku;name;description;price;stock;categorySlug;imageUrl
 SKU-0001;iPhone 15;Das neueste Apple Smartphone;1199.99;15;elektronik;/uploads/iphone.jpg</pre>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" th:text="#{admin.csv.import.cancel}">Abbrechen</button>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-eye"></i> Vorschau anzeigen
+                                <i class="bi bi-eye"></i> <span th:text="#{admin.csv.import.previewBtn}">Vorschau anzeigen</span>
                             </button>
                         </div>
                     </form>
