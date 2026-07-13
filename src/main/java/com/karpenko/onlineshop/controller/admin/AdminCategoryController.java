@@ -2,7 +2,7 @@ package com.karpenko.onlineshop.controller.admin;
 
 import com.karpenko.onlineshop.entity.Category;
 import com.karpenko.onlineshop.service.CategoryService;
-import com.karpenko.onlineshop.util.SlugUtil;
+import com.karpenko.onlineshop.util.MessageUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminCategoryController {
 
     private final CategoryService categoryService;
+    private final MessageUtil messageUtil;
 
     @ModelAttribute("activeMenu")
     public String activeMenu() { return "categories"; }
@@ -44,12 +45,15 @@ public class AdminCategoryController {
         if (bindingResult.hasErrors()) {
             return "admin/categories/form";
         }
+
         try {
             categoryService.saveCategory(category);
-            redirectAttributes.addFlashAttribute("successMessage", "Kategorie erfolgreich gespeichert.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    messageUtil.get("admin.categories.save.success"));
         } catch (Exception e) {
             log.error("Fehler beim Speichern der Kategorie: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Fehler beim Speichern.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("admin.categories.save.error", e.getMessage()));
         }
         return "redirect:/admin/categories";
     }
@@ -57,8 +61,8 @@ public class AdminCategoryController {
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
         Category category = categoryService.getCategoryById(id)
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Kategorie mit ID " + id + " nicht gefunden"));
-
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException(
+                        "Kategorie mit ID " + id + " nicht gefunden"));
         model.addAttribute("category", category);
         return "admin/categories/form";
     }
@@ -67,10 +71,12 @@ public class AdminCategoryController {
     public String deleteCategory(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             categoryService.deleteCategory(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Kategorie erfolgreich gelöscht.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    messageUtil.get("admin.categories.delete.success"));
         } catch (Exception e) {
             log.error("Fehler beim Löschen der Kategorie: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Fehler beim Löschen: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("admin.categories.delete.error", e.getMessage()));
         }
         return "redirect:/admin/categories";
     }

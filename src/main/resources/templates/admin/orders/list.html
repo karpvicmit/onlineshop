@@ -31,8 +31,11 @@
                     <td style="font-weight: 700;" th:text="'#' + ${order.id}">#1</td>
                     <td th:text="${order.user != null ? order.user.email : #{common.guest}}">kunde@email.de</td>
                     <td class="text-muted" th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
-                    <td><span class="status-badge" th:text="${order.paymentMethod != null ? order.paymentMethod.displayName : '-'}">Vorkasse</span></td>
-                    <td class="text-end" style="font-weight: 700;" th:text="${#numbers.formatDecimal(order.grandTotal, 1, 2)} + ' €'">0.00 €</td>
+                    <td>
+                        <span class="status-badge" th:text="#{'payment.' + ${order.paymentMethod.name()} + '.name'}">Vorkasse</span>
+                    </td>
+                    <td class="text-end" style="font-weight: 700;"
+                        th:text="${#numbers.formatDecimal(order.grandTotal, 1, 2)} + ' €'">0.00 €</td>
                     <td>
                         <span th:switch="${order.status}" class="status-badge">
                             <span th:case="'NEW'" class="status-badge status-badge-new" th:text="#{orderStatus.NEW}">NEU</span>

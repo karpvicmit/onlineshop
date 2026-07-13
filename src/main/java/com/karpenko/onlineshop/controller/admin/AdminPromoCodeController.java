@@ -4,6 +4,7 @@ import com.karpenko.onlineshop.dto.promo.PromoCodeDto;
 import com.karpenko.onlineshop.entity.DiscountType;
 import com.karpenko.onlineshop.entity.PromoCode;
 import com.karpenko.onlineshop.service.PromoCodeAdminService;
+import com.karpenko.onlineshop.util.MessageUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import java.util.List;
 public class AdminPromoCodeController {
 
     private final PromoCodeAdminService promoCodeAdminService;
+    private final MessageUtil messageUtil;
 
     @ModelAttribute("activeMenu")
     public String activeMenu() {
@@ -75,19 +77,18 @@ public class AdminPromoCodeController {
         try {
             promoCodeAdminService.savePromoCode(promoCode);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Promo-Code erfolgreich gespeichert.");
+                    messageUtil.get("admin.promocodes.save.success"));
             log.info("Promo code saved: {}", promoCode.getCode());
         } catch (DataIntegrityViolationException e) {
             log.warn("Duplicate promo code: {}", promoCode.getCode());
             bindingResult.rejectValue("code", "duplicate",
-                    "Dieser Promo-Code existiert bereits.");
+                    messageUtil.get("admin.promocodes.duplicate"));
             return "admin/promocodes/form";
         } catch (Exception e) {
             log.error("Error saving promo code", e);
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Fehler beim Speichern: " + e.getMessage());
+                    messageUtil.get("admin.promocodes.save.error", e.getMessage()));
         }
-
         return "redirect:/admin/promocodes";
     }
 
@@ -97,12 +98,12 @@ public class AdminPromoCodeController {
         try {
             promoCodeAdminService.deletePromoCode(id);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Promo-Code erfolgreich gelöscht.");
+                    messageUtil.get("admin.promocodes.delete.success"));
             log.info("Promo code deleted: ID {}", id);
         } catch (Exception e) {
             log.error("Error deleting promo code", e);
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Fehler beim Löschen: " + e.getMessage());
+                    messageUtil.get("admin.promocodes.delete.error", e.getMessage()));
         }
         return "redirect:/admin/promocodes";
     }
@@ -113,12 +114,12 @@ public class AdminPromoCodeController {
         try {
             promoCodeAdminService.toggleActive(id);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Status des Promo-Codes erfolgreich geändert.");
+                    messageUtil.get("admin.promocodes.toggle.success"));
             log.info("Promo code {} toggled", id);
         } catch (Exception e) {
             log.error("Error toggling promo code", e);
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Fehler: " + e.getMessage());
+                    messageUtil.get("admin.promocodes.toggle.error", e.getMessage()));
         }
         return "redirect:/admin/promocodes";
     }

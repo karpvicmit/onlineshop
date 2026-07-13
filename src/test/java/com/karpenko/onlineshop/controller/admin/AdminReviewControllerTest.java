@@ -53,6 +53,8 @@ class AdminReviewControllerTest extends BaseWebMvcTest {
     void shouldApproveReview() throws Exception {
         doNothing().when(reviewService).approveReview(100L);
 
+        when(messageUtil.get("admin.reviews.approve.success")).thenReturn("Review approved successfully");
+
         mockMvc.perform(post("/admin/reviews/100/approve").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/reviews"))
@@ -66,6 +68,8 @@ class AdminReviewControllerTest extends BaseWebMvcTest {
     @WithMockUser(username = "admin@test.de", roles = {"ADMIN"})
     void shouldRejectReview() throws Exception {
         doNothing().when(reviewService).rejectReview(100L);
+
+        when(messageUtil.get("admin.reviews.reject.success")).thenReturn("Review rejected successfully");
 
         mockMvc.perform(post("/admin/reviews/100/reject").with(csrf()))
                 .andExpect(status().is3xxRedirection())

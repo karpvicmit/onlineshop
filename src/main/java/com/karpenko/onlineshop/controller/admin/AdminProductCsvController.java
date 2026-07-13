@@ -4,6 +4,7 @@ import com.karpenko.onlineshop.dto.csv.CsvImportResult;
 import com.karpenko.onlineshop.dto.csv.CsvPreviewResult;
 import com.karpenko.onlineshop.service.CsvExportService;
 import com.karpenko.onlineshop.service.CsvImportService;
+import com.karpenko.onlineshop.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -33,12 +33,12 @@ public class AdminProductCsvController {
 
     private final CsvImportService csvImportService;
     private final CsvExportService csvExportService;
+    private final MessageUtil messageUtil;
 
     @GetMapping("/export")
     public ResponseEntity<byte[]> exportProducts() throws IOException {
         byte[] csv = csvExportService.exportProducts();
         String filename = "products_" + timestamp() + ".csv";
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
@@ -49,7 +49,6 @@ public class AdminProductCsvController {
     public ResponseEntity<byte[]> exportCategories() throws IOException {
         byte[] csv = csvExportService.exportCategories();
         String filename = "categories_" + timestamp() + ".csv";
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
@@ -70,7 +69,8 @@ public class AdminProductCsvController {
             return "redirect:/admin/products";
         } catch (IOException e) {
             log.error("Failed to read CSV file", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Fehler beim Lesen der Datei.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("admin.csv.import.error.read"));
             return "redirect:/admin/products";
         }
     }
@@ -80,9 +80,7 @@ public class AdminProductCsvController {
                                  RedirectAttributes redirectAttributes) {
         try {
             CsvImportResult result = csvImportService.importProducts(file);
-
-            String msg = String.format(
-                    "Import abgeschlossen: %d erstellt, %d aktualisiert, %d übersprungen.",
+            String msg = messageUtil.get("admin.csv.import.success",
                     result.getCreated(), result.getUpdated(), result.getSkipped());
 
             if (result.hasErrors()) {
@@ -92,14 +90,14 @@ public class AdminProductCsvController {
             } else {
                 redirectAttributes.addFlashAttribute("successMessage", msg);
             }
-
             return "redirect:/admin/products";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/admin/products";
         } catch (IOException e) {
             log.error("Failed to import CSV", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Fehler beim Import.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("admin.csv.import.error.import"));
             return "redirect:/admin/products";
         }
     }

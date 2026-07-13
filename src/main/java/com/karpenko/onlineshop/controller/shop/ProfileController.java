@@ -5,6 +5,7 @@ import com.karpenko.onlineshop.dto.user.ProfileUpdateDto;
 import com.karpenko.onlineshop.entity.User;
 import com.karpenko.onlineshop.service.ProfileService;
 import com.karpenko.onlineshop.service.UserService;
+import com.karpenko.onlineshop.util.MessageUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +23,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/profile")
 @RequiredArgsConstructor
 public class ProfileController {
+
     private final UserService userService;
     private final ProfileService profileService;
+    private final MessageUtil messageUtil;
 
     @GetMapping
     public String showProfile(Model model) {
         User currentUser = userService.getCurrentUser();
-
         ProfileUpdateDto dto = new ProfileUpdateDto();
         dto.setFirstName(currentUser.getFirstName());
         dto.setLastName(currentUser.getLastName());
@@ -49,9 +51,12 @@ public class ProfileController {
         if (bindingResult.hasErrors()) {
             return "/profile";
         }
+
         User currentUser = userService.getCurrentUser();
         profileService.updateProfile(currentUser, dto);
-        redirectAttributes.addFlashAttribute("successMessage", "Profil erfolgreich aktualisiert.");
+
+        redirectAttributes.addFlashAttribute("successMessage",
+                messageUtil.get("profile.update.success"));
         return "redirect:/profile";
     }
 
@@ -67,7 +72,7 @@ public class ProfileController {
         try {
             userService.changePassword(currentUser, dto);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Passwort erfolgreich geändert.");
+                    messageUtil.get("profile.password.success"));
             return "redirect:/profile";
         } catch (IllegalArgumentException ex) {
             log.warn("Password change failed: {}", ex.getMessage());

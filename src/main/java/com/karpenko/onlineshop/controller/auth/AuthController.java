@@ -3,6 +3,7 @@ package com.karpenko.onlineshop.controller.auth;
 import com.karpenko.onlineshop.dto.user.UserRegistrationDto;
 import com.karpenko.onlineshop.exception.EmailAlreadyExistsException;
 import com.karpenko.onlineshop.service.UserService;
+import com.karpenko.onlineshop.util.MessageUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-
-
-import com.karpenko.onlineshop.service.UserService;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -22,7 +20,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
+
     private final UserService userService;
+    private final MessageUtil messageUtil;
 
     @GetMapping("/login")
     public String login() {
@@ -56,7 +56,8 @@ public class AuthController {
             return "auth/register";
         } catch (Exception e) {
             log.error("Unerwarteter Fehler bei Registrierung", e);
-            model.addAttribute("errorMessage", "Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.");
+            model.addAttribute("errorMessage",
+                    messageUtil.get("auth.register.error.technical"));
             return "auth/register";
         }
     }
@@ -65,13 +66,16 @@ public class AuthController {
     public String confirmEmail(@RequestParam String token, RedirectAttributes redirectAttributes) {
         try {
             userService.confirmEmail(token);
-            redirectAttributes.addFlashAttribute("successMessage", "E-Mail erfolgreich bestätigt! Sie können sich jetzt anmelden.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    messageUtil.get("auth.confirmEmail.success"));
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Ungültiger Bestätigungslink.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("auth.confirmEmail.invalid"));
             return "redirect:/login";
         } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Bestätigungslink ist abgelaufen. Bitte registrieren Sie sich erneut.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("auth.confirmEmail.expired"));
             return "redirect:/register";
         }
     }

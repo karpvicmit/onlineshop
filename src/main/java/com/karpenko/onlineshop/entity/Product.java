@@ -25,27 +25,27 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Product name is required")
+    @NotBlank(message = "{validation.product.name.required}")
     @Column(nullable = false)
     private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @NotNull(message = "Price is required")
-    @PositiveOrZero(message = "Price must be >= 0")
+    @NotNull(message = "{validation.product.price.required}")
+    @PositiveOrZero(message = "{validation.product.price.positive}")
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @NotNull(message = "Stock is required")
-    @PositiveOrZero(message = "Stock must be >= 0")
+    @NotNull(message = "{validation.product.stock.required}")
+    @PositiveOrZero(message = "{validation.product.stock.positive}")
     @Column(nullable = false)
     private Integer stock = 0;
 
     @Column(name = "image_url")
     private String imageUrl;
 
-    @NotNull(message = "Category is required")
+    @NotNull(message = "{validation.product.category.required}")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
@@ -65,7 +65,7 @@ public class Product {
     @Column(name = "version", nullable = false)
     private Integer version = 0;
 
-    @NotBlank(message = "SKU is required")
+    @NotBlank(message = "{validation.product.sku.required}")
     @Column(nullable = false, unique = true, length = 50)
     private String sku;
 

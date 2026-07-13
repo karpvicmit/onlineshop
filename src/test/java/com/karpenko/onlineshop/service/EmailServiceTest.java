@@ -5,6 +5,7 @@ import com.karpenko.onlineshop.entity.Order;
 import com.karpenko.onlineshop.entity.PaymentMethod;
 import com.karpenko.onlineshop.entity.ShippingMethod;
 import com.karpenko.onlineshop.entity.User;
+import com.karpenko.onlineshop.util.MessageUtil;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,14 +18,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.IContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +43,12 @@ class EmailServiceTest {
     @Mock
     private InvoiceProperties invoiceProperties;
 
+    @Mock
+    private TemplateEngine templateEngine;
+
+    @Mock
+    private MessageUtil messageUtil;
+
     @InjectMocks
     private EmailService emailService;
 
@@ -44,6 +56,12 @@ class EmailServiceTest {
     void setUp() {
         Session session = Session.getDefaultInstance(new Properties());
         lenient().when(mailSender.createMimeMessage()).thenReturn(new MimeMessage(session));
+        lenient().when(templateEngine.process(anyString(), any(IContext.class)))
+                .thenReturn("<html><body>Test</body></html>");
+        lenient().when(messageUtil.getForLocale(anyString(), any(Locale.class), any()))
+                .thenReturn("Test Subject");
+        lenient().when(messageUtil.getForLocale(anyString(), any(Locale.class)))
+                .thenReturn("Test Subject");
     }
 
     // ========================================================================
@@ -95,7 +113,6 @@ class EmailServiceTest {
                     .when(mailSender).send(any(MimeMessage.class));
 
             LocalDateTime changeDate = LocalDateTime.now();
-
             assertThatCode(() ->
                     emailService.sendPasswordChangeNotification("user@test.de", changeDate))
                     .as("Password change notification failure must not break the flow")
@@ -114,9 +131,7 @@ class EmailServiceTest {
         @DisplayName("Should send order confirmation email")
         void shouldSendEmail() {
             Order order = buildOrder(100L, new BigDecimal("199.99"));
-
             emailService.sendOrderConfirmationEmail("user@test.de", order);
-
             verify(mailSender, times(1)).send(any(MimeMessage.class));
         }
 
@@ -127,7 +142,6 @@ class EmailServiceTest {
                     .when(mailSender).send(any(MimeMessage.class));
 
             Order order = buildOrder(100L, new BigDecimal("199.99"));
-
             assertThatCode(() -> emailService.sendOrderConfirmationEmail("user@test.de", order))
                     .doesNotThrowAnyException();
         }
@@ -137,7 +151,6 @@ class EmailServiceTest {
         void shouldHandleNullOrderDate() {
             Order order = buildOrder(100L, new BigDecimal("199.99"));
             order.setOrderDate(null);
-
             assertThatCode(() -> emailService.sendOrderConfirmationEmail("user@test.de", order))
                     .doesNotThrowAnyException();
         }
@@ -154,9 +167,7 @@ class EmailServiceTest {
         @DisplayName("Should send payment success email after Stripe webhook")
         void shouldSendEmail() {
             Order order = buildOrder(200L, new BigDecimal("499.00"));
-
             emailService.sendPaymentSuccessEmail("user@test.de", order);
-
             verify(mailSender, times(1)).send(any(MimeMessage.class));
         }
 
@@ -167,7 +178,6 @@ class EmailServiceTest {
                     .when(mailSender).send(any(MimeMessage.class));
 
             Order order = buildOrder(200L, new BigDecimal("499.00"));
-
             assertThatCode(() -> emailService.sendPaymentSuccessEmail("user@test.de", order))
                     .doesNotThrowAnyException();
         }
@@ -194,9 +204,7 @@ class EmailServiceTest {
         @DisplayName("Should send invoice email with bank details")
         void shouldSendInvoiceEmail() {
             Order order = buildOrder(300L, new BigDecimal("1250.00"));
-
             emailService.sendInvoiceEmail("user@test.de", order);
-
             verify(mailSender, times(1)).send(any(MimeMessage.class));
         }
 
@@ -207,7 +215,6 @@ class EmailServiceTest {
                     .when(mailSender).send(any(MimeMessage.class));
 
             Order order = buildOrder(300L, new BigDecimal("1250.00"));
-
             assertThatCode(() -> emailService.sendInvoiceEmail("user@test.de", order))
                     .doesNotThrowAnyException();
         }
@@ -217,7 +224,6 @@ class EmailServiceTest {
         void shouldHandleNullOrderDate() {
             Order order = buildOrder(300L, new BigDecimal("1250.00"));
             order.setOrderDate(null);
-
             assertThatCode(() -> emailService.sendInvoiceEmail("user@test.de", order))
                     .doesNotThrowAnyException();
         }

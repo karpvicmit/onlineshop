@@ -25,17 +25,17 @@ public class PromoCode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Promo code is required")
+    @NotBlank(message = "{validation.promoCode.code.required}")
     @Column(nullable = false, unique = true, length = 50)
     private String code;
 
-    @NotNull(message = "Discount type is required")
+    @NotNull(message = "{validation.promoCode.discountType.required}")
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_type", nullable = false, length = 20)
     private DiscountType discountType = DiscountType.PERCENTAGE;
 
-    @NotNull(message = "Discount value is required")
-    @PositiveOrZero(message = "Discount value must be >= 0")
+    @NotNull(message = "{validation.promoCode.discountValue.required}")
+    @PositiveOrZero(message = "{validation.promoCode.discountValue.positive}")
     @Column(name = "discount_value", nullable = false, precision = 10, scale = 2)
     private BigDecimal discountValue;
 

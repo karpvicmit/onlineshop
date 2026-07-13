@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.invoice.subject(${orderId})}">Rechnung #123 - OnlineShop</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
+<div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+    <h2 style="color: #0d6efd;">
+        <span th:text="#{email.invoice.title}">Rechnung</span> #<span th:text="${orderId}">123</span>
+    </h2>
+    <p th:text="#{email.invoice.greeting}">Sehr geehrte(r) Kunde(in),</p>
+    <p th:text="#{email.invoice.text}">
+        vielen Dank für Ihre Bestellung. Anbei erhalten Sie die Rechnung mit allen Zahlungsinformationen.
+    </p>
+    <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 20px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #333;" th:text="#{email.invoice.details}">Rechnungsdetails</h3>
+        <p style="margin: 0 0 8px 0;">
+            <strong th:text="#{email.invoice.invoiceNumber}">Rechnungsnummer:</strong>
+            #<span th:text="${orderId}">123</span>
+        </p>
+        <p style="margin: 0 0 8px 0;">
+            <strong th:text="#{email.invoice.invoiceDate}">Rechnungsdatum:</strong>
+            <span th:text="${orderDate}">01.01.2026</span>
+        </p>
+        <p style="margin: 0 0 8px 0;">
+            <strong th:text="#{email.invoice.dueDate}">Zahlbar bis:</strong>
+            <span style="color: #dc3545;"><strong th:text="${dueDate}">15.01.2026</strong></span>
+        </p>
+        <p style="margin: 0;">
+            <strong th:text="#{email.invoice.amount}">Rechnungsbetrag:</strong>
+            <span style="font-size: 1.3em; color: #0d6efd;"><strong><span th:text="${grandTotal}">199.99</span> €</strong></span>
+        </p>
+    </div>
+    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 8px 0; color: #856404;">
+            <strong th:text="#{email.invoice.referenceTitle}">⚠ Wichtig: Verwendungszweck</strong>
+        </p>
+        <p style="margin: 0; font-size: 1.1em; color: #856404;">
+            <span th:text="#{email.invoice.referenceText}">Bitte geben Sie als Verwendungszweck unbedingt an:</span><br>
+            <code style="background: white; padding: 4px 8px; border-radius: 3px; font-size: 1.1em;"
+                  th:text="${paymentReference}">Rechnung Nr. 123</code>
+        </p>
+    </div>
+    <div style="background-color: #e7f3ff; border: 1px solid #b6d4fe; border-radius: 5px; padding: 20px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #0d6efd;" th:text="#{email.invoice.bankDetails}">Bankverbindung</h3>
+        <p style="margin: 0 0 8px 0;">
+            <strong th:text="#{email.invoice.accountHolder}">Kontoinhaber:</strong>
+            <span th:text="${accountHolder}">OnlineShop GmbH</span>
+        </p>
+        <p style="margin: 0 0 8px 0;">
+            <strong>IBAN:</strong>
+            <code th:text="${iban}">DE89370400440532013000</code>
+        </p>
+        <p style="margin: 0 0 8px 0;">
+            <strong>BIC:</strong>
+            <code th:text="${bic}">COBADEFFXXX</code>
+        </p>
+        <p style="margin: 0;">
+            <strong th:text="#{email.invoice.bankName}">Bank:</strong>
+            <span th:text="${bankName}">Commerzbank Berlin</span>
+        </p>
+    </div>
+    <p>
+        <span th:text="#{email.invoice.paymentInstruction}">Bitte überweisen Sie den Rechnungsbetrag bis zum</span>
+        <strong th:text="${dueDate}">15.01.2026</strong>
+        <span th:text="#{email.invoice.paymentInstruction2}">auf das oben genannte Konto.</span>
+    </p>
+    <p>
+        <span th:text="#{email.invoice.questions}">Bei Fragen zu Ihrer Rechnung kontaktieren Sie uns bitte unter</span>
+        <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">rechnung@onlineshop.de</a>.
+    </p>
+    <p>
+        <span th:text="#{email.invoice.regards1}">Mit freundlichen Grüßen,</span><br>
+        <span th:text="#{email.invoice.regards2}">Ihr OnlineShop-Team</span>
+    </p>
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+    <p style="color: #999; font-size: 12px;" th:text="#{email.footer.automatic}">
+        Dies ist eine automatische Benachrichtigung. Bitte antworten Sie nicht direkt auf diese E-Mail.
+    </p>
+</div>
+</body>
+</html>

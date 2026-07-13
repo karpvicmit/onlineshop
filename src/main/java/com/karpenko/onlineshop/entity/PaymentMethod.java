@@ -1,25 +1,14 @@
 package com.karpenko.onlineshop.entity;
 
+/**
+ * Payment methods available in the shop.
+ * Display names and descriptions are localized via messages.properties
+ * using keys: payment.{NAME}.name and payment.{NAME}.desc
+ */
 public enum PaymentMethod {
-    VORKASSE("Vorkasse", "Bezahlung vor Versand per Überweisung"),
-    RECHNUNG("Rechnung", "Bezahlung innerhalb von 14 Tagen nach Erhalt"),
-    KREDITKARTE("Kreditkarte", "Sichere Zahlung per Kreditkarte (Visa, Mastercard)"),
-    PAYPAL("PayPal", "Bezahlung über Ihr PayPal-Konto"),
-    SOFORT("Sofortüberweisung", "Direkte Banküberweisung via Sofort");
-
-    private final String displayName;
-    private final String description;
-
-    PaymentMethod(String displayName, String description) {
-        this.displayName = displayName;
-        this.description = description;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
+    VORKASSE,
+    RECHNUNG,
+    KREDITKARTE,
+    PAYPAL,
+    SOFORT
 }

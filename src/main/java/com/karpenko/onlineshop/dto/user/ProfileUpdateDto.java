@@ -5,12 +5,13 @@ import lombok.Data;
 
 @Data
 public class ProfileUpdateDto {
-    @NotBlank(message = "Vorname darf nicht leer sein")
+
+    @NotBlank(message = "{validation.profile.firstName.required}")
     private String firstName;
 
-    @NotBlank(message = "Nachname darf nicht leer sein")
+    @NotBlank(message = "{validation.profile.lastName.required}")
     private String lastName;
 
-    @NotBlank(message = "Lieferadresse darf nicht leer sein")
+    @NotBlank(message = "{validation.profile.address.required}")
     private String address;
 }

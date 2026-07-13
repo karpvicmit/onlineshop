@@ -5,6 +5,7 @@ import com.karpenko.onlineshop.entity.Product;
 import com.karpenko.onlineshop.repository.CategoryRepository;
 import com.karpenko.onlineshop.service.CategoryService;
 import com.karpenko.onlineshop.service.ProductService;
+import com.karpenko.onlineshop.util.MessageUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 @Slf4j
 @Controller
 @RequestMapping("/admin/products")
@@ -30,6 +30,7 @@ public class AdminProductController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final MessageUtil messageUtil;
 
     @ModelAttribute("activeMenu")
     public String activeMenu() { return "products"; }
@@ -41,7 +42,6 @@ public class AdminProductController {
             Model model) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<ProductDto> productPage = productService.findProducts(null, null, pageable);
-
         model.addAttribute("productPage", productPage);
         model.addAttribute("baseUrl", "/admin/products");
         return "admin/products/list";
@@ -54,14 +54,12 @@ public class AdminProductController {
         return "admin/products/form";
     }
 
-
     @PostMapping("/save")
     public String saveProduct(@Valid @ModelAttribute("product") Product product,
                               BindingResult bindingResult,
                               @RequestParam("imageFile") MultipartFile imageFile,
                               Model model,
                               RedirectAttributes redirectAttributes) {
-
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.getAllCategories());
             return "admin/products/form";
@@ -69,10 +67,12 @@ public class AdminProductController {
 
         try {
             productService.saveProduct(product, imageFile);
-            redirectAttributes.addFlashAttribute("successMessage", "Produkt erfolgreich gespeichert.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    messageUtil.get("admin.products.save.success"));
         } catch (Exception e) {
             log.error("Fehler beim Speichern des Produkts: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Fehler beim Speichern: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("admin.products.save.error", e.getMessage()));
         }
         return "redirect:/admin/products";
     }
@@ -89,10 +89,12 @@ public class AdminProductController {
     public String deleteProduct(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             productService.deleteProduct(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Produkt erfolgreich gelöscht.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    messageUtil.get("admin.products.delete.success"));
         } catch (Exception e) {
             log.error("Fehler beim Löschen des Produkts: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Fehler beim Löschen: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("admin.products.delete.error", e.getMessage()));
         }
         return "redirect:/admin/products";
     }

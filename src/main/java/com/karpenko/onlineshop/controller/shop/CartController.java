@@ -1,11 +1,10 @@
-// main/java/com/karpenko/onlineshop/controller/shop/CartController.java
-
 package com.karpenko.onlineshop.controller.shop;
 
 import com.karpenko.onlineshop.dto.cart.CartDto;
 import com.karpenko.onlineshop.exception.CartNotFoundException;
 import com.karpenko.onlineshop.security.CustomUserDetails;
 import com.karpenko.onlineshop.service.CartService;
+import com.karpenko.onlineshop.util.MessageUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +27,7 @@ import java.util.List;
 public class CartController {
 
     private final CartService cartService;
+    private final MessageUtil messageUtil;
 
     public static final String SESSION_PROMO_CODE = "PROMO_CODE";
 
@@ -61,7 +61,8 @@ public class CartController {
             log.info("User {} added product {} (qty: {}) to cart",
                     userDetails.getId(), productId, quantity);
         } catch (IllegalStateException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            String errorMessage = mapCartErrorMessage(ex.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             log.warn("Add to cart failed: {}", ex.getMessage());
         }
         return "redirect:/shop/cart";
@@ -75,7 +76,8 @@ public class CartController {
         try {
             cartService.updateItemQuantity(userDetails.getId(), productId, quantity);
         } catch (IllegalStateException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            String errorMessage = mapCartErrorMessage(ex.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             log.warn("Quantity update failed: {}", ex.getMessage());
         }
         return "redirect:/shop/cart";
@@ -96,16 +98,18 @@ public class CartController {
                                  HttpSession session,
                                  RedirectAttributes redirectAttributes) {
         if (promoCode == null || promoCode.isBlank()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Bitte geben Sie einen Promo-Code ein.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("cart.promo.enter"));
             return "redirect:/shop/cart";
         }
 
         try {
             CartDto cartDto = cartService.getCartDtoForUser(userDetails.getId(), promoCode.trim());
+
             if (cartDto.getAppliedPromoCode() != null) {
                 session.setAttribute(SESSION_PROMO_CODE, cartDto.getAppliedPromoCode());
                 redirectAttributes.addFlashAttribute("successMessage",
-                        "Promo-Code '" + cartDto.getAppliedPromoCode() + "' erfolgreich angewendet!");
+                        messageUtil.get("cart.promo.success", cartDto.getAppliedPromoCode()));
                 log.info("User {} applied promo code: {}", userDetails.getId(), cartDto.getAppliedPromoCode());
             } else if (cartDto.getPromoErrorMessage() != null) {
                 session.removeAttribute(SESSION_PROMO_CODE);
@@ -113,7 +117,8 @@ public class CartController {
             }
         } catch (Exception ex) {
             log.warn("Failed to apply promo code: {}", ex.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Fehler beim Anwenden des Promo-Codes.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("cart.promo.error"));
         }
         return "redirect:/shop/cart";
     }
@@ -122,8 +127,22 @@ public class CartController {
     public String removePromoCode(HttpSession session,
                                   RedirectAttributes redirectAttributes) {
         session.removeAttribute(SESSION_PROMO_CODE);
-        redirectAttributes.addFlashAttribute("successMessage", "Promo-Code entfernt.");
+        redirectAttributes.addFlashAttribute("successMessage",
+                messageUtil.get("cart.promo.removed"));
         log.info("Promo code removed from session");
         return "redirect:/shop/cart";
+    }
+
+    /**
+     * Maps English exception messages from services to localized keys.
+     */
+    private String mapCartErrorMessage(String message) {
+        if (message == null) {
+            return messageUtil.get("cart.error.generic");
+        }
+        if (message.contains("Insufficient stock")) {
+            return messageUtil.get("cart.error.insufficientStock");
+        }
+        return messageUtil.get("cart.error.generic");
     }
 }

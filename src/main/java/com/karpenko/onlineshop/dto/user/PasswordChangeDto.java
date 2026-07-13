@@ -7,13 +7,13 @@ import lombok.Data;
 @Data
 public class PasswordChangeDto {
 
-    @NotBlank(message = "Aktuelles Passwort darf nicht leer sein")
+    @NotBlank(message = "{validation.password.current.required}")
     private String currentPassword;
 
-    @NotBlank(message = "Neues Passwort darf nicht leer sein")
-    @Size(min = 8, message = "Neues Passwort muss mindestens 8 Zeichen lang sein")
+    @NotBlank(message = "{validation.password.new.required}")
+    @Size(min = 8, message = "{validation.password.new.min}")
     private String newPassword;
 
-    @NotBlank(message = "Passwort-Bestätigung darf nicht leer sein")
+    @NotBlank(message = "{validation.password.confirm.required}")
     private String confirmPassword;
 }

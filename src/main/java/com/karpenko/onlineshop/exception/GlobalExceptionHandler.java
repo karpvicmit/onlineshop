@@ -1,5 +1,7 @@
 package com.karpenko.onlineshop.exception;
 
+import com.karpenko.onlineshop.util.MessageUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -12,7 +14,10 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MessageUtil messageUtil;
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -26,7 +31,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleCartNotFound(CartNotFoundException ex, Model model) {
         log.warn("Cart not found: {}", ex.getMessage());
-        model.addAttribute("errorMessage", "Your cart could not be found.");
+        model.addAttribute("errorMessage", messageUtil.get("error.cart.notFound"));
         return "error/404";
     }
 
@@ -66,7 +71,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleDataIntegrity(DataIntegrityViolationException ex, Model model) {
         log.warn("Data integrity violation: {}", ex.getMessage());
-        model.addAttribute("errorMessage", "Operation cannot be completed due to data conflict.");
+        model.addAttribute("errorMessage", messageUtil.get("error.data.conflict"));
         return "error/409";
     }
 
@@ -87,7 +92,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleGenericException(Exception ex, Model model) {
         log.error("Unexpected error occurred", ex);
-        model.addAttribute("errorMessage", "An internal error occurred. Please try again later.");
+        model.addAttribute("errorMessage", messageUtil.get("error.internal"));
         return "error/500";
     }
 }

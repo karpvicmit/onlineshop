@@ -8,16 +8,17 @@ import com.karpenko.onlineshop.security.CustomUserDetails;
 import com.karpenko.onlineshop.service.CategoryService;
 import com.karpenko.onlineshop.service.ProductReviewService;
 import com.karpenko.onlineshop.service.ProductService;
+import com.karpenko.onlineshop.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class ProductController {
     private final CategoryService categoryService;
     private final ProductReviewService productReviewService;
     private final FavoriteRepository favoriteRepository;
+    private final MessageUtil messageUtil;
 
     @GetMapping
     public String listProducts(
@@ -76,7 +78,9 @@ public class ProductController {
     public String productDetail(@PathVariable Long id, Model model,
                                 @org.springframework.security.core.annotation.AuthenticationPrincipal
                                 CustomUserDetails userDetails) {
+
         log.info("Produktdetail für ID: {}", id);
+
         ProductDto product = productService.getProductById(id);
         model.addAttribute("product", product);
 
@@ -90,6 +94,7 @@ public class ProductController {
         // Can write review?
         boolean canWriteReview = false;
         boolean isFavorite = false;
+
         if (userDetails != null) {
             canWriteReview = productReviewService.hasUserPurchasedAndNotReviewed(
                     userDetails.getId(), id);
@@ -97,6 +102,7 @@ public class ProductController {
                     .findByUserIdAndProductId(userDetails.getId(), id)
                     .isPresent();
         }
+
         model.addAttribute("canWriteReview", canWriteReview);
         model.addAttribute("isFavorite", isFavorite);
 
@@ -109,6 +115,7 @@ public class ProductController {
                 .filter(p -> !p.getId().equals(id))
                 .limit(4)
                 .toList();
+
         model.addAttribute("relatedProducts", relatedProducts);
 
         return "shop/products/detail";
@@ -121,11 +128,11 @@ public class ProductController {
                                @RequestParam String comment,
                                @org.springframework.security.core.annotation.AuthenticationPrincipal
                                CustomUserDetails userDetails,
-                               org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirectAttributes) {
         try {
             productReviewService.addReview(userDetails.getId(), id, rating, title, comment);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Vielen Dank! Ihre Bewertung wird nach einer Überprüfung angezeigt.");
+                    messageUtil.get("product.review.success"));
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }

@@ -2,27 +2,22 @@ package com.karpenko.onlineshop.entity;
 
 import java.math.BigDecimal;
 
+/**
+ * Shipping methods available in the shop.
+ * Display names and descriptions are localized via messages.properties
+ * using keys: shipping.{NAME}.name and shipping.{NAME}.desc
+ * Cost is stored here as it's a business constant, not a display text.
+ */
 public enum ShippingMethod {
-    STANDARD("Standardversand", "Lieferung in 3–5 Werktagen", new BigDecimal("4.99")),
-    EXPRESS("Expressversand", "Lieferung am nächsten Werktag", new BigDecimal("9.99")),
-    ABHOLUNG("Selbstabholung", "Kostenlose Abholung im Lager", BigDecimal.ZERO);
 
-    private final String displayName;
-    private final String description;
+    STANDARD(new BigDecimal("4.99")),
+    EXPRESS(new BigDecimal("9.99")),
+    ABHOLUNG(BigDecimal.ZERO);
+
     private final BigDecimal cost;
 
-    ShippingMethod(String displayName, String description, BigDecimal cost) {
-        this.displayName = displayName;
-        this.description = description;
+    ShippingMethod(BigDecimal cost) {
         this.cost = cost;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public BigDecimal getCost() {

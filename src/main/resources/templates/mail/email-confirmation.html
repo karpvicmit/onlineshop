@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.confirmation.subject}">Registration confirmation - OnlineShop</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
+<div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+    <h2 style="color: #333;" th:text="#{email.confirmation.greeting}">Welcome to OnlineShop!</h2>
+    <p th:text="#{email.confirmation.text}">Thank you for registering. Please confirm your email address to complete the registration.</p>
+    <p style="margin: 30px 0;">
+        <a th:href="${confirmationLink}"
+           style="background-color: #0d6efd; color: white; padding: 12px 30px;
+           text-decoration: none; border-radius: 5px; display: inline-block;"
+           th:text="#{email.confirmation.button}">
+            Confirm email
+        </a>
+    </p>
+    <p style="color: #666; font-size: 14px;" th:text="#{email.confirmation.fallback}">
+        If the button doesn't work, copy and paste this link into your browser:
+    </p>
+    <p style="color: #0d6efd; word-break: break-all;" th:text="${confirmationLink}">
+        http://localhost:8080/confirm-email?token=xxx
+    </p>
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+    <p style="color: #999; font-size: 12px;" th:text="#{email.footer.automatic}">
+        This email was sent automatically. Please do not reply to it.
+    </p>
+</div>
+</body>
+</html>

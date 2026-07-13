@@ -9,6 +9,7 @@ import com.karpenko.onlineshop.service.EmailService;
 import com.karpenko.onlineshop.service.OrderService;
 import com.karpenko.onlineshop.service.PaymentService;
 import com.karpenko.onlineshop.service.UserService;
+import com.karpenko.onlineshop.util.MessageUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,8 @@ public class CheckoutController {
     private final OrderService orderService;
     private final UserService userService;
     private final PaymentService paymentService;
-    private final EmailService emailService; // ← restored
+    private final EmailService emailService;
+    private final MessageUtil messageUtil;
 
     @Value("${stripe.publishable-key}")
     private String stripePublishableKey;
@@ -57,7 +59,8 @@ public class CheckoutController {
         try {
             paymentProvider = PaymentProvider.valueOf(paymentProviderStr);
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Ungültige Zahlungsart ausgewählt.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("checkout.error.invalidPayment"));
             return "redirect:/shop/checkout";
         }
 
@@ -65,7 +68,8 @@ public class CheckoutController {
         try {
             shippingMethod = ShippingMethod.valueOf(shippingMethodStr);
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Ungültige Versandart ausgewählt.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("checkout.error.invalidShipping"));
             return "redirect:/shop/checkout";
         }
 
@@ -88,10 +92,8 @@ public class CheckoutController {
                 } catch (Exception e) {
                     log.warn("Failed to send invoice email for order {}: {}", order.getId(), e.getMessage());
                 }
-                String message = "Bestellung erfolgreich aufgegeben! "
-                        + "Sie erhalten in Kürze eine E-Mail mit der Rechnung und unseren Bankdaten. "
-                        + "Bestellnummer: #" + order.getId();
-                redirectAttributes.addFlashAttribute("successMessage", message);
+                redirectAttributes.addFlashAttribute("successMessage",
+                        messageUtil.get("checkout.success.invoice", order.getId()));
                 return "redirect:/shop/orders/" + order.getId();
             }
 
@@ -103,16 +105,39 @@ public class CheckoutController {
                         order.getId(), e.getMessage());
             }
 
-            String message = "Bestellung erfolgreich aufgegeben! Bestellnummer: #" + order.getId();
-            redirectAttributes.addFlashAttribute("successMessage", message);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    messageUtil.get("checkout.success", order.getId()));
             return "redirect:/shop/orders/" + order.getId();
 
         } catch (ProductOutOfStockException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/shop/cart";
         } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            String errorMessage = mapIllegalStateMessage(e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             return "redirect:/shop/checkout";
         }
+    }
+
+    /**
+     * Maps English exception messages from services to localized keys.
+     * This preserves test compatibility while showing localized messages to users.
+     */
+    private String mapIllegalStateMessage(String message) {
+        if (message == null) {
+            return messageUtil.get("checkout.error.generic");
+        }
+        if (message.contains("Cart is empty")) {
+            return messageUtil.get("checkout.error.cartEmpty");
+        } else if (message.contains("Delivery address is missing")) {
+            return messageUtil.get("checkout.error.addressMissing");
+        } else if (message.contains("Payment provider is required")) {
+            return messageUtil.get("checkout.error.paymentRequired");
+        } else if (message.contains("Shipping method is required")) {
+            return messageUtil.get("checkout.error.shippingRequired");
+        } else if (message.contains("Invalid promo code")) {
+            return messageUtil.get("checkout.error.invalidPromo");
+        }
+        return messageUtil.get("checkout.error.generic");
     }
 }

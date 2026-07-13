@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.orderConfirmation.subject(${orderId})}">Bestellbestätigung #123 - OnlineShop</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
+<div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+    <h2 style="color: #198754;">
+        <span th:text="#{email.orderConfirmation.title}">✓ Vielen Dank für Ihre Bestellung!</span>
+    </h2>
+    <p th:text="#{email.orderConfirmation.text}">
+        Wir haben Ihre Bestellung erhalten und werden sie schnellstmöglich bearbeiten.
+    </p>
+    <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 20px; margin: 20px 0;">
+        <p style="margin: 0 0 8px 0;">
+            <strong th:text="#{email.orderConfirmation.orderNumber}">Bestellnummer:</strong>
+            #<span th:text="${orderId}">123</span>
+        </p>
+        <p style="margin: 0 0 8px 0;">
+            <strong th:text="#{email.orderConfirmation.orderDate}">Bestelldatum:</strong>
+            <span th:text="${orderDate}">01.01.2026 12:00</span>
+        </p>
+        <p style="margin: 0 0 8px 0;">
+            <strong th:text="#{email.orderConfirmation.totalAmount}">Gesamtbetrag:</strong>
+            <span th:text="${grandTotal}">199.99</span> €
+        </p>
+        <p style="margin: 0 0 8px 0;">
+            <strong th:text="#{email.orderConfirmation.shippingMethod}">Versandart:</strong>
+            <span th:text="${shippingName}">Standard</span>
+        </p>
+        <p style="margin: 0;">
+            <strong th:text="#{email.orderConfirmation.paymentMethod}">Zahlungsart:</strong>
+            <span th:text="${paymentName}">Vorkasse</span>
+        </p>
+    </div>
+    <p th:text="#{email.orderConfirmation.trackOrder}">
+        Sie können den Status Ihrer Bestellung jederzeit in Ihrem Kundenkonto einsehen.
+    </p>
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+    <p style="color: #999; font-size: 12px;" th:text="#{email.footer.automatic}">
+        Dies ist eine automatische Benachrichtigung. Bitte antworten Sie nicht auf diese E-Mail.
+    </p>
+</div>
+</body>
+</html>

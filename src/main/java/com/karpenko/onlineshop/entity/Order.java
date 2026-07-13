@@ -43,7 +43,7 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status = OrderStatus.NEW;
 
-    @NotBlank(message = "Delivery address is required")
+    @NotBlank(message = "{validation.order.deliveryAddress.required}")
     @Column(name = "delivery_address", nullable = false, columnDefinition = "TEXT")
     private String deliveryAddress;
 
@@ -57,7 +57,6 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
-
 
     @NotNull
     @Enumerated(EnumType.STRING)

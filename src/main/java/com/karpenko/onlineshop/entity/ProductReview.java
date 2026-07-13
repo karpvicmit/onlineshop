@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -31,15 +32,16 @@ public class ProductReview {
     private User user;
 
     @NotNull
-    @Min(1) @Max(5)
+    @Min(value = 1, message = "{validation.review.rating.min}")
+    @Max(value = 5, message = "{validation.review.rating.max}")
     @Column(nullable = false)
     private Integer rating;
 
-    @NotBlank
+    @NotBlank(message = "{validation.review.title.required}")
     @Column(nullable = false)
     private String title;
 
-    @NotBlank
+    @NotBlank(message = "{validation.review.comment.required}")
     @Column(columnDefinition = "TEXT", nullable = false)
     private String comment;
 

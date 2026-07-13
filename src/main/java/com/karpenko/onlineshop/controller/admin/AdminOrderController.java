@@ -6,6 +6,7 @@ import com.karpenko.onlineshop.entity.PaymentStatus;
 import com.karpenko.onlineshop.service.EmailService;
 import com.karpenko.onlineshop.service.OrderService;
 import com.karpenko.onlineshop.repository.OrderRepository;
+import com.karpenko.onlineshop.util.MessageUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,7 @@ public class AdminOrderController {
     private final OrderService orderService;
     private final OrderRepository orderRepository;
     private final EmailService emailService;
+    private final MessageUtil messageUtil;
 
     @ModelAttribute("activeMenu")
     public String activeMenu() { return "orders"; }
@@ -42,6 +44,7 @@ public class AdminOrderController {
             Model model) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate"));
         Page<Order> orderPage = orderService.getAllOrdersForAdmin(pageable);
+
         model.addAttribute("orders", orderPage.getContent());
         model.addAttribute("orderPage", orderPage);
         model.addAttribute("currentPage", page);
@@ -62,18 +65,16 @@ public class AdminOrderController {
                                RedirectAttributes redirectAttributes) {
         try {
             orderService.updateOrderStatus(id, status);
-            redirectAttributes.addFlashAttribute("successMessage", "Order status updated successfully.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    messageUtil.get("admin.orders.status.update.success"));
         } catch (Exception e) {
             log.warn("Failed to update order status: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    messageUtil.get("admin.orders.status.update.error", e.getMessage()));
         }
         return "redirect:/admin/orders";
     }
 
-    /**
-     * Marks a "Rechnung" order as paid.
-     * Sets paymentStatus = SUCCEEDED, paidAt = now, and sends confirmation email to customer.
-     */
     @PostMapping("/{id}/mark-as-paid")
     public String markAsPaid(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -82,7 +83,7 @@ public class AdminOrderController {
 
             if (order.getPaymentStatus() == PaymentStatus.SUCCEEDED) {
                 redirectAttributes.addFlashAttribute("infoMessage",
-                        "Order #" + id + " is already marked as paid.");
+                        messageUtil.get("admin.orders.markAsPaid.already", id));
                 return "redirect:/admin/orders";
             }
 
@@ -100,11 +101,11 @@ public class AdminOrderController {
 
             log.info("Order #{} marked as paid by admin", id);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Order #" + id + " wurde als bezahlt markiert. Kunde wurde per E-Mail benachrichtigt.");
+                    messageUtil.get("admin.orders.markAsPaid.success", id));
         } catch (Exception e) {
             log.error("Failed to mark order #{} as paid", id, e);
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Fehler beim Markieren als bezahlt: " + e.getMessage());
+                    messageUtil.get("admin.orders.markAsPaid.error", e.getMessage()));
         }
         return "redirect:/admin/orders";
     }

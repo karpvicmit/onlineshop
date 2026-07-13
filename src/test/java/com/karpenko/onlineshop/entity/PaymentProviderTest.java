@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PaymentProviderTest {
 
     @Test
-    @DisplayName("Should contain STRIPE, PAYPAL, VORKASSE, RECHNUNG")
+    @DisplayName("Should contain STRIPE, VORKASSE, RECHNUNG")
     void shouldContainAllProviders() {
         PaymentProvider[] values = PaymentProvider.values();
         assertThat(values).containsExactlyInAnyOrder(

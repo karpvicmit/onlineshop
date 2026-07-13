@@ -21,7 +21,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Category name is required")
+    @NotBlank(message = "{validation.category.name.required}")
     @Column(nullable = false, unique = true)
     private String name;
 
