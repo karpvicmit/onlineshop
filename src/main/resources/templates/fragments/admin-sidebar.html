@@ -8,65 +8,54 @@
             <i class="bi bi-shield-lock-fill"></i>
         </div>
         <div>
-            <h3 class="sidebar-title">Admin-Panel</h3>
-            <p class="sidebar-subtitle">OnlineShop Verwaltung</p>
+            <h3 class="sidebar-title" th:text="#{admin.sidebar.title}">Admin-Panel</h3>
+            <p class="sidebar-subtitle" th:text="#{admin.sidebar.subtitle}">OnlineShop Verwaltung</p>
         </div>
     </div>
-
     <!-- Navigation -->
     <nav class="sidebar-nav">
-        <a th:href="@{/admin/dashboard}"
-           class="sidebar-nav-item"
+        <a th:href="@{/admin/dashboard}" class="sidebar-nav-item"
            th:classappend="${activeMenu == 'dashboard'} ? 'active'">
             <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
+            <span th:text="#{admin.sidebar.dashboard}">Dashboard</span>
         </a>
-        <a th:href="@{/admin/products}"
-           class="sidebar-nav-item"
+        <a th:href="@{/admin/products}" class="sidebar-nav-item"
            th:classappend="${activeMenu == 'products'} ? 'active'">
             <i class="bi bi-box-seam"></i>
-            <span>Produkte</span>
+            <span th:text="#{admin.sidebar.products}">Produkte</span>
         </a>
-        <a th:href="@{/admin/categories}"
-           class="sidebar-nav-item"
+        <a th:href="@{/admin/categories}" class="sidebar-nav-item"
            th:classappend="${activeMenu == 'categories'} ? 'active'">
             <i class="bi bi-tags"></i>
-            <span>Kategorien</span>
+            <span th:text="#{admin.sidebar.categories}">Kategorien</span>
         </a>
-        <a th:href="@{/admin/orders}"
-           class="sidebar-nav-item"
+        <a th:href="@{/admin/orders}" class="sidebar-nav-item"
            th:classappend="${activeMenu == 'orders'} ? 'active'">
             <i class="bi bi-receipt"></i>
-            <span>Bestellungen</span>
+            <span th:text="#{admin.sidebar.orders}">Bestellungen</span>
         </a>
-        <a th:href="@{/admin/users}"
-           class="sidebar-nav-item"
+        <a th:href="@{/admin/users}" class="sidebar-nav-item"
            th:classappend="${activeMenu == 'users'} ? 'active'">
             <i class="bi bi-people"></i>
-            <span>Benutzer</span>
+            <span th:text="#{admin.sidebar.users}">Benutzer</span>
         </a>
-        <a th:href="@{/admin/analytics}"
-           class="sidebar-nav-item"
+        <a th:href="@{/admin/analytics}" class="sidebar-nav-item"
            th:classappend="${activeMenu == 'analytics'} ? 'active'">
             <i class="bi bi-graph-up"></i>
-            <span>Analyse</span>
+            <span th:text="#{admin.sidebar.analytics}">Analyse</span>
         </a>
-        <a th:href="@{/admin/reviews}"
-           class="sidebar-nav-item"
+        <a th:href="@{/admin/reviews}" class="sidebar-nav-item"
            th:classappend="${activeMenu == 'reviews'} ? 'active'">
             <i class="bi bi-chat-left-text"></i>
-            <span>Bewertungen</span>
+            <span th:text="#{admin.sidebar.reviews}">Bewertungen</span>
         </a>
-        <a th:href="@{/admin/promocodes}"
-           class="sidebar-nav-item"
+        <a th:href="@{/admin/promocodes}" class="sidebar-nav-item"
            th:classappend="${activeMenu == 'promocodes'} ? 'active'">
             <i class="bi bi-tag-fill"></i>
-            <span>Promo-Codes</span>
+            <span th:text="#{admin.sidebar.promocodes}">Promo-Codes</span>
         </a>
     </nav>
-
     <div class="sidebar-divider"></div>
-
     <!-- User Section -->
     <div class="sidebar-user">
         <div class="sidebar-user-info">
@@ -80,12 +69,12 @@
         <div class="sidebar-user-actions">
             <a th:href="@{/shop/products}" class="sidebar-user-btn">
                 <i class="bi bi-shop"></i>
-                <span>Shop</span>
+                <span th:text="#{admin.sidebar.shop}">Shop</span>
             </a>
             <form th:action="@{/logout}" method="post" class="d-inline w-100">
                 <button type="submit" class="sidebar-user-btn w-100">
                     <i class="bi bi-box-arrow-right"></i>
-                    <span>Abmelden</span>
+                    <span th:text="#{admin.sidebar.logout}">Abmelden</span>
                 </button>
             </form>
         </div>

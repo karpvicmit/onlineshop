@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Serverfehler')}"></head>
+<head th:replace="~{fragments/head :: head(#{error.500.title})}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 <div class="container mt-5 text-center">
     <h1 class="display-1 text-danger">500</h1>
-    <h2>Interner Serverfehler</h2>
-    <p class="lead">Entschuldigung, etwas ist schiefgelaufen. Unser Team wurde informiert.</p>
-    <a th:href="@{/}" class="btn btn-primary mt-3">Zurück zur Startseite</a>
+    <h2 th:text="#{error.500.title}">Interner Serverfehler</h2>
+    <p class="lead" th:text="#{error.500.text}">Entschuldigung, etwas ist schiefgelaufen. Unser Team wurde informiert.</p>
+    <a th:href="@{/}" class="btn btn-primary mt-3" th:text="#{error.back.home}">Zurück zur Startseite</a>
 </div>
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
